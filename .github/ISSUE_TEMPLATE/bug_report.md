@@ -7,32 +7,47 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+# 🐛 Bug Report
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+## Description
+Une description concise et claire du bug. Expliquez ce qui ne fonctionne pas comme prévu.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+Exemple :  
+> Lorsque je [action], il se produit [comportement attendu vs comportement actuel].
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+---
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+## Étapes pour reproduire le bug
+Liste des étapes permettant de reproduire le problème. Incluez autant de détails que possible.  
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+1. Aller à [URL ou section].
+2. Cliquer sur [bouton/élément].
+3. Observer le comportement [décrire l'erreur].
 
-**Additional context**
-Add any other context about the problem here.
+---
+
+## Comportement attendu
+Décrivez ce que vous pensiez devoir se produire à la place.
+
+---
+
+## Environnement
+Indiquez les détails de l'environnement dans lequel le bug est survenu :  
+- **Système d'exploitation** : [Windows/macOS/Linux]
+- **Navigateur ou Version logicielle** : [Chrome, Firefox, Safari, etc.]
+- **Version du projet** : [par exemple, 1.0.0]
+
+---
+
+## Journaux ou messages d'erreur
+Ajoutez les messages d'erreur ou journaux pertinents, le cas échéant.  
+
+
+## Screenshots
+Ajoutez des captures d'écran ou des vidéos pour illustrer le problème (facultatif).
+
+## Informations supplémentaires
+Ajoutez ici tout autre détail pouvant aider à reproduire ou corriger le problème.
+
+Exemple :  
+> Le problème survient uniquement après [action spécifique]. Il semble lié à [module/dépendance spécifique].
