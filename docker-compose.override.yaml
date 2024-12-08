@@ -1,0 +1,26 @@
+services:
+  ###> doctrine/doctrine-bundle ###
+  db:
+    ports:
+      - 5432:5432
+  ###< doctrine/doctrine-bundle ###
+  adminer:
+    image: adminer:latest
+    ports:
+      - "${ADMINER_PORT}:8080"
+    networks:
+      - adminer_postgres_network
+
+  ###> symfony/mailer ###
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "1025"
+      - "8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    networks:
+      - mailer_postgres_network
+
+###< symfony/mailer ###
