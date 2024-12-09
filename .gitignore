@@ -1,5 +1,7 @@
 
 ###> symfony/framework-bundle ###
+/.idea
+.idea
 /.env
 /.env.test
 /.env.local
@@ -25,3 +27,5 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+.idea/php.xml
+.idea/shapeof.iml

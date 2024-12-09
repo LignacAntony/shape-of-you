@@ -53,22 +53,22 @@ help: ## Show this help.
 
 ## === 🐋  DOCKER ================================================
 docker-up: ## Start docker containers.
-	@printf "$(BLUE)🔥 Démarrage des containers Docker...$(RESET)\n"
+	@echo "$(BLUE)🔥 Démarrage des containers Docker...$(RESET)\n"
 	$(DOCKER_COMPOSE_UP)
 .PHONY: docker-up
 
 docker-up-local: ## Start docker containers in local environment.
-	@printf "$(BLUE)🔥 Démarrage des containers Docker en local...$(RESET)\n"
+	@echo "$(BLUE)🔥 Démarrage des containers Docker en local...$(RESET)\n"
 	$(DOCKER_COMPOSE) -f docker-compose.yaml -f docker-compose.override.yaml up -d
 .PHONY: docker-up-local
 
 docker-stop: ## Stop docker containers.
-	@printf "$(YELLOW)🛑 Arrêt des containers Docker...$(RESET)\n"
+	@echo "$(YELLOW)🛑 Arrêt des containers Docker...$(RESET)\n"
 	$(DOCKER_COMPOSE_STOP)
 .PHONY: docker-stop
 
 docker-down: ## Stop and remove docker containers.
-	@printf "$(RED) 🚨 Suppression des containers Docker...$(RESET)\n"
+	@echo "$(RED) 🚨 Suppression des containers Docker...$(RESET)\n"
 	$(DOCKER_COMPOSE) down
 
 docker-logs: ## Display Docker logs.
@@ -224,9 +224,9 @@ qa-audit: ## Run composer audit.
 
 ## === 🔎  TESTS =================================================
 tests: ## Run tests.
-	@printf "$(BLUE)🚀 Lancement des tests...$(RESET)\n"
+	@echo "$(BLUE)🚀 Lancement des tests...$(RESET)\n"
 	$(PHPUNIT) --testdox
-	@printf "$(GREEN)✅ Tests terminés!$(RESET)\n"
+	@echo "$(GREEN)✅ Tests terminés!$(RESET)\n"
 .PHONY: tests
 
 tests-coverage: ## Run tests with coverage.
@@ -236,23 +236,23 @@ tests-coverage: ## Run tests with coverage.
 
 ## —— 🚀 Git et déploiement ———————————————————————————————————————
 staging-deploy: ## Déploie sur l'environnement de recette
-	@printf "$(YELLOW)🚀 Déploiement en recette...$(RESET)\n"
+	@echo "$(YELLOW)🚀 Déploiement en recette...$(RESET)\n"
 	$(GIT) checkout staging
 	$(GIT) pull origin staging
 	$(COMPOSER) install --no-dev --optimize-autoloader
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction --env=staging
 	$(CONSOLE) cache:clear --env=staging
-	@printf "$(GREEN)✅ Déployé en recette!$(RESET)\n"
+	@echo "$(GREEN)✅ Déployé en recette!$(RESET)\n"
 .PHONY: staging-deploy
 
 prod-deploy: ## Déploie sur l'environnement de production
-	@printf "$(YELLOW)🚀 Déploiement en production...$(RESET)\n"
+	@echo "$(YELLOW)🚀 Déploiement en production...$(RESET)\n"
 	$(GIT) checkout main
 	$(GIT) pull origin main
 	$(COMPOSER) install --no-dev --optimize-autoloader
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction --env=prod
 	$(CONSOLE) cache:clear --env=prod
-	@printf "$(GREEN)✅ Déployé en production!$(RESET)\n"
+	@echo "$(GREEN)✅ Déployé en production!$(RESET)\n"
 .PHONY: prod-deploy
 #---------------------------------------------#
 
@@ -261,14 +261,12 @@ before-commit: qa-cs-fixer qa-phpstan qa-security-checker qa-phpcpd qa-lint-twig
 .PHONY: before-commit
 
 env-install: ## 🎯 Installe et configure le projet complet
-	@printf "$(BLUE)🚀 Installation du projet...$(RESET)\n"
+	@echo "$(BLUE)🚀 Installation du projet...$(RESET)\n"
 	$(MAKE) docker-up-local
 	$(MAKE) composer-install
-	$(MAKE) sf-dmm
-	$(MAKE) sf-fixtures
 	$(MAKE) sf-start
 	$(MAKE) sf-open 
-	@printf "$(GREEN)✅ Projet installé avec succès!$(RESET)\n"
+	@echo "$(GREEN)✅ Projet installé avec succès!$(RESET)\n"
 .PHONY: env-install
 
 start: docker-up-local sf-start sf-open ## Start project.
