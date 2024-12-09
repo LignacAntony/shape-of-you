@@ -67,6 +67,10 @@ docker-stop: ## Stop docker containers.
 	$(DOCKER_COMPOSE_STOP)
 .PHONY: docker-stop
 
+docker-down: ## Stop and remove docker containers.
+	@printf "$(RED) 🚨 Suppression des containers Docker...$(RESET)\n"
+	$(DOCKER_COMPOSE) down
+
 docker-logs: ## Display Docker logs.
 	$(DOCKER_COMPOSE) logs -f
 .PHONY: docker-logs
@@ -256,16 +260,18 @@ prod-deploy: ## Déploie sur l'environnement de production
 before-commit: qa-cs-fixer qa-phpstan qa-security-checker qa-phpcpd qa-lint-twigs qa-lint-yaml qa-lint-container qa-lint-schema tests ## Run before commit.
 .PHONY: before-commit
 
-first-install: ## 🎯 Installe et configure le projet complet
+env-install: ## 🎯 Installe et configure le projet complet
 	@printf "$(BLUE)🚀 Installation du projet...$(RESET)\n"
 	$(MAKE) docker-up-local
 	$(MAKE) composer-install
+	$(MAKE) sf-dmm
+	$(MAKE) sf-fixtures
 	$(MAKE) sf-start
 	$(MAKE) sf-open 
 	@printf "$(GREEN)✅ Projet installé avec succès!$(RESET)\n"
-.PHONY: first-install
+.PHONY: env-install
 
-start: docker-up sf-start sf-open ## Start project.
+start: docker-up-local sf-start sf-open ## Start project.
 .PHONY: start
 
 stop: docker-stop sf-stop ## Stop project.
@@ -273,5 +279,9 @@ stop: docker-stop sf-stop ## Stop project.
 
 reset-db: ## Reset database. TODO
 	$(eval CONFIRM := $(shell read -p "Are you sure you want to reset the database? [y/N] " CONFIRM && echo $${CONFIRM:-N}))
+	$(if $(filter y,$(CONFIRM)),\
+		$(MAKE) docker-stop
+		$(MAKE) docker-down,\
+		$(info $(RED)Reset database canceled$(RESET)))
 .PHONY: reset-db
 #---------------------------------------------#
