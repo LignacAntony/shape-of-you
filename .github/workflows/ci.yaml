@@ -1,0 +1,75 @@
+name: "CI"
+
+on:
+  push:
+  workflow_dispatch: ~
+
+jobs:
+  linter:
+    name: "Lint code"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Composer install
+        uses: php-actions/composer@v6
+        with:
+          php_version: 8.3
+      - name: "Generate cs config"
+        run: cp phpcs.xml.dist phpcs.xml
+      - name: PHP Code Sniffer
+        uses: php-actions/phpcs@v1
+        with:
+          php_version: 8.3
+          path: src/
+          standard: phpcs.xml
+      - name: "PHPStan"
+        uses: php-actions/phpstan@v3
+        continue-on-error: true
+        with:
+          path: src/
+          php_version: 8.3
+          level: 9
+
+#   deps:
+#     needs: ["linter"]
+#     name: "Install depedencies"
+#     runs-on: "ubuntu-latest"
+#     services:
+#       database:
+#         image: mysql
+#         env:
+#           MYSQL_ROOT_PASSWORD: password
+#           MYSQL_DATABASE: app
+#           MYSQL_ROOT_HOST: "%"
+#         ports:
+#           - 3306:3306
+#     steps:
+#       - name: "Checkout Repository"
+#         uses: actions/checkout@v4
+#       - name: Setup PHP Action
+#         uses: shivammathur/setup-php@2.31.1
+#         with:
+#           php-version: 8.3
+#           tools: composer
+#       - name: "Install composer deps"
+#         run: |
+#           export APP_ENV=test
+#           composer install --prefer-dist --no-interaction --no-progress
+#       - name: "Run migrations"
+#         run: |
+#           php bin/console d:m:m
+#         env:
+#           DATABASE_HOST: 127.0.0.1
+#           DATABASE_NAME: app
+#           DATABASE_PASSWORD: password
+#       - name: "Start server"
+#         run: |
+#           php bin/console
+#           php -S 127.0.0.1:8080 -t public &
+#           sleep 2
+#           nc -zv localhost 8080
+#       - name: "Start PHPUnit"
+#         run: |
+#           wget -O phpunit.phar https://phar.phpunit.de/phpunit-10.phar
+#           chmod +x phpunit.phar
+#           ./phpunit.phar
