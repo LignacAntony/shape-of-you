@@ -11,16 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Composer install
-        env:
-          POSTGRES_VERSION: ${{ secrets.POSTGRES_VERSION }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          ADMINER_PORT: ${{ secrets.ADMINER_PORT }}
-        uses: php-actions/composer@v6
-        with:
-          php_version: 8.3
+      # - name: Composer install
+      #   env:
+      #     POSTGRES_VERSION: ${{ secrets.POSTGRES_VERSION }}
+      #     POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      #     POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      #     POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      #     ADMINER_PORT: ${{ secrets.ADMINER_PORT }}
+      #   uses: php-actions/composer@v6
+      #   with:
+      #     php_version: 8.3
 
       - name: "Generate cs config"
         run: cp phpcs.xml.dist phpcs.xml
