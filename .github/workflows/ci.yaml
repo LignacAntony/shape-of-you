@@ -5,11 +5,21 @@ on:
   workflow_dispatch: ~
 
 jobs:
-  linter:
-    name: "Lint code"
-    runs-on: "ubuntu-latest"
+  php-code-sniffer:
+    name: "PHP-Code-Sniffer"
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: "Checkout Repository"
+        uses: actions/checkout@master
+      - name: "Setup Php Enviroment"
+        uses: shivammathur/setup-php@v2
+        with:
+            php-version: '8.3'
+            tools: composer
+      - name: "Install Packages"
+        run: composer global require "squizlabs/php_codesniffer"
+      - name: "Run PHP Code Sniffer"
+        run: ~/.composer/vendor/bin/phpcs
 
       # - name: Composer install
       #   env:
@@ -22,21 +32,21 @@ jobs:
       #   with:
       #     php_version: 8.3
 
-      - name: "Generate cs config"
-        run: cp phpcs.xml.dist phpcs.xml
-      - name: PHP Code Sniffer
-        uses: php-actions/phpcs@v1
-        with:
-          php_version: 8.3
-          path: src/
-          standard: phpcs.xml
-      - name: "PHPStan"
-        uses: php-actions/phpstan@v3
-        continue-on-error: true
-        with:
-          path: src/
-          php_version: 8.3
-          level: 9
+      # - name: "Generate cs config"
+      #   run: cp phpcs.xml.dist phpcs.xml
+      # - name: PHP Code Sniffer
+      #   uses: php-actions/phpcs@v1
+      #   with:
+      #     php_version: 8.3
+      #     path: src/
+      #     standard: phpcs.xml
+      # - name: "PHPStan"
+      #   uses: php-actions/phpstan@v3
+      #   continue-on-error: true
+      #   with:
+      #     path: src/
+      #     php_version: 8.3
+      #     level: 9
 
 #   deps:
 #     needs: ["linter"]
