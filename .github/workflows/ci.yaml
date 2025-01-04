@@ -19,7 +19,9 @@ jobs:
       - name: "Install Packages"
         run: composer global require "squizlabs/php_codesniffer"
       - name: "Run PHP Code Sniffer"
-        run: ~/.composer/vendor/bin/phpcs
+        run: ./vendor/bin/phpcs
+      - name: "Try auto fix"
+        run: ./vendor/bin/phpcbf
 
       # - name: Composer install
       #   env:
