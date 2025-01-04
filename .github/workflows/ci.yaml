@@ -37,7 +37,7 @@ jobs:
           run: composer global require "phpstan/phpstan"
       -   name: "Run PHP Stan"
           run: ~/.composer/vendor/bin/phpstan analyse src
-          continue-on-error: true
+          continue-on-error: false
       # - name: Composer install
       #   env:
       #     POSTGRES_VERSION: ${{ secrets.POSTGRES_VERSION }}
