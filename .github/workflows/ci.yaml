@@ -22,7 +22,22 @@ jobs:
         run: ~/.composer/vendor/bin/phpcs
       - name: "Try auto fix"
         run: ~/.composer/vendor/bin/phpcbf
-
+  php-stan:
+    name: "PHP-Stan"
+    runs-on: ubuntu-latest
+    steps:
+      -   name: "Checkout Repository"
+          uses: actions/checkout@master
+      -   name: "Setup Php Enviroment"
+          uses: shivammathur/setup-php@v2
+          with:
+              php-version: '8.1'
+              tools: composer
+      -   name: "Install Packages"
+          run: composer global require "phpstan/phpstan"
+      -   name: "Run PHP Stan"
+          run: ~/.composer/vendor/bin/phpstan analyse src
+          continue-on-error: true
       # - name: Composer install
       #   env:
       #     POSTGRES_VERSION: ${{ secrets.POSTGRES_VERSION }}
