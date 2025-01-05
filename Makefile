@@ -264,6 +264,7 @@ env-install: ## 🎯 Installe et configure le projet complet
 	@echo "$(BLUE)🚀 Installation du projet...$(RESET)\n"
 	$(MAKE) docker-up-local
 	$(MAKE) composer-install
+	$(MAKE) sf-dmm
 	$(MAKE) sf-start
 	$(MAKE) sf-open 
 	@echo "$(GREEN)✅ Projet installé avec succès!$(RESET)\n"
