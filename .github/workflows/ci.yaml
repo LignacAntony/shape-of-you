@@ -64,3 +64,6 @@ jobs:
           ADMINER_PORT: ${{ secrets.ADMINER_PORT }}
         run: docker-compose -f docker-compose.yaml -f docker-compose.override.yaml up -d
         continue-on-error: false
+      - name: Docker shows running containers
+        run: docker ps -a
+        continue-on-error: false
