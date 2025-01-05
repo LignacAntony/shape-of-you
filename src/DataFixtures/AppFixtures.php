@@ -20,8 +20,14 @@ class AppFixtures extends Fixture
     {
         $user = new User();
         $user->setEmail('user@user.fr');
+        $user->setFirstname('John');
+        $user->setLastname('Doe');
+        $user->setUsername('johndoe');
+        $user->setVerified(true);
         $hashedPassword = $this->passwordHasher->hashPassword($user, 'password');
         $user->setPassword($hashedPassword);
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setUpdatedAt(new \DateTime());
         $manager->persist($user);
 
 
