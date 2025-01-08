@@ -16,8 +16,8 @@ jobs:
         with:
             php-version: '8.3'
             tools: composer
-      - name: "Install Packages"
-        run: composer global require "squizlabs/php_codesniffer"
+      - name: "Composer install"
+        run: composer install
       - name: "Run PHP Code Sniffer"
         run: ~/.composer/vendor/bin/phpcs
       - name: "Try auto fix"
@@ -33,8 +33,8 @@ jobs:
         with:
             php-version: '8.1'
             tools: composer
-      - name: "Install Packages"
-        run: composer global require "phpstan/phpstan"
+      - name: "Composer install"
+        run: composer install
       - name: "Run PHP Stan"
         run: ~/.composer/vendor/bin/phpstan analyse --level 5 src/ 
         continue-on-error: true
