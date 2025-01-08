@@ -36,7 +36,7 @@ jobs:
       - name: "Install Packages"
         run: composer global require "phpstan/phpstan"
       - name: "Run PHP Stan"
-        run: ~/.composer/vendor/bin/phpstan analyse src
+        run: ~/.composer/vendor/bin/phpstan analyse --level 5 src/ 
         continue-on-error: true
   composer-install:
     name: "Composer Install"
