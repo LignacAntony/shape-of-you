@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+
+{% block body %}
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-4">Tableau de bord d'administration</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-blue-100 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2">Utilisateurs</h3>
+                <p class="text-3xl font-bold">1,234</p>
+            </div>
+            <div class="bg-green-100 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2">Produits</h3>
+                <p class="text-3xl font-bold">567</p>
+            </div>
+            <div class="bg-yellow-100 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2">Commandes</h3>
+                <p class="text-3xl font-bold">89</p>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <h3 class="text-xl font-semibold mb-4">Actions rapides</h3>
+            <div class="space-x-2">
+                <a href="#" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Ajouter un utilisateur
+                </a>
+                <a href="#" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Créer un produit
+                </a>
+                <a href="#" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                    Voir les commandes
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
