@@ -1,4 +1,13 @@
-# 🧪 Test Unitaire
+---
+name: Test Unit
+about: Set up test unit or end to end for this project
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+# 🧪 Test Unit
 
 ## Objectif
 Décrivez ce que le test doit vérifier.
