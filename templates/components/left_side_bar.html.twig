@@ -1,0 +1,25 @@
+<aside class="w-64 bg-gray-800 text-white flex-shrink-0 overflow-y-auto flex flex-col">
+    <div class="p-4">
+        <h1 class="text-2xl font-semibold">Mon Application</h1>
+    </div>
+    <nav class="mt-6 flex-grow">
+        <a href="{{ path('app_home') }}" class="block py-2 px-4 text-sm hover:bg-gray-700">
+            Accueil
+        </a>
+        <a href="{{ path('app_admin_index') }}" class="block py-2 px-4 text-sm hover:bg-gray-700">
+            Administration
+        </a>
+        {# Ajoutez d'autres liens de navigation ici #}
+    </nav>
+    <div class="p-4">
+        {% if app.user %}
+            <a href="{{ path('app_logout') }}" class="block w-full text-center py-2 px-4 bg-red-600 hover:bg-red-700 rounded transition duration-300">
+                Déconnexion
+            </a>
+        {% else %}
+            <a href="{{ path('app_login') }}" class="block w-full text-center py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded transition duration-300">
+                Connexion
+            </a>
+        {% endif %}
+    </div>
+</aside>
