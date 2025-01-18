@@ -15,6 +15,11 @@
         <server name="SHELL_VERBOSITY" value="-1" />
         <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
+
+        <!-- ###+ symfony/resend-mailer ### -->
+        <!-- MAILER_DSN=resend+api://API_KEY@default -->
+        <!-- MAILER_DSN=resend+smtp://resend:API_KEY@default -->
+        <!-- ###- symfony/resend-mailer ### -->
     </php>
 
     <testsuites>
