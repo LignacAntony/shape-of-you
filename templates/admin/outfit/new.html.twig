@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Outfit{% endblock %}
+
+{% block body %}
+    <h1>Create new Outfit</h1>
+
+    {{ include('admin/outfit/_form.html.twig') }}
+
+    <a href="{{ path('app_outfit_index') }}">back to list</a>
+{% endblock %}

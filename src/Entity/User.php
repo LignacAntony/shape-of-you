@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -59,6 +61,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToOne(mappedBy: 'appUser', cascade: ['persist', 'remove'])]
     private ?Profile $profile = null;
+    /**
+     * @var Collection<int, Outfit>
+     */
+    #[ORM\OneToMany(targetEntity: Outfit::class, mappedBy: 'author')]
+    private Collection $outfits;
+
+    /**
+     * @var Collection<int, Like>
+     */
+    #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'author')]
+    private Collection $likes;
+
+    /**
+     * @var Collection<int, Review>
+     */
+    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'author')]
+    private Collection $reviews;
+
+    public function __construct()
+    {
+        $this->outfits = new ArrayCollection();
+        $this->likes = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -227,6 +253,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, Outfit>
+     */
+    public function getOutfits(): Collection
+    {
+        return $this->outfits;
+    }
+
+    public function addOutfit(Outfit $outfit): static
+    {
+        if (!$this->outfits->contains($outfit)) {
+            $this->outfits->add($outfit);
+            $outfit->setAuthor($this);
+        }
+
+        return $this;
+    }
+
     public function getProfile(): ?Profile
     {
         return $this->profile;
@@ -245,6 +289,78 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->profile = $profile;
+
+        return $this;
+    }
+
+    public function removeOutfit(Outfit $outfit): static
+    {
+        if ($this->outfits->removeElement($outfit)) {
+            // set the owning side to null (unless already changed)
+            if ($outfit->getAuthor() === $this) {
+                $outfit->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Like>
+     */
+    public function getLikes(): Collection
+    {
+        return $this->likes;
+    }
+
+    public function addLike(Like $like): static
+    {
+        if (!$this->likes->contains($like)) {
+            $this->likes->add($like);
+            $like->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLike(Like $like): static
+    {
+        if ($this->likes->removeElement($like)) {
+            // set the owning side to null (unless already changed)
+            if ($like->getAuthor() === $this) {
+                $like->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(Review $review): static
+    {
+        if (!$this->reviews->contains($review)) {
+            $this->reviews->add($review);
+            $review->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReview(Review $review): static
+    {
+        if ($this->reviews->removeElement($review)) {
+            // set the owning side to null (unless already changed)
+            if ($review->getAuthor() === $this) {
+                $review->setAuthor(null);
+            }
+        }
 
         return $this;
     }
