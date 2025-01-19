@@ -6,10 +6,18 @@
         <a href="{{ path('app_home') }}" class="block py-2 px-4 text-sm hover:bg-gray-700">
             Accueil
         </a>
-        <a href="{{ path('app_admin_index') }}" class="block py-2 px-4 text-sm hover:bg-gray-700">
-            Administration
-        </a>
-        {# Ajoutez d'autres liens de navigation ici #}
+        {% if app.user %}
+            {% if is_granted('ROLE_USER') %}
+                <a href="" class="block py-2 px-4 text-sm hover:bg-gray-700">
+                    Profile
+                </a>
+            {% endif %}
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_admin_index') }}" class="block py-2 px-4 text-sm hover:bg-gray-700">
+                    Administration
+                </a>
+            {% endif %}
+        {% endif %}
     </nav>
     <div class="p-4">
         {% if app.user %}
