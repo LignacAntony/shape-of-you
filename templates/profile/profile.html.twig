@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <!-- Container principal pour gérer la largeur -->
+  <div class="max-w-4xl mx-auto">
+
+    <h2 class="text-3xl font-extrabold text-gray-900 mb-6">
+      Bonjour
+      {% if profile.appUser %}
+        {{ profile.appUser.username }} {{ profile.appUser.lastname }}
+      {% else %}
+        (Inconnu)
+      {% endif %}
+    </h2>
+
+    {# Carte blanche contenant les infos du profil #}
+    <div class="space-y-6 p-6 bg-white shadow sm:rounded-lg">
+      {# AVATAR #}
+      <div>
+        {% if profile.avatar %}
+          <img 
+            src="{{ profile.avatar }}" 
+            alt="Avatar de {{ profile.appUser ? profile.appUser.username : 'N/A' }}" 
+            class="mt-2 rounded-full w-24 h-24 object-cover"
+          >
+        {% else %}
+          <p class="text-gray-500 mt-2">Aucun avatar</p>
+        {% endif %}
+      </div>
+
+      {# BIO #}
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Bio</label>
+        {% if profile.bio %}
+          <p class="mt-2 text-gray-700">{{ profile.bio }}</p>
+        {% else %}
+          <p class="text-gray-500 mt-2">Pas de bio</p>
+        {% endif %}
+      </div>
+
+      {# PREFERENCES #}
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Préférences</label>
+        {% if profile.preferences %}
+          <ul class="list-disc list-inside mt-2 text-gray-700">
+            {% for key, value in profile.preferences %}
+              <li>{{ key }} : {{ value }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500 mt-2">Aucune préférence renseignée</p>
+        {% endif %}
+      </div>
+
+      {# MESURES #}
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Mesures</label>
+        {% if profile.measurements %}
+          <ul class="list-disc list-inside mt-2 text-gray-700">
+            {% for key, value in profile.measurements %}
+              <li>{{ key }} : {{ value }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500 mt-2">Aucune mesure renseignée</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
