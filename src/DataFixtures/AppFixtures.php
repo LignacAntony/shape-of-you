@@ -28,13 +28,8 @@ class AppFixtures extends Fixture
         $user->setLastname('Doe');
         $user->setUsername('johndoe');
         $user->setVerified(true);
-
         $hashedPassword = $this->passwordHasher->hashPassword($user, 'password');
         $user->setPassword($hashedPassword);
-
-        $user->setCreatedAt(new \DateTimeImmutable());
-        $user->setUpdatedAt(new \DateTime());
-
         $manager->persist($user);
 
         $profile = new Profile();
@@ -50,7 +45,7 @@ class AppFixtures extends Fixture
         ]);
         $profile->setLastLoginAt(new \DateTime());
         $manager->persist($profile);
-      
+
         $useradmin = new User();
         $useradmin->setEmail('admin@admin.fr');
         $useradmin->setFirstname('John');
@@ -60,8 +55,6 @@ class AppFixtures extends Fixture
         $useradmin->setVerified(true);
         $hashedPassword = $this->passwordHasher->hashPassword($useradmin, 'password');
         $useradmin->setPassword($hashedPassword);
-        $useradmin->setCreatedAt(new \DateTimeImmutable());
-        $useradmin->setUpdatedAt(new \DateTime());
         $manager->persist($useradmin);
 
         $outfit = new Outfit();
