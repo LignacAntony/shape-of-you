@@ -48,8 +48,20 @@ class AppFixtures extends Fixture
             'weight' => 75
         ]);
         $profile->setLastLoginAt(new \DateTime());
-
         $manager->persist($profile);
+      
+        $useradmin = new User();
+        $useradmin->setEmail('admin@admin.fr');
+        $useradmin->setFirstname('John');
+        $useradmin->setLastname('Doe');
+        $useradmin->setUsername('johndoe');
+        $useradmin->setRoles(['ROLE_ADMIN']);
+        $useradmin->setVerified(true);
+        $hashedPassword = $this->passwordHasher->hashPassword($useradmin, 'password');
+        $useradmin->setPassword($hashedPassword);
+        $useradmin->setCreatedAt(new \DateTimeImmutable());
+        $useradmin->setUpdatedAt(new \DateTime());
+        $manager->persist($useradmin);
 
         // ---- 3) Flush ----
         $manager->flush();
