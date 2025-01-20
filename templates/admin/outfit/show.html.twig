@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Outfit{% endblock %}
+
+{% block body %}
+    <h1>Outfit</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ outfit.id }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ outfit.name }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ outfit.description }}</td>
+            </tr>
+            <tr>
+                <th>CreatedAt</th>
+                <td>{{ outfit.CreatedAt ? outfit.CreatedAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>UpdateDateAt</th>
+                <td>{{ outfit.UpdateDateAt ? outfit.UpdateDateAt|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>IsPublished</th>
+                <td>{{ outfit.isPublished ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>LikesCount</th>
+                <td>{{ outfit.likesCount }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_outfit_index') }}">back to list</a>
+
+    <a href="{{ path('app_outfit_edit', {'id': outfit.id}) }}">edit</a>
+
+    {{ include('admin/outfit/_delete_form.html.twig') }}
+{% endblock %}

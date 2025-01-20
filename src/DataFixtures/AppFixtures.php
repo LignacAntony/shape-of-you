@@ -2,6 +2,9 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Like;
+use App\Entity\Outfit;
+use App\Entity\Review;
 use App\Entity\User;
 use App\Entity\Profile;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -19,25 +22,18 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        // ---- 1) Créer un user ----
         $user = new User();
         $user->setEmail('user@user.fr');
         $user->setFirstname('John');
         $user->setLastname('Doe');
         $user->setUsername('johndoe');
         $user->setVerified(true);
-
         $hashedPassword = $this->passwordHasher->hashPassword($user, 'password');
         $user->setPassword($hashedPassword);
-
-        $user->setCreatedAt(new \DateTimeImmutable());
-        $user->setUpdatedAt(new \DateTime());
-
         $manager->persist($user);
 
-        // ---- 2) Créer le profile du user ----
         $profile = new Profile();
-        $profile->setAppUser($user); // Liaison entre Profile et User
+        $profile->setAppUser($user);
         $profile->setAvatar('https://example.com/avatars/johndoe.png');
         $profile->setBio('Biographie de John Doe...');
         $profile->setPreferences([
@@ -49,7 +45,7 @@ class AppFixtures extends Fixture
         ]);
         $profile->setLastLoginAt(new \DateTime());
         $manager->persist($profile);
-      
+
         $useradmin = new User();
         $useradmin->setEmail('admin@admin.fr');
         $useradmin->setFirstname('John');
@@ -59,11 +55,26 @@ class AppFixtures extends Fixture
         $useradmin->setVerified(true);
         $hashedPassword = $this->passwordHasher->hashPassword($useradmin, 'password');
         $useradmin->setPassword($hashedPassword);
-        $useradmin->setCreatedAt(new \DateTimeImmutable());
-        $useradmin->setUpdatedAt(new \DateTime());
         $manager->persist($useradmin);
 
-        // ---- 3) Flush ----
+        $outfit = new Outfit();
+        $outfit->setAuthor($user);
+        $outfit->setName('Jogging outfit');
+        $outfit->setDescription('Mon meilleur outfit pour aller au kebab !');
+        $outfit->setIsPublished(true);
+        $manager->persist($outfit);
+
+        $like = new Like();
+        $like->setAuthor($user);
+        $like->setOutfit($outfit);
+        $manager->persist($like);
+
+        $review = new Review();
+        $review->setAuthor($user);
+        $review->setOutfit($outfit);
+        $review->setContent('Super outfit !');
+        $manager->persist($review);
+
         $manager->flush();
     }
 }
