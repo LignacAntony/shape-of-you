@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ClothingItem index{% endblock %}
+
+{% block body %}
+    <h1>ClothingItem index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Brand</th>
+                <th>Color</th>
+                <th>Price</th>
+                <th>AiTags</th>
+                <th>CreatedAt</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for clothing_item in clothing_items %}
+            <tr>
+                <td>{{ clothing_item.id }}</td>
+                <td>{{ clothing_item.name }}</td>
+                <td>{{ clothing_item.description }}</td>
+                <td>{{ clothing_item.brand }}</td>
+                <td>{{ clothing_item.color }}</td>
+                <td>{{ clothing_item.price }}</td>
+                <td>{{ clothing_item.aiTags ? clothing_item.aiTags|json_encode : '' }}</td>
+                <td>{{ clothing_item.createdAt ? clothing_item.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_clothing_item_show', {'id': clothing_item.id}) }}">show</a>
+                    <a href="{{ path('app_clothing_item_edit', {'id': clothing_item.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="9">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_clothing_item_new') }}">Create new</a>
+{% endblock %}

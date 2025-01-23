@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}OutfitItem index{% endblock %}
+
+{% block body %}
+    <h1>OutfitItem index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Size</th>
+                <th>PurchaseAt</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for outfit_item in outfit_items %}
+            <tr>
+                <td>{{ outfit_item.id }}</td>
+                <td>{{ outfit_item.size }}</td>
+                <td>{{ outfit_item.purchaseAt ? outfit_item.purchaseAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_outfit_item_show', {'id': outfit_item.id}) }}">show</a>
+                    <a href="{{ path('app_outfit_item_edit', {'id': outfit_item.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_outfit_item_new') }}">Create new</a>
+{% endblock %}

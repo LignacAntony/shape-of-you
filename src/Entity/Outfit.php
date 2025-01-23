@@ -52,10 +52,17 @@ class Outfit
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'outfit')]
     private Collection $reviews;
 
+    /**
+     * @var Collection<int, OutfitItem>
+     */
+    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'outfit')]
+    private Collection $outfitItems;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
         $this->reviews = new ArrayCollection();
+        $this->outfitItems = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -201,6 +208,36 @@ class Outfit
             // set the owning side to null (unless already changed)
             if ($review->getOutfit() === $this) {
                 $review->setOutfit(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OutfitItem>
+     */
+    public function getOutfitItems(): Collection
+    {
+        return $this->outfitItems;
+    }
+
+    public function addOutfitItem(OutfitItem $outfitItem): static
+    {
+        if (!$this->outfitItems->contains($outfitItem)) {
+            $this->outfitItems->add($outfitItem);
+            $outfitItem->setOutfit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOutfitItem(OutfitItem $outfitItem): static
+    {
+        if ($this->outfitItems->removeElement($outfitItem)) {
+            // set the owning side to null (unless already changed)
+            if ($outfitItem->getOutfit() === $this) {
+                $outfitItem->setOutfit(null);
             }
         }
 
