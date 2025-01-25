@@ -79,11 +79,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'author')]
     private Collection $reviews;
 
+    /**
+     * @var Collection<int, Wardrobe>
+     */
+    #[ORM\OneToMany(targetEntity: Wardrobe::class, mappedBy: 'author', orphanRemoval: true)]
+    private Collection $wardrobes;
+
     public function __construct()
     {
         $this->outfits = new ArrayCollection();
         $this->likes = new ArrayCollection();
         $this->reviews = new ArrayCollection();
+        $this->wardrobes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -359,6 +366,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($review->getAuthor() === $this) {
                 $review->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Wardrobe>
+     */
+    public function getWardrobes(): Collection
+    {
+        return $this->wardrobes;
+    }
+
+    public function addWardrobe(Wardrobe $wardrobe): static
+    {
+        if (!$this->wardrobes->contains($wardrobe)) {
+            $this->wardrobes->add($wardrobe);
+            $wardrobe->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWardrobe(Wardrobe $wardrobe): static
+    {
+        if ($this->wardrobes->removeElement($wardrobe)) {
+            // set the owning side to null (unless already changed)
+            if ($wardrobe->getAuthor() === $this) {
+                $wardrobe->setAuthor(null);
             }
         }
 
