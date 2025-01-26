@@ -3,33 +3,59 @@
 {% block title %}Like index{% endblock %}
 
 {% block body %}
-    <h1>Like index</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-2xl font-bold mb-4">Like index</h1>
 
-    <table class="table">
-        <thead>
+        <!-- Responsive table container -->
+        <table class="min-w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+            <thead class="bg-gray-200">
             <tr>
-                <th>Id</th>
-                <th>CreatedAt</th>
-                <th>actions</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Id</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">CreatedAt</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
             </tr>
-        </thead>
-        <tbody>
-        {% for like in likes %}
-            <tr>
-                <td>{{ like.id }}</td>
-                <td>{{ like.createdAt ? like.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_like_show', {'id': like.id}) }}">show</a>
-                    <a href="{{ path('app_like_edit', {'id': like.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            {% for like in likes %}
+                <tr class="border-b hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-2 text-gray-800">{{ like.id }}</td>
+                    <td class="px-4 py-2 text-gray-800">
+                        {{ like.createdAt ? like.createdAt|date('Y-m-d H:i:s') : '' }}
+                    </td>
+                    <td class="px-4 py-2 text-gray-800">
+                        <a
+                                href="{{ path('app_like_show', {'id': like.id}) }}"
+                                class="text-indigo-600 hover:underline mr-2"
+                        >
+                            show
+                        </a>
+                        <a
+                                href="{{ path('app_like_edit', {'id': like.id}) }}"
+                                class="text-blue-600 hover:underline"
+                        >
+                            edit
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="px-4 py-2 text-center text-gray-500">
+                        no records found
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
 
-    <a href="{{ path('app_like_new') }}">Create new</a>
+        <!-- Create new button -->
+        <div class="mt-4">
+            <a
+                    href="{{ path('app_like_new') }}"
+                    class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow
+                       transition-colors duration-200"
+            >
+                Create new
+            </a>
+        </div>
+    </div>
 {% endblock %}
