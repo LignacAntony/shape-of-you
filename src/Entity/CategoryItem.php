@@ -19,21 +19,22 @@ class CategoryItem
     private ?string $name = null;
 
     #[ORM\Column(length: 1000, nullable: true)]
-    private ?string $desription = null;
+    private ?string $description = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'categoryItems')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE', nullable: true)]
     private ?self $categoryParent = null;
 
     /**
      * @var Collection<int, self>
      */
-    #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'categoryParent')]
+    #[ORM\OneToMany(targetEntity: self::class, mappedBy: 'categoryParent', cascade: ['remove'], orphanRemoval: true)]
     private Collection $categoryItems;
 
     /**
      * @var Collection<int, ClothingItem>
      */
-    #[ORM\OneToMany(targetEntity: ClothingItem::class, mappedBy: 'category')]
+    #[ORM\OneToMany(targetEntity: ClothingItem::class, mappedBy: 'category', cascade: ['remove'], orphanRemoval: true)]
     private Collection $clothingItems;
 
     public function __construct()
@@ -59,14 +60,14 @@ class CategoryItem
         return $this;
     }
 
-    public function getDesription(): ?string
+    public function getDescription(): ?string
     {
-        return $this->desription;
+        return $this->description;
     }
 
-    public function setDesription(?string $desription): static
+    public function setDescription(?string $description): static
     {
-        $this->desription = $desription;
+        $this->description = $description;
 
         return $this;
     }

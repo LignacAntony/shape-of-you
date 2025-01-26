@@ -81,18 +81,18 @@ class AppFixtures extends Fixture
 
         $categoryItem = new CategoryItem();
         $categoryItem->setName('Vêtements');
-        $categoryItem->setDesription('Catégorie des vêtements');
+        $categoryItem->setDescription('Catégorie des vêtements');
         $manager->persist($categoryItem);
 
         $categoryItem2 = new CategoryItem();
         $categoryItem2->setName('Chaussures');
-        $categoryItem2->setDesription('Catégorie des chaussures');
+        $categoryItem2->setDescription('Catégorie des chaussures');
         $categoryItem2->setCategoryParent($categoryItem);
         $manager->persist($categoryItem2);
 
         $categoryItem3 = new CategoryItem();
         $categoryItem3->setName('Baskets');
-        $categoryItem3->setDesription('Catégorie des baskets');
+        $categoryItem3->setDescription('Catégorie des baskets');
         $categoryItem3->setCategoryParent($categoryItem2);
         $manager->persist($categoryItem3);
 
