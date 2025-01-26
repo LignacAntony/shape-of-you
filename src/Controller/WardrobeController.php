@@ -19,7 +19,7 @@ final class WardrobeController extends AbstractController
     #[Route(name: 'app_wardrobe_index', methods: ['GET'])]
     public function index(WardrobeRepository $wardrobeRepository): Response
     {
-        return $this->render('wardrobe/index.html.twig', [
+        return $this->render('admin/wardrobe/index.html.twig', [
             'wardrobes' => $wardrobeRepository->findAll(),
         ]);
     }
@@ -38,7 +38,7 @@ final class WardrobeController extends AbstractController
             return $this->redirectToRoute('app_wardrobe_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('wardrobe/new.html.twig', [
+        return $this->render('admin/wardrobe/new.html.twig', [
             'wardrobe' => $wardrobe,
             'form' => $form,
         ]);
@@ -47,7 +47,7 @@ final class WardrobeController extends AbstractController
     #[Route('/{id}', name: 'app_wardrobe_show', methods: ['GET'])]
     public function show(Wardrobe $wardrobe): Response
     {
-        return $this->render('wardrobe/show.html.twig', [
+        return $this->render('admin/wardrobe/show.html.twig', [
             'wardrobe' => $wardrobe,
         ]);
     }
@@ -64,7 +64,7 @@ final class WardrobeController extends AbstractController
             return $this->redirectToRoute('app_wardrobe_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('wardrobe/edit.html.twig', [
+        return $this->render('admin/wardrobe/edit.html.twig', [
             'wardrobe' => $wardrobe,
             'form' => $form,
         ]);
