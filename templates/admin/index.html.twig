@@ -35,7 +35,7 @@
             </div>
             <div class="mt-8">
                 <h3 class="text-xl font-semibold mb-4">Actions rapides</h3>
-                <div class="space-x-2">
+                <div class="space-x-2 ">
                     <a href="#" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                         Ajouter un utilisateur
                     </a>
@@ -46,6 +46,20 @@
                         Voir les commandes
                     </a>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mx-auto mt-8">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Gérer les entités</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Toute la carte est un lien -->
+                    <a
+                            href="{{ path('app_clothing_item_index') }}"
+                            class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
+                    >
+                        <h2 class="text-lg font-semibold mb-2">Clothing Items</h2>
+                    </a>
             </div>
         </div>
     </div>

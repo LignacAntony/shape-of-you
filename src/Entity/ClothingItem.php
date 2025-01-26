@@ -32,7 +32,7 @@ class ClothingItem
     #[ORM\Column(length: 100)]
     private ?string $color = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, nullable: true)]
     private ?string $price = null;
 
     #[ORM\Column(nullable: true)]
@@ -44,7 +44,7 @@ class ClothingItem
     /**
      * @var Collection<int, OutfitItem>
      */
-    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'clothingItem')]
+    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'clothingItem', orphanRemoval: true)]
     private Collection $outfitItems;
 
     public function __construct()
