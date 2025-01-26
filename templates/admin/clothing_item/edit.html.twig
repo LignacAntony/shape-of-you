@@ -7,7 +7,7 @@
 
     <!-- Container for the form -->
     <div class="max-w-md mx-auto bg-white p-6 rounded-md shadow-md">
-        {{ include('clothing_item/_form.html.twig', {'button_label': 'Update'}) }}
+        {{ include('admin/clothing_item/_form.html.twig', {'button_label': 'Update'}) }}
     </div>
 
     <!-- Back to list link -->
@@ -18,7 +18,7 @@
         >
             Back to list
         </a>
-        {{ include('clothing_item/_delete_form.html.twig') }}
+        {{ include('admin/clothing_item/_delete_form.html.twig') }}
 
     </div>
 {% endblock %}
