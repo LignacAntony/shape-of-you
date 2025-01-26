@@ -3,35 +3,61 @@
 {% block title %}Review index{% endblock %}
 
 {% block body %}
-    <h1>Review index</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-2xl font-bold mb-4">Review index</h1>
 
-    <table class="table">
-        <thead>
+        <!-- Responsive table container -->
+        <table class="min-w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+            <thead class="bg-gray-200">
             <tr>
-                <th>Id</th>
-                <th>Content</th>
-                <th>CreatedAt</th>
-                <th>actions</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Id</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Content</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">CreatedAt</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
             </tr>
-        </thead>
-        <tbody>
-        {% for review in reviews %}
-            <tr>
-                <td>{{ review.id }}</td>
-                <td>{{ review.content }}</td>
-                <td>{{ review.createdAt ? review.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_review_show', {'id': review.id}) }}">show</a>
-                    <a href="{{ path('app_review_edit', {'id': review.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            {% for review in reviews %}
+                <tr class="border-b hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-2 text-gray-800">{{ review.id }}</td>
+                    <td class="px-4 py-2 text-gray-800">{{ review.content }}</td>
+                    <td class="px-4 py-2 text-gray-800">
+                        {{ review.createdAt ? review.createdAt|date('Y-m-d H:i:s') : '' }}
+                    </td>
+                    <td class="px-4 py-2 text-gray-800">
+                        <a
+                                href="{{ path('app_review_show', {'id': review.id}) }}"
+                                class="text-indigo-600 hover:underline mr-2"
+                        >
+                            show
+                        </a>
+                        <a
+                                href="{{ path('app_review_edit', {'id': review.id}) }}"
+                                class="text-blue-600 hover:underline"
+                        >
+                            edit
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="px-4 py-2 text-center text-gray-500">
+                        no records found
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
 
-    <a href="{{ path('app_review_new') }}">Create new</a>
+        <!-- Create new button -->
+        <div class="mt-4">
+            <a
+                    href="{{ path('app_review_new') }}"
+                    class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow
+                       transition-colors duration-200"
+            >
+                Create new
+            </a>
+        </div>
+    </div>
 {% endblock %}
