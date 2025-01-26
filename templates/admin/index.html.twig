@@ -53,13 +53,18 @@
         <div class="bg-white shadow-md rounded-lg p-6">
             <h2 class="text-2xl font-bold mb-4">Gérer les entités</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Toute la carte est un lien -->
                     <a
                             href="{{ path('app_clothing_item_index') }}"
                             class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
                     >
                         <h2 class="text-lg font-semibold mb-2">Clothing Items</h2>
                     </a>
+                <a
+                        href="{{ path('app_outfit_index') }}"
+                        class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
+                >
+                    <h2 class="text-lg font-semibold mb-2">Outfits</h2>
+                </a>
             </div>
         </div>
     </div>

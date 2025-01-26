@@ -19,7 +19,7 @@ class Like
     private ?User $author = null;
 
     #[ORM\ManyToOne(inversedBy: 'likes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Outfit $outfit = null;
 
     #[ORM\Column]

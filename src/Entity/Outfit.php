@@ -43,19 +43,19 @@ class Outfit
     /**
      * @var Collection<int, Like>
      */
-    #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'outfit')]
+    #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'outfit', cascade: ['remove'], orphanRemoval: true)]
     private Collection $likes;
 
     /**
      * @var Collection<int, Review>
      */
-    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'outfit')]
+    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'outfit', cascade: ['remove'], orphanRemoval: true)]
     private Collection $reviews;
 
     /**
      * @var Collection<int, OutfitItem>
      */
-    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'outfit')]
+    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'outfit', cascade: ['remove'], orphanRemoval: true)]
     private Collection $outfitItems;
 
     public function __construct()
