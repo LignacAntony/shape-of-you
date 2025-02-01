@@ -17,7 +17,7 @@ class CategoryItemType extends AbstractType
             ->add('description')
             ->add('categoryParent', EntityType::class, [
                 'class' => CategoryItem::class,
-                'choice_label' => 'id',
+                'choice_label' => 'name',
             ])
         ;
     }

@@ -18,7 +18,7 @@ class WardrobeType extends AbstractType
             ->add('description')
             ->add('author', EntityType::class, [
                 'class' => User::class,
-                'choice_label' => 'id',
+                'choice_label' => 'firstname',
             ])
         ;
     }
