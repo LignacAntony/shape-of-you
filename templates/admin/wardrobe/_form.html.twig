@@ -1,7 +1,7 @@
 {{ form_start(form, { attr: { class: "space-y-6" } }) }}
     {% for field in form %}
         {# Ignorer les champs cachés tels que le CSRF token #}
-        {% if field.vars.block_prefixes|last not in ['_token'] %}
+        {% if field.vars.block_prefixes|last not in ['_wardrobe__token'] %}
             <div>
                 {{ form_label(field, null, {
                     'label_attr': {
