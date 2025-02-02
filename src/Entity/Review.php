@@ -19,7 +19,7 @@ class Review
     private ?User $author = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Outfit $outfit = null;
 
     #[ORM\Column(length: 1000)]

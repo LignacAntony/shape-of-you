@@ -18,11 +18,11 @@ class ReviewType extends AbstractType
             ->add('content')
             ->add('author', EntityType::class, [
                 'class' => User::class,
-                'choice_label' => 'id',
+                'choice_label' => 'firstname',
             ])
             ->add('outfit', EntityType::class, [
                 'class' => Outfit::class,
-                'choice_label' => 'id',
+                'choice_label' => 'name',
             ])
         ;
     }

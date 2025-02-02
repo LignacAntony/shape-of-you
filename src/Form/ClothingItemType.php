@@ -22,7 +22,7 @@ class ClothingItemType extends AbstractType
             ->add('aiTags')
             ->add('category', EntityType::class, [
                 'class' => CategoryItem::class,
-                'choice_label' => 'id',
+                'choice_label' => 'name',
             ])
         ;
     }

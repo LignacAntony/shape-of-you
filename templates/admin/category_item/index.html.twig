@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CategoryItem index{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-2xl font-bold mb-4">Category Item index</h1>
+
+        <table class="min-w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+            <thead class="bg-gray-200">
+            <tr>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Id</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Name</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Description</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for category_item in category_items %}
+                <tr class="border-b hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-2 text-gray-800">{{ category_item.id }}</td>
+                    <td class="px-4 py-2 text-gray-800">{{ category_item.name }}</td>
+                    <td class="px-4 py-2 text-gray-800">{{ category_item.description }}</td>
+                    <td class="px-4 py-2 text-gray-800">
+                        <a
+                                href="{{ path('app_category_item_show', {'id': category_item.id}) }}"
+                                class="text-indigo-600 hover:underline mr-2"
+                        >
+                            show
+                        </a>
+                        <a
+                                href="{{ path('app_category_item_edit', {'id': category_item.id}) }}"
+                                class="text-blue-600 hover:underline"
+                        >
+                            edit
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="px-4 py-2 text-center text-gray-500">No records found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="mt-4">
+            <a
+                    href="{{ path('app_category_item_new') }}"
+                    class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow
+                   transition-colors duration-200"
+            >
+                Create new
+            </a>
+        </div>
+    </div>
+{% endblock %}

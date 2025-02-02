@@ -14,10 +14,10 @@ class CategoryItemType extends AbstractType
     {
         $builder
             ->add('name')
-            ->add('desription')
+            ->add('description')
             ->add('categoryParent', EntityType::class, [
                 'class' => CategoryItem::class,
-                'choice_label' => 'id',
+                'choice_label' => 'name',
             ])
         ;
     }

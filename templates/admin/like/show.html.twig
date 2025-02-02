@@ -3,24 +3,50 @@
 {% block title %}Like{% endblock %}
 
 {% block body %}
-    <h1>Like</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-2xl font-bold mb-6">Like</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ like.id }}</td>
-            </tr>
-            <tr>
-                <th>CreatedAt</th>
-                <td>{{ like.createdAt ? like.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <!-- Responsive table container -->
+        <div class="overflow-x-auto rounded-lg shadow-md">
+            <table class="min-w-full divide-y divide-gray-200 bg-white">
+                <tbody class="divide-y divide-gray-200">
+                <tr>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                        Id
+                    </th>
+                    <td class="px-6 py-3">
+                        {{ like.id }}
+                    </td>
+                </tr>
+                <tr>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                        Created At
+                    </th>
+                    <td class="px-6 py-3">
+                        {{ like.createdAt ? like.createdAt|date('Y-m-d H:i:s') : '' }}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <a href="{{ path('app_like_index') }}">back to list</a>
+        <!-- Action buttons -->
+        <div class="mt-6 space-x-2">
+            <a
+                    href="{{ path('app_like_index') }}"
+                    class="inline-block px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+            >
+                Back to list
+            </a>
 
-    <a href="{{ path('app_like_edit', {'id': like.id}) }}">edit</a>
+            <a
+                    href="{{ path('app_like_edit', {'id': like.id}) }}"
+                    class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            >
+                Edit
+            </a>
 
-    {{ include('admin/like/_delete_form.html.twig') }}
+            {{ include('admin/like/_delete_form.html.twig') }}
+        </div>
+    </div>
 {% endblock %}

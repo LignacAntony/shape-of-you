@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ClothingItem{% endblock %}
+
+{% block body %}
+    <h1 class="text-2xl font-bold mb-6">ClothingItem</h1>
+
+    <div class="overflow-x-auto rounded-lg shadow-md">
+        <table class="min-w-full divide-y divide-gray-200 bg-white">
+            <tbody class="divide-y divide-gray-200">
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                    Id
+                </th>
+                <td class="px-6 py-3">
+                    {{ clothing_item.id }}
+                </td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                    Name
+                </th>
+                <td class="px-6 py-3">
+                    {{ clothing_item.name }}
+                </td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                    Description
+                </th>
+                <td class="px-6 py-3">
+                    {{ clothing_item.description }}
+                </td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                    Brand
+                </th>
+                <td class="px-6 py-3">
+                    {{ clothing_item.brand }}
+                </td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                    Color
+                </th>
+                <td class="px-6 py-3">
+                    {{ clothing_item.color }}
+                </td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                    Price
+                </th>
+                <td class="px-6 py-3">
+                    {{ clothing_item.price }}
+                </td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                    AiTags
+                </th>
+                <td class="px-6 py-3">
+                    {{ clothing_item.aiTags ? clothing_item.aiTags|json_encode : '' }}
+                </td>
+            </tr>
+            <tr>
+                <th class="px-6 py-3 text-left font-semibold text-gray-700 bg-gray-50">
+                    CreatedAt
+                </th>
+                <td class="px-6 py-3">
+                    {{ clothing_item.createdAt ? clothing_item.createdAt|date('Y-m-d H:i:s') : '' }}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 space-x-2">
+        <a
+                href="{{ path('app_clothing_item_index') }}"
+                class="inline-block px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+        >
+            Back to list
+        </a>
+
+        <a
+                href="{{ path('app_clothing_item_edit', {'id': clothing_item.id}) }}"
+                class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+        >
+            Edit
+        </a>
+
+        {{ include('admin/clothing_item/_delete_form.html.twig') }}
+    </div>
+{% endblock %}

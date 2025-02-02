@@ -14,9 +14,11 @@ class OutfitItem
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'outfitItems')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Outfit $outfit = null;
 
     #[ORM\ManyToOne(inversedBy: 'outfitItems')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?ClothingItem $clothingItem = null;
 
     #[ORM\ManyToOne(inversedBy: 'outfitItems')]

@@ -19,7 +19,7 @@ final class ClothingItemController extends AbstractController
     #[Route(name: 'app_clothing_item_index', methods: ['GET'])]
     public function index(ClothingItemRepository $clothingItemRepository): Response
     {
-        return $this->render('clothing_item/index.html.twig', [
+        return $this->render('admin/clothing_item/index.html.twig', [
             'clothing_items' => $clothingItemRepository->findAll(),
         ]);
     }
@@ -38,7 +38,7 @@ final class ClothingItemController extends AbstractController
             return $this->redirectToRoute('app_clothing_item_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('clothing_item/new.html.twig', [
+        return $this->render('admin/clothing_item/new.html.twig', [
             'clothing_item' => $clothingItem,
             'form' => $form,
         ]);
@@ -47,7 +47,7 @@ final class ClothingItemController extends AbstractController
     #[Route('/{id}', name: 'app_clothing_item_show', methods: ['GET'])]
     public function show(ClothingItem $clothingItem): Response
     {
-        return $this->render('clothing_item/show.html.twig', [
+        return $this->render('admin/clothing_item/show.html.twig', [
             'clothing_item' => $clothingItem,
         ]);
     }
@@ -64,7 +64,7 @@ final class ClothingItemController extends AbstractController
             return $this->redirectToRoute('app_clothing_item_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('clothing_item/edit.html.twig', [
+        return $this->render('admin/clothing_item/edit.html.twig', [
             'clothing_item' => $clothingItem,
             'form' => $form,
         ]);
