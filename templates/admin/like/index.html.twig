@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Like index{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-2xl font-bold mb-4">Like index</h1>
+
+        <!-- Responsive table container -->
+        <table class="min-w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+            <thead class="bg-gray-200">
+            <tr>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Id</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">CreatedAt</th>
+                <th class="px-4 py-2 text-left font-medium text-gray-700">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for like in likes %}
+                <tr class="border-b hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-2 text-gray-800">{{ like.id }}</td>
+                    <td class="px-4 py-2 text-gray-800">
+                        {{ like.createdAt ? like.createdAt|date('Y-m-d H:i:s') : '' }}
+                    </td>
+                    <td class="px-4 py-2 text-gray-800">
+                        <a
+                                href="{{ path('app_like_show', {'id': like.id}) }}"
+                                class="text-indigo-600 hover:underline mr-2"
+                        >
+                            show
+                        </a>
+                        <a
+                                href="{{ path('app_like_edit', {'id': like.id}) }}"
+                                class="text-blue-600 hover:underline"
+                        >
+                            edit
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="px-4 py-2 text-center text-gray-500">
+                        no records found
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Create new button -->
+        <div class="mt-4">
+            <a
+                    href="{{ path('app_like_new') }}"
+                    class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow
+                       transition-colors duration-200"
+            >
+                Create new
+            </a>
+        </div>
+    </div>
+{% endblock %}

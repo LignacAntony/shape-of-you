@@ -3,14 +3,19 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -53,6 +58,43 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(nullable: true)]
     private ?bool $isVerified = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\OneToOne(mappedBy: 'appUser', cascade: ['persist', 'remove'])]
+    private ?Profile $profile = null;
+    /**
+     * @var Collection<int, Outfit>
+     */
+    #[ORM\OneToMany(targetEntity: Outfit::class, mappedBy: 'author')]
+    private Collection $outfits;
+
+    /**
+     * @var Collection<int, Like>
+     */
+    #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'author')]
+    private Collection $likes;
+
+    /**
+     * @var Collection<int, Review>
+     */
+    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'author')]
+    private Collection $reviews;
+
+    /**
+     * @var Collection<int, Wardrobe>
+     */
+    #[ORM\OneToMany(targetEntity: Wardrobe::class, mappedBy: 'author', orphanRemoval: true)]
+    private Collection $wardrobes;
+
+    public function __construct()
+    {
+        $this->outfits = new ArrayCollection();
+        $this->likes = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
+        $this->wardrobes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -205,6 +247,160 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setVerified(?bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Outfit>
+     */
+    public function getOutfits(): Collection
+    {
+        return $this->outfits;
+    }
+
+    public function addOutfit(Outfit $outfit): static
+    {
+        if (!$this->outfits->contains($outfit)) {
+            $this->outfits->add($outfit);
+            $outfit->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function getProfile(): ?Profile
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(?Profile $profile): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($profile === null && $this->profile !== null) {
+            $this->profile->setAppUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($profile !== null && $profile->getAppUser() !== $this) {
+            $profile->setAppUser($this);
+        }
+
+        $this->profile = $profile;
+
+        return $this;
+    }
+
+    public function removeOutfit(Outfit $outfit): static
+    {
+        if ($this->outfits->removeElement($outfit)) {
+            // set the owning side to null (unless already changed)
+            if ($outfit->getAuthor() === $this) {
+                $outfit->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Like>
+     */
+    public function getLikes(): Collection
+    {
+        return $this->likes;
+    }
+
+    public function addLike(Like $like): static
+    {
+        if (!$this->likes->contains($like)) {
+            $this->likes->add($like);
+            $like->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLike(Like $like): static
+    {
+        if ($this->likes->removeElement($like)) {
+            // set the owning side to null (unless already changed)
+            if ($like->getAuthor() === $this) {
+                $like->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(Review $review): static
+    {
+        if (!$this->reviews->contains($review)) {
+            $this->reviews->add($review);
+            $review->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReview(Review $review): static
+    {
+        if ($this->reviews->removeElement($review)) {
+            // set the owning side to null (unless already changed)
+            if ($review->getAuthor() === $this) {
+                $review->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Wardrobe>
+     */
+    public function getWardrobes(): Collection
+    {
+        return $this->wardrobes;
+    }
+
+    public function addWardrobe(Wardrobe $wardrobe): static
+    {
+        if (!$this->wardrobes->contains($wardrobe)) {
+            $this->wardrobes->add($wardrobe);
+            $wardrobe->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWardrobe(Wardrobe $wardrobe): static
+    {
+        if ($this->wardrobes->removeElement($wardrobe)) {
+            // set the owning side to null (unless already changed)
+            if ($wardrobe->getAuthor() === $this) {
+                $wardrobe->setAuthor(null);
+            }
+        }
 
         return $this;
     }

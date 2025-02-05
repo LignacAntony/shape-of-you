@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+
+{% block body %}
+    {# Menu horizontal simple #}
+    <nav class="bg-gray-800 p-4 mb-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <span class="text-white font-bold text-lg">Admin Panel</span>
+            <div class="space-x-4">
+                <a href="{{ path('app_admin_index') }}" class="text-white">Dashboard</a>
+                <a href="{{ path('app_outfit_index') }}" class="text-white">Outfits</a>
+                {# <a href="{{ path('app_user_index') }}" class="text-white">Users</a> #}
+                <a href="{{ path('app_review_index') }}" class="text-white">Reviews</a>
+                <a href="{{ path('app_like_index') }}" class="text-white">Likes</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mx-auto">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Tableau de bord d'administration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-2">Utilisateurs</h3>
+                    <p class="text-3xl font-bold">1,234</p>
+                </div>
+                <div class="bg-green-100 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-2">Produits</h3>
+                    <p class="text-3xl font-bold">567</p>
+                </div>
+                <div class="bg-yellow-100 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-2">Commandes</h3>
+                    <p class="text-3xl font-bold">89</p>
+                </div>
+            </div>
+            <div class="mt-8">
+                <h3 class="text-xl font-semibold mb-4">Actions rapides</h3>
+                <div class="space-x-2 ">
+                    <a href="#" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Ajouter un utilisateur
+                    </a>
+                    <a href="#" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Créer un produit
+                    </a>
+                    <a href="#" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                        Voir les commandes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mx-auto mt-8">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Gérer les entités</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <a
+                            href="{{ path('app_clothing_item_index') }}"
+                            class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
+                    >
+                        <h2 class="text-lg font-semibold mb-2">Clothing Items</h2>
+                    </a>
+                <a
+                        href="{{ path('app_outfit_index') }}"
+                        class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
+                >
+                    <h2 class="text-lg font-semibold mb-2">Outfits</h2>
+                </a>
+                <a
+                        href="{{ path('app_like_index') }}"
+                        class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
+                >
+                    <h2 class="text-lg font-semibold mb-2">Likes</h2>
+                </a>
+                <a
+                        href="{{ path('app_review_index') }}"
+                        class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
+                >
+                    <h2 class="text-lg font-semibold mb-2">Reviews</h2>
+                </a>
+                <a
+                        href="{{ path('app_category_item_index') }}"
+                        class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
+                >
+                    <h2 class="text-lg font-semibold mb-2">Category Item</h2>
+                </a>
+                <a
+                        href="{{ path('app_wardrobe_index') }}"
+                        class="bg-green-100 block rounded shadow p-4 hover:bg-green-200 transition-colors duration-200"
+                >
+                    <h2 class="text-lg font-semibold mb-2">Wardrobe</h2>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
