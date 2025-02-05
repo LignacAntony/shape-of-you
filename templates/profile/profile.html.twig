@@ -3,72 +3,109 @@
 {% block title %}Mon Profil{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <!-- Container principal pour gérer la largeur -->
-  <div class="max-w-4xl mx-auto">
+  <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
 
-    <h2 class="text-3xl font-extrabold text-gray-900 mb-6">
-      Bonjour
-      {% if profile.appUser %}
-        {{ profile.appUser.username }} {{ profile.appUser.lastname }}
-      {% else %}
-        (Inconnu)
-      {% endif %}
-    </h2>
-
-    {# Carte blanche contenant les infos du profil #}
-    <div class="space-y-6 p-6 bg-white shadow sm:rounded-lg">
-      {# AVATAR #}
-      <div>
-        {% if profile.avatar %}
-          <img 
-            src="{{ profile.avatar }}" 
-            alt="Avatar de {{ profile.appUser ? profile.appUser.username : 'N/A' }}" 
-            class="mt-2 rounded-full w-24 h-24 object-cover"
-          >
+      <h2 class="text-3xl font-extrabold text-gray-900 mb-6">
+        Bonjour
+        {% if profile.appUser %}
+          {{ profile.appUser.username }} {{ profile.appUser.lastname }}
         {% else %}
-          <p class="text-gray-500 mt-2">Aucun avatar</p>
+          (Inconnu)
         {% endif %}
-      </div>
+      </h2>
 
-      {# BIO #}
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Bio</label>
-        {% if profile.bio %}
-          <p class="mt-2 text-gray-700">{{ profile.bio }}</p>
-        {% else %}
-          <p class="text-gray-500 mt-2">Pas de bio</p>
-        {% endif %}
-      </div>
+      <!-- Bouton Modifier -->
+      <button id="edit-toggle" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Modifier le profil
+      </button>
 
-      {# PREFERENCES #}
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Préférences</label>
-        {% if profile.preferences %}
+      <!-- Mode Vue -->
+      <div id="view-mode">
+        <div>
+          {% if profile.avatar %}
+            <img src="{{ profile.avatar }}" alt="Avatar de {{ profile.appUser ? profile.appUser.username : 'N/A' }}" class="mt-2 rounded-full w-24 h-24 object-cover">
+          {% else %}
+            <p class="text-gray-500 mt-2">Aucun avatar</p>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Bio</label>
+          <p class="mt-2 text-gray-700">{{ profile.bio ?: 'Pas de bio' }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Préférences</label>
           <ul class="list-disc list-inside mt-2 text-gray-700">
             {% for key, value in profile.preferences %}
               <li>{{ key }} : {{ value }}</li>
             {% endfor %}
           </ul>
-        {% else %}
-          <p class="text-gray-500 mt-2">Aucune préférence renseignée</p>
-        {% endif %}
-      </div>
+        </div>
 
-      {# MESURES #}
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Mesures</label>
-        {% if profile.measurements %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Mesures</label>
           <ul class="list-disc list-inside mt-2 text-gray-700">
             {% for key, value in profile.measurements %}
               <li>{{ key }} : {{ value }}</li>
             {% endfor %}
           </ul>
-        {% else %}
-          <p class="text-gray-500 mt-2">Aucune mesure renseignée</p>
-        {% endif %}
+        </div>
+      </div>
+
+      <!-- Mode Édition (Formulaire Symfony caché au départ) -->
+      <div id="edit-mode" class="hidden">
+        {{ form_start(form) }}
+        <div class="mb-4">
+          {{ form_label(form.avatar) }}
+          {{ form_widget(form.avatar, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+        </div>
+
+        <div class="mb-4">
+          {{ form_label(form.bio) }}
+          {{ form_widget(form.bio, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+        </div>
+
+        <div class="mb-4">
+          {{ form_label(form.preferences) }}
+          {{ form_widget(form.preferences, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+        </div>
+
+        <div class="mb-4">
+          {{ form_label(form.measurements) }}
+          {{ form_widget(form.measurements, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+        </div>
+
+        {{ form_widget(form.save) }}
+        {{ form_end(form) }}
       </div>
     </div>
   </div>
-</div>
+
+  <!-- JavaScript pour gérer le mode Vue / Édition -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const editToggle = document.getElementById("edit-toggle");
+      const viewMode = document.getElementById("view-mode");
+      const editMode = document.getElementById("edit-mode");
+      const saveBtn = document.getElementById("save-btn");
+
+      let editActive = false;
+
+      editToggle.addEventListener("click", function() {
+        editActive = !editActive;
+
+        if (editActive) {
+          editToggle.textContent = "Annuler";
+          viewMode.classList.add("hidden");
+          editMode.classList.remove("hidden");
+        } else {
+          editToggle.textContent = "Modifier le profil";
+          viewMode.classList.remove("hidden");
+          editMode.classList.add("hidden");
+        }
+      });
+    });
+  </script>
 {% endblock %}
