@@ -1,9 +1,10 @@
 <?php
-
 namespace App\Form;
 
 use App\Entity\Profile;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -14,6 +15,11 @@ class ProfileEditType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Récupérer les préférences et mesures actuelles
+        $profile = $options['data'];
+        $preferences = $profile->getPreferences() ?? [];
+        $measurements = $profile->getMeasurements() ?? [];
+
         $builder
             ->add('avatar', TextType::class, [
                 'label' => 'URL de l\'avatar',
@@ -25,19 +31,34 @@ class ProfileEditType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control'],
             ])
-            ->add('preferences', TextareaType::class, [
-                'label' => 'Préférences (JSON)',
+            ->add('preferences', ChoiceType::class, [
+                'label' => 'Thème',
+                'choices' => [
+                    'Mode Sombre' => 'dark',
+                    'Mode Clair' => 'light',
+                ],
+                'expanded' => true, // Boutons radio
+                'multiple' => false, // Une seule sélection
+                'data' => $preferences['theme'] ?? 'light', // Valeur par défaut
+                'mapped' => false, // Car c'est un champ JSON
+            ])
+            ->add('height', IntegerType::class, [
+                'label' => 'Taille (cm)',
                 'required' => false,
+                'data' => $measurements['height'] ?? null, // Pré-remplissage
+                'mapped' => false, // Car c'est un JSON
                 'attr' => ['class' => 'form-control'],
             ])
-            ->add('measurements', TextareaType::class, [
-                'label' => 'Mesures (JSON)',
+            ->add('weight', IntegerType::class, [
+                'label' => 'Poids (kg)',
                 'required' => false,
+                'data' => $measurements['weight'] ?? null, // Pré-remplissage
+                'mapped' => false, // Car c'est un JSON
                 'attr' => ['class' => 'form-control'],
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Enregistrer',
-                'attr' => ['class' => 'hidden mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded', 'id' => 'save-btn'],
+                'attr' => ['class' => 'hidden mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded'],
             ]);
     }
 

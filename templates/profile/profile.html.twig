@@ -3,28 +3,30 @@
 {% block title %}Mon Profil{% endblock %}
 
 {% block body %}
-  <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto">
+  <div class="h-full flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
 
-      <h2 class="text-3xl font-extrabold text-gray-900 mb-6">
-        Bonjour
-        {% if profile.appUser %}
-          {{ profile.appUser.username }} {{ profile.appUser.lastname }}
-        {% else %}
-          (Inconnu)
-        {% endif %}
-      </h2>
-
-      <!-- Bouton Modifier -->
-      <button id="edit-toggle" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        Modifier le profil
-      </button>
+      <!-- Titre / Bonjour -->
+      <div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Bonjour
+          {% if profile.appUser %}
+            {{ profile.appUser.username }} {{ profile.appUser.lastname }}
+          {% else %}
+            (Inconnu)
+          {% endif %}
+        </h2>
+      </div>
 
       <!-- Mode Vue -->
-      <div id="view-mode">
-        <div>
+      <div id="view-mode" class="space-y-6">
+        <div class="flex flex-col items-center">
           {% if profile.avatar %}
-            <img src="{{ profile.avatar }}" alt="Avatar de {{ profile.appUser ? profile.appUser.username : 'N/A' }}" class="mt-2 rounded-full w-24 h-24 object-cover">
+            <img
+                    src="{{ profile.avatar }}"
+                    alt="Avatar de {{ profile.appUser ? profile.appUser.username : 'N/A' }}"
+                    class="rounded-full w-24 h-24 object-cover"
+            >
           {% else %}
             <p class="text-gray-500 mt-2">Aucun avatar</p>
           {% endif %}
@@ -54,48 +56,122 @@
         </div>
       </div>
 
-      <!-- Mode Édition (Formulaire Symfony caché au départ) -->
+      <!-- Mode Édition (formulaire caché au départ) -->
       <div id="edit-mode" class="hidden">
-        {{ form_start(form) }}
-        <div class="mb-4">
-          {{ form_label(form.avatar) }}
-          {{ form_widget(form.avatar, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+        {{ form_start(form, { 'attr': {'class': 'mt-8 space-y-6'} }) }}
+        <!-- On peut injecter un token CSRF si nécessaire -->
+        {# <input type="hidden" name="_csrf_token" value="{{ csrf_token('edit_profile') }}"> #}
+
+        <div class="rounded-md shadow-sm -space-y-px">
+          <!-- Avatar -->
+          <div>
+            {{ form_label(form.avatar, null, {'label_attr': {'class': 'sr-only'}}) }}
+            {{ form_widget(form.avatar, {
+              'attr': {
+                'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border
+                           border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md
+                           focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
+                           focus:z-10 sm:text-sm',
+                'placeholder': 'URL de l’avatar'
+              }
+            }) }}
+          </div>
+
+          <!-- Bio -->
+          <div>
+            {{ form_label(form.bio, null, {'label_attr': {'class': 'sr-only'}}) }}
+            {{ form_widget(form.bio, {
+              'attr': {
+                'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border
+                           border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md
+                           focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
+                           focus:z-10 sm:text-sm',
+                'placeholder': 'Votre bio...'
+              }
+            }) }}
+          </div>
         </div>
 
-        <div class="mb-4">
-          {{ form_label(form.bio) }}
-          {{ form_widget(form.bio, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+        <!-- Préférences -->
+        <div class="rounded-md shadow-sm">
+          <div class="mt-4">
+            {{ form_label(form.preferences, 'Préférences', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+            {{ form_widget(form.preferences, {
+              'attr': {
+                'class': 'mt-1 w-full border-gray-300 rounded p-2'
+              }
+            }) }}
+          </div>
         </div>
 
-        <div class="mb-4">
-          {{ form_label(form.preferences) }}
-          {{ form_widget(form.preferences, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+        <!-- Mesures (height / weight) -->
+        <div class="rounded-md shadow-sm">
+          <div class="mt-4">
+            {{ form_label(form.height, 'Taille', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+            {{ form_widget(form.height, {
+              'attr': {
+                'class': 'mt-1 w-full border-gray-300 rounded p-2',
+                'placeholder': 'Taille (cm)'
+              }
+            }) }}
+          </div>
+          <div class="mt-4">
+            {{ form_label(form.weight, 'Poids', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+            {{ form_widget(form.weight, {
+              'attr': {
+                'class': 'mt-1 w-full border-gray-300 rounded p-2',
+                'placeholder': 'Poids (kg)'
+              }
+            }) }}
+          </div>
         </div>
 
-        <div class="mb-4">
-          {{ form_label(form.measurements) }}
-          {{ form_widget(form.measurements, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+        <!-- Bouton de sauvegarde -->
+        <div>
+          <button type="submit"
+                  class="group relative w-full flex justify-center py-2 px-4
+                         border border-transparent text-sm font-medium rounded-md
+                         text-white bg-indigo-600 hover:bg-indigo-700
+                         focus:outline-none focus:ring-2 focus:ring-offset-2
+                         focus:ring-indigo-500 mt-6">
+            Sauvegarder
+          </button>
         </div>
-
-        {{ form_widget(form.save) }}
         {{ form_end(form) }}
       </div>
+
+      <!-- Bouton pour basculer en mode Édition / Vue -->
+      <button id="edit-toggle"
+              class="group relative w-full flex justify-center py-2 px-4
+                   border border-transparent text-sm font-medium rounded-md
+                   text-white bg-blue-600 hover:bg-blue-700
+                   focus:outline-none focus:ring-2 focus:ring-offset-2
+                   focus:ring-blue-500">
+        Modifier le profil
+      </button>
+
+      <!-- Autre lien ou action possible -->
+      <div class="text-center">
+        <a href="#"
+           class="font-medium text-indigo-600 hover:text-indigo-500 mt-4 inline-block">
+          Modifier vos informations personnelles
+        </a>
+      </div>
+
     </div>
   </div>
 
-  <!-- JavaScript pour gérer le mode Vue / Édition -->
+  <!-- Script pour basculer entre mode vue et mode édition -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const editToggle = document.getElementById("edit-toggle");
       const viewMode = document.getElementById("view-mode");
       const editMode = document.getElementById("edit-mode");
-      const saveBtn = document.getElementById("save-btn");
 
       let editActive = false;
 
       editToggle.addEventListener("click", function() {
         editActive = !editActive;
-
         if (editActive) {
           editToggle.textContent = "Annuler";
           viewMode.classList.add("hidden");
