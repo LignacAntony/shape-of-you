@@ -19,7 +19,6 @@ class ProfileController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function index(Request $request, EntityManagerInterface $entityManager, Security $security, ProfileRepository $profileRepository): Response
     {
-        // Récupérer l'utilisateur connecté
         $user = $security->getUser();
 
         $profile = $profileRepository->findOneBy(['appUser' => $user]);
@@ -31,12 +30,16 @@ class ProfileController extends AbstractController
             $entityManager->flush();
         }
 
-        // Création du formulaire pour modifier le profil
         $form = $this->createForm(ProfileEditType::class, $profile);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $selectedTheme = $form->get('preferences')->getData();
+            $avatarFile = $form->get('avatarFile')->getData();
+
+            if ($avatarFile) {
+                $profile->setAvatarFile($avatarFile);
+            }
 
             $newHeight = $form->get('height')->getData();
             $newWeight = $form->get('weight')->getData();
@@ -58,7 +61,6 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('profile_show');
         }
 
-        // Rendu de la vue avec le formulaire et les données du profil
         return $this->render('profile/profile.html.twig', [
             'profile' => $profile,
             'form' => $form->createView(),

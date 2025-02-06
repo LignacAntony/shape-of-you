@@ -21,11 +21,8 @@
       <div id="view-mode" class="space-y-6">
         <div class="flex flex-col items-center">
           {% if profile.avatar %}
-            <img
-                    src="{{ profile.avatar }}"
-                    alt="Avatar de {{ profile.appUser ? profile.appUser.username : 'N/A' }}"
-                    class="rounded-full w-24 h-24 object-cover"
-            >
+            <img src="{{ asset('/uploads/avatars/' ~ profile.avatar) }}" alt="Avatar" class="mt-2 rounded-full w-24 h-24 object-cover">
+
           {% else %}
             <p class="text-gray-500 mt-2">Aucun avatar</p>
           {% endif %}
@@ -61,16 +58,8 @@
 
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
-            {{ form_label(form.avatar, null, {'label_attr': {'class': 'sr-only'}}) }}
-            {{ form_widget(form.avatar, {
-              'attr': {
-                'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border
-                           border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md
-                           focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-                           focus:z-10 sm:text-sm',
-                'placeholder': 'URL de l’avatar'
-              }
-            }) }}
+            {{ form_label(form.avatarFile) }}
+            {{ form_widget(form.avatarFile, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
           </div>
 
           <div>
