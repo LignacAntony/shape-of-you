@@ -8,5 +8,7 @@
 	<rule ref="PSR12" />
 
 	<file>src/</file>
-
+	<rule ref="Generic.Files.LineLength">
+		<severity>0</severity>
+	</rule>
 </ruleset>

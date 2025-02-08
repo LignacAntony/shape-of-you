@@ -25,7 +25,12 @@ class Outfit
     private ?string $name = null;
 
     #[ORM\Column(length: 4000, nullable: true)]
-    #[Assert\Length(min: 10, max: 4000, minMessage: 'Votre description doit comporter au moins {{ limit }} caractères', maxMessage: 'Votre description ne peut pas dépasser {{ limit }} caractères')]
+    #[Assert\Length(
+        min: 10,
+        max: 4000,
+        minMessage: 'Votre description doit comporter au moins {{ limit }} caractères',
+        maxMessage: 'Votre description ne peut pas dépasser {{ limit }} caractères'
+    )]
     private ?string $description = null;
 
     #[ORM\Column]

@@ -71,8 +71,11 @@ final class ClothingItemController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_clothing_item_delete', methods: ['POST'])]
-    public function delete(Request $request, ClothingItem $clothingItem, EntityManagerInterface $entityManager): Response
-    {
+    public function delete(
+        Request $request,
+        ClothingItem $clothingItem,
+        EntityManagerInterface $entityManager
+    ): Response {
         if ($this->isCsrfTokenValid('delete' . $clothingItem->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($clothingItem);
             $entityManager->flush();
