@@ -43,6 +43,7 @@ class AppFixtures extends Fixture
         $profile->setPreferences([
             'theme' => 'dark',
         ]);
+
         $profile->setMeasurements([
             'height' => 180,
             'weight' => 75
