@@ -41,6 +41,11 @@ class Profile
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $lastLoginAt = null;
 
+
+    public function __construct()
+    {
+        $this->avatar = 'default.jpg';
+    }
     public function __serialize(): array
     {
         $data = get_object_vars($this);
