@@ -1,0 +1,29 @@
+{% set icon = icon|default('tag') %}
+{% set color = color|default('primary') %}
+{% set button_label = button_label|default(null) %}
+
+<div class="px-4 mb-4">
+    <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center">
+            <i class="fas fa-{{ icon }} mr-2 {% if color == 'primary' %}text-blue-500{% elseif color == 'success' %}text-green-500{% elseif color == 'info' %}text-blue-400{% else %}text-gray-500{% endif %}"></i>
+            <h2 class="text-xl font-semibold m-0">{{ title }}</h2>
+        </div>
+        {% if button_label %}
+            <button class="px-3 py-1 text-sm rounded-lg {% if color == 'primary' %}bg-blue-500{% elseif color == 'success' %}bg-green-500{% elseif color == 'info' %}bg-blue-400{% else %}bg-gray-500{% endif %} text-white hover:opacity-90 transition-opacity">
+                <i class="fas fa-plus mr-2"></i>{{ button_label }}
+            </button>
+        {% else %}
+            {% block button %}{% endblock %}
+        {% endif %}
+    </div>
+
+    {% if items|length > 0 %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% block items %}{% endblock %}
+        </div>
+    {% else %}
+        <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+            <i class="fas fa-info-circle mr-2"></i>{{ empty_message }}
+        </div>
+    {% endif %}
+</div> 

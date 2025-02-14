@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ wardrobe.name }}{% endblock %}
+
+{% block body %}
+    {# On récupère les tenues uniques à partir des outfitItems #}
+    {% set outfits = [] %}
+    {% for item in wardrobe.outfitItems %}
+        {% if item.outfit not in outfits %}
+            {% set outfits = outfits|merge([item.outfit]) %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="container-fluid py-4">
+        {# Section principale #}
+        {% embed 'components/wardrobe_card.html.twig' with {
+            'name': wardrobe.name,
+            'description': wardrobe.description,
+            'image': wardrobe.image,
+            'stats': [
+                {'color': 'primary', 'value': wardrobe.outfitItems|length, 'label': 'vêtements'},
+                {'color': 'success', 'value': outfits|length, 'label': 'tenues'}
+            ]
+        } %}
+            {% block card_content %}
+                {% if wardrobe.image %}
+                    <div class="col-12 mb-4">
+                        <div class="image-card">
+                            <img src="{{ asset(wardrobe.image) }}" 
+                                alt="{{ wardrobe.name }}"
+                                class="img-fluid rounded shadow-sm">
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="col-md-6">
+                    <div class="flex items-center text-gray-500">
+                        <i class="far fa-calendar-alt mr-2"></i>
+                        Créée le {{ wardrobe.createdAt|date('d/m/Y') }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="flex items-center text-gray-500">
+                        <i class="fas fa-user mr-2"></i>
+                        Par {{ wardrobe.author.username }}
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        {# Section Tenues #}
+        {% embed 'components/category_section.html.twig' with {
+            'title': 'Tenues',
+            'icon': 'tshirt',
+            'color': 'success',
+            'button_label': 'Créer une tenue',
+            'items': outfits,
+            'empty_message': 'Aucune tenue n\'a été créée dans cette garde-robe.'
+        } %}
+            {% block items %}
+                {% for outfit in outfits %}
+                    {% include 'components/outfit_card.html.twig' with {
+                        'outfit': outfit,
+                        'color': 'success'
+                    } %}
+                {% endfor %}
+            {% endblock %}
+        {% endembed %}
+
+        {# Section Vêtements #}
+        {% embed 'components/category_section.html.twig' with {
+            'title': 'Vêtements',
+            'icon': 'tags',
+            'color': 'info',
+            'items': wardrobe.outfitItems,
+            'empty_message': 'Cette garde-robe ne contient aucun vêtement.'
+        } %}
+            {% block button %}
+                {% include 'components/add_clothing_modal.html.twig' with {
+                    'categories': categories,
+                    'wardrobe_id': wardrobe.id
+                } %}
+            {% endblock %}
+            
+            {% block items %}
+                {% for item in wardrobe.outfitItems %}
+                    {% include 'components/clothing_card.html.twig' with {
+                        'item': item,
+                        'color': 'info'
+                    } %}
+                {% endfor %}
+            {% endblock %}
+        {% endembed %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% include 'components/card_styles.html.twig' %}
+{% endblock %} 

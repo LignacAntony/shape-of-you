@@ -70,6 +70,12 @@ Encore
     //.autoProvidejQuery()
 
     .enablePostCssLoader()
+
+    // Configuration pour Font Awesome
+    .copyFiles({
+        from: './node_modules/@fortawesome/fontawesome-free/webfonts',
+        to: 'webfonts/[path][name].[ext]'
+    })
 ;
 
 module.exports = Encore.getWebpackConfig();

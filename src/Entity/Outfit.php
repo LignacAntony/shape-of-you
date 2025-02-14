@@ -29,13 +29,16 @@ class Outfit
     private ?string $description = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $CreatedAt = null;
+    private ?bool $isPublished = false;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private array $images;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $UpdateDateAt = null;
-
-    #[ORM\Column]
-    private ?bool $isPublished = null;
 
     #[ORM\Column]
     private ?int $likesCount = null;
@@ -60,9 +63,10 @@ class Outfit
 
     public function __construct()
     {
-        $this->likes = new ArrayCollection();
-        $this->reviews = new ArrayCollection();
         $this->outfitItems = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
+        $this->likes = new ArrayCollection();
+        $this->images = [];
     }
 
     public function getId(): ?int
@@ -108,12 +112,12 @@ class Outfit
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->CreatedAt;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $CreatedAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->CreatedAt = $CreatedAt;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -241,6 +245,35 @@ class Outfit
             }
         }
 
+        return $this;
+    }
+
+    public function getImages(): array
+    {
+        return $this->images ?? [];
+    }
+
+    public function setImages(?array $images): static
+    {
+        $this->images = $images ?? [];
+        return $this;
+    }
+
+    public function addImage(string $imagePath): static
+    {
+        if (!in_array($imagePath, $this->images)) {
+            $this->images[] = $imagePath;
+        }
+        return $this;
+    }
+
+    public function removeImage(string $imagePath): static
+    {
+        $key = array_search($imagePath, $this->images);
+        if ($key !== false) {
+            unset($this->images[$key]);
+            $this->images = array_values($this->images); // Réindexe le tableau
+        }
         return $this;
     }
 }

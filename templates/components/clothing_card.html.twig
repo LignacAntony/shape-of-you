@@ -1,0 +1,36 @@
+{% set color = color|default('info') %}
+
+<a href="{{ path('clothing_details', {'id': item.id}) }}" class="block transition-transform duration-300 hover:-translate-y-1">
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md">
+        <div class="aspect-w-1 aspect-h-1 bg-gray-50 flex items-center justify-center">
+            {% if item.clothingItem.category %}
+                <i class="fas fa-{{ item.clothingItem.category.name|lower == 'chaussures' ? 'shoe-prints' : 
+                                  item.clothingItem.category.name|lower == 'accessoires' ? 'glasses' : 
+                                  'tshirt' }} text-2xl {% if color == 'info' %}text-blue-500{% else %}text-gray-500{% endif %}"></i>
+            {% else %}
+                <i class="fas fa-tshirt text-2xl {% if color == 'info' %}text-blue-500{% else %}text-gray-500{% endif %}"></i>
+            {% endif %}
+        </div>
+        <div class="p-3">
+            <h3 class="text-sm font-medium text-gray-900 truncate mb-2">{{ item.clothingItem.name }}</h3>
+            {% if item.clothingItem.brand %}
+                <div class="text-xs text-gray-500 mb-2">{{ item.clothingItem.brand }}</div>
+            {% endif %}
+            <div class="flex flex-wrap gap-2">
+                <span class="px-2 py-1 text-xs rounded-full {% if color == 'info' %}bg-blue-500{% else %}bg-gray-500{% endif %} text-white">
+                    <i class="fas fa-ruler mr-1"></i>{{ item.size }}
+                </span>
+                {% if item.clothingItem.color %}
+                    <span class="px-2 py-1 text-xs rounded-full bg-gray-500 text-white">
+                        <i class="fas fa-palette mr-1"></i>{{ item.clothingItem.color }}
+                    </span>
+                {% endif %}
+                {% if item.outfit %}
+                    <span class="px-2 py-1 text-xs rounded-full bg-green-500 text-white">
+                        <i class="fas fa-tshirt mr-1"></i>{{ item.outfit.name }}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</a> 
