@@ -1,0 +1,128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ outfit.name }}{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        {# Section principale #}
+        {% embed 'components/wardrobe_card.html.twig' with {
+            'name': outfit.name,
+            'description': outfit.description,
+            'stats': [
+                {'color': 'success', 'value': outfit.outfitItems|length, 'label': 'éléments'},
+                {'color': 'success', 'value': outfit.likesCount, 'label': 'likes'}
+            ]
+        } %}
+            {% block card_content %}
+                {% if outfit.images|length > 0 %}
+                    <div class="col-12 mb-4">
+                        <div class="row g-3">
+                            {% for imagePath in outfit.images %}
+                                <div class="col-6 col-md-4">
+                                    <div class="image-card">
+                                        <img src="{{ asset(imagePath) }}" 
+                                            alt="{{ outfit.name }}"
+                                            class="img-fluid rounded shadow-sm">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="far fa-calendar-alt me-2"></i>
+                        Créée le {{ outfit.createdAt|date('d/m/Y') }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="fas fa-user me-2"></i>
+                        Par {{ outfit.author.username }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center">
+                        {% if outfit.isPublished %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check me-1"></i>Publié
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-clock me-1"></i>Non publié
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        {# Section Vêtements #}
+        {% embed 'components/category_section.html.twig' with {
+            'title': 'Vêtements de la tenue',
+            'icon': 'tshirt',
+            'color': 'success',
+            'button_label': 'Ajouter un vêtement',
+            'items': outfit.outfitItems,
+            'empty_message': 'Cette tenue ne contient aucun vêtement.'
+        } %}
+            {% block items %}
+                {% for item in outfit.outfitItems %}
+                    {% include 'components/clothing_card.html.twig' with {
+                        'item': item,
+                        'color': 'success'
+                    } %}
+                {% endfor %}
+            {% endblock %}
+        {% endembed %}
+
+        {# Section Commentaires #}
+        {% if outfit.reviews|length > 0 %}
+            {% embed 'components/category_section.html.twig' with {
+                'title': 'Commentaires',
+                'icon': 'comments',
+                'color': 'secondary',
+                'items': outfit.reviews,
+                'empty_message': 'Aucun commentaire pour le moment.'
+            } %}
+                {% block items %}
+                    <div class="list-group list-group-flush w-100">
+                        {% for review in outfit.reviews %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-circle fa-2x text-muted me-2"></i>
+                                        <strong>{{ review.author.username }}</strong>
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ review.createdAt|date('d/m/Y H:i') }}
+                                    </small>
+                                </div>
+                                <p class="mb-0">{{ review.content }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endblock %}
+            {% endembed %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% include 'components/card_styles.html.twig' %}
+    <style>
+        .list-group {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .list-group-item:first-child {
+            border-top: none;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+{% endblock %} 

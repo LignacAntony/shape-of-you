@@ -1,0 +1,34 @@
+{% set description = description|default(null) %}
+{% set stats = stats|default([]) %}
+{% set image = image|default(null) %}
+
+<div class="bg-white rounded-lg shadow-sm mb-4">
+    <div class="bg-gray-50 px-4 py-3 flex justify-between items-center border-b">
+        <div class="flex items-center">
+            {% if image %}
+                <img src="{{ asset(image) }}" alt="{{ name }}" class="w-10 h-10 rounded-full mr-2 object-cover">
+            {% else %}
+                <i class="fas fa-door-closed mr-2 text-blue-500"></i>
+            {% endif %}
+            <h1 class="text-xl font-semibold m-0">{{ name }}</h1>
+        </div>
+        {% if stats|length > 0 %}
+            <div class="flex gap-2">
+                {% for stat in stats %}
+                    <span class="px-2 py-1 text-sm rounded-full {% if stat.color == 'primary' %}bg-blue-500 text-white{% elseif stat.color == 'success' %}bg-green-500 text-white{% else %}bg-gray-500 text-white{% endif %}">
+                        {{ stat.value }} {{ stat.label }}
+                    </span>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="p-4">
+        {% if description %}
+            <p class="text-lg mb-4 text-gray-600">{{ description }}</p>
+        {% endif %}
+        
+        <div class="grid gap-4">
+            {% block card_content %}{% endblock %}
+        </div>
+    </div>
+</div> 

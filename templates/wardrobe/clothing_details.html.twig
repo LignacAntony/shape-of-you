@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ outfitItem.clothingItem.name }}{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                {# En-tête avec navigation #}
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <a href="{{ path('user_wardrobe') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Modifier
+                        </button>
+                        <button type="button" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Supprimer
+                        </button>
+                    </div>
+                </div>
+
+                {# Informations principales #}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h1 class="h3 mb-0 text-info">
+                            {% if outfitItem.clothingItem.category %}
+                                <i class="fas fa-{{ outfitItem.clothingItem.category.name|lower == 'chaussures' ? 'shoe-prints' : 
+                                    outfitItem.clothingItem.category.name|lower == 'accessoires' ? 'glasses' : 
+                                    'tshirt' }} me-2"></i>
+                            {% else %}
+                                <i class="fas fa-tshirt me-2"></i>
+                            {% endif %}
+                            {{ outfitItem.clothingItem.name }}
+                        </h1>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <div class="mb-4">
+                                    <h2 class="h5 mb-3">Caractéristiques</h2>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        {% if outfitItem.clothingItem.brand %}
+                                            <div class="feature-item">
+                                                <i class="fas fa-tag text-info me-2"></i>
+                                                <span class="fw-medium">Marque:</span>
+                                                {{ outfitItem.clothingItem.brand }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="feature-item">
+                                            <i class="fas fa-ruler text-info me-2"></i>
+                                            <span class="fw-medium">Taille:</span>
+                                            {{ outfitItem.size }}
+                                        </div>
+                                        
+                                        {% if outfitItem.clothingItem.color %}
+                                            <div class="feature-item">
+                                                <i class="fas fa-palette text-info me-2"></i>
+                                                <span class="fw-medium">Couleur:</span>
+                                                {{ outfitItem.clothingItem.color }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if outfitItem.clothingItem.category %}
+                                            <div class="feature-item">
+                                                <i class="fas fa-tags text-info me-2"></i>
+                                                <span class="fw-medium">Catégorie:</span>
+                                                {{ outfitItem.clothingItem.category.name }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                {% if outfitItem.clothingItem.description %}
+                                    <div class="mb-4">
+                                        <h2 class="h5 mb-3">Description</h2>
+                                        <p class="text-muted">{{ outfitItem.clothingItem.description }}</p>
+                                    </div>
+                                {% endif %}
+
+                                {% if outfitItem.clothingItem.images|length > 0 %}
+                                    <div class="mb-4">
+                                        <h2 class="h5 mb-3">Images</h2>
+                                        <div class="row g-3">
+                                            {% for imagePath in outfitItem.clothingItem.images %}
+                                                <div class="col-6 col-md-4">
+                                                    <div class="image-card">
+                                                        <img src="{{ asset(imagePath) }}" 
+                                                            alt="{{ outfitItem.clothingItem.name }}"
+                                                            class="img-fluid rounded shadow-sm">
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <h2 class="h5 mb-3">Informations</h2>
+                                        <ul class="list-unstyled mb-0">
+                                            <li class="mb-3">
+                                                <div class="d-flex align-items-center text-muted">
+                                                    <i class="far fa-calendar-alt me-2"></i>
+                                                    Ajouté le {{ outfitItem.clothingItem.createdAt|date('d/m/Y') }}
+                                                </div>
+                                            </li>
+                                            {% if outfitItem.wardrobe %}
+                                                <li class="mb-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-door-closed me-2 text-info"></i>
+                                                        <a href="{{ path('wardrobe_details', {'id': outfitItem.wardrobe.id}) }}" class="text-decoration-none">
+                                                            {{ outfitItem.wardrobe.name }}
+                                                        </a>
+                                                    </div>
+                                                </li>
+                                            {% endif %}
+                                            <li>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-tshirt me-2 text-success"></i>
+                                                    <a href="{{ path('outfit_details', {'id': outfitItem.outfit.id}) }}" class="text-decoration-none">
+                                                        {{ outfitItem.outfit.name }}
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .feature-item {
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .image-card {
+            aspect-ratio: 1;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+{% endblock %} 
