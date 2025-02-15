@@ -3,8 +3,12 @@
 {% block title %}Mon Profil{% endblock %}
 
 {% block body %}
-  <div class="h-full flex items-center justify-center bg-gree-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+  <h2 class="title-text">
+    Profile
+    <span class="title-underline"></span>
+  </h2>
+  <div class="flex justify-center py-12 md:px-4 sm:px-6 lg:px-8">
+    <div class="max-w-lg w-full px-4 lg:px-8 rounded-2xl bg-white shadow-lg p-8">
       {% for label, messages in app.flashes %}
         {% for message in messages %}
           {% if label == 'success' %}
@@ -32,11 +36,10 @@
         </h2>
       </div>
 
-      <!-- Mode Vue -->
       <div id="view-mode" class="space-y-6">
         <div class="flex flex-col items-center">
           {% if profile.avatar %}
-            <img src="{{ asset('/uploads/avatars/' ~ profile.avatar) }}" alt="Avatar" class="mt-2 rounded-full w-24 h-24 object-cover">
+            <img src="{{ asset('/uploads/avatars/' ~ profile.avatar) }}" alt="Avatar" class="mt-2 rounded-full w-24 h-24 object-cover border-primary-600 border-4">
 
           {% else %}
             <p class="text-gray-500 mt-2">Aucun avatar</p>
@@ -44,24 +47,24 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">Bio</label>
-          <p class="mt-2 text-gray-700">{{ profile.bio ?: 'Pas de bio' }}</p>
+          <label class="form-label mt-8">Bio : </label>
+          <p class="form-area overflow-hidden">{{ profile.bio ?: 'Pas de bio' }}</p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">Préférences</label>
-          <ul class="list-disc list-inside mt-2 text-gray-700">
+          <label class="form-label">Préférences</label>
+          <ul class="form-area">
             {% for key, value in profile.preferences %}
-              <li>{{ key }} : {{ value }}</li>
+              <li>{{ key | capitalize }} : {{ value }}</li>
             {% endfor %}
           </ul>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">Mesures</label>
-          <ul class="list-disc list-inside mt-2 text-gray-700">
+          <label class="form-label">Mesures</label>
+          <ul class="form-area">
             {% for key, value in profile.measurements %}
-              <li>{{ key }} : {{ value }}</li>
+              <li>{{ key | capitalize }} : {{ value }}</li>
             {% endfor %}
           </ul>
         </div>
@@ -71,65 +74,76 @@
         {{ form_start(form, { 'attr': {'class': 'mt-8 space-y-6'} }) }}
          <input type="hidden" name="_csrf_token" value="{{ csrf_token('edit_profile') }}">
 
-        <div class="rounded-md shadow-sm -space-y-px">
           <div>
-            {{ form_label(form.avatarFile) }}
-            {{ form_widget(form.avatarFile, {'attr': {'class': 'w-full p-2 border border-gray-300 rounded'}}) }}
+            {{ form_label(form.avatarFile, 'Avatar', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.avatarFile, {'attr': {'class': 'w-full form-area'}}) }}
           </div>
 
           <div>
-            {{ form_label(form.bio, null, {'label_attr': {'class': 'sr-only'}}) }}
+            {{ form_label(form.bio, "Bio", {'label_attr': {'class': 'form-label'}}) }}
             {{ form_widget(form.bio, {
               'attr': {
-                'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border
-                           border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md
-                           focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-                           focus:z-10 sm:text-sm',
+                'class': 'form-area w-full',
                 'placeholder': 'Votre bio...'
               }
             }) }}
           </div>
-        </div>
 
-        <div class="rounded-md shadow-sm">
-          <div class="mt-4">
-            {{ form_label(form.preferences, 'Préférences', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-            {{ form_widget(form.preferences, {
-              'attr': {
-                'class': 'mt-1 w-full border-gray-300 rounded p-2'
-              }
-            }) }}
+          {# Récupération du champ en une seule fois pour éviter l'erreur #}
+          {% set preferences_widget = form_widget(form.preferences) %}
+
+          <div>
+              <label class="form-label">
+                  Préférences - Choisir un Thème
+              </label>
+              <div class="flex gap-4 mt-4">
+                  <label class="cursor-pointer">
+                      <input type="radio" name="{{ form.preferences.vars.full_name }}" value="light"
+                             class="sr-only peer"
+                              {% if form.preferences.vars.value == 'light' %} checked {% endif %}>
+                      <span class="py-2 px-4 font-bold text-center border-2 text-primary-600 border-primary-600 rounded-lg
+                        bg-white dark:bg-white dark:border-primary-600
+                        peer-checked:bg-primary-600 peer-checked:text-white transition">Mode Clair
+                      </span>
+                  </label>
+                  <label class="cursor-pointer">
+                      <input type="radio" name="{{ form.preferences.vars.full_name }}" value="dark"
+                             class="sr-only peer"
+                              {% if form.preferences.vars.value == 'dark' %} checked {% endif %}>
+                      <span class="py-2 px-4 font-bold text-center border-2 text-primary-600 border-primary-600 rounded-lg
+                        bg-white dark:bg-white dark:border-primary-600
+                        peer-checked:bg-primary-600 peer-checked:text-white transitio">
+                          Mode Sombre
+                      </span>
+                  </label>
+              </div>
           </div>
-        </div>
 
-        <div class="rounded-md shadow-sm">
-          <div class="mt-4">
-            {{ form_label(form.height, 'Taille', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+          {# Ne pas afficher form_widget(form.preferences) une deuxième fois #}
+
+
+          <div>
+            {{ form_label(form.height, 'Taille', {'label_attr': {'class': 'form-label'}}) }}
             {{ form_widget(form.height, {
               'attr': {
-                'class': 'mt-1 w-full border-gray-300 rounded p-2',
+                'class': 'form-area w-full',
                 'placeholder': 'Taille (cm)'
               }
             }) }}
           </div>
-          <div class="mt-4">
-            {{ form_label(form.weight, 'Poids', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+          <div>
+            {{ form_label(form.weight, 'Poids', {'label_attr': {'class': 'form-label'}}) }}
             {{ form_widget(form.weight, {
               'attr': {
-                'class': 'mt-1 w-full border-gray-300 rounded p-2',
+                'class': 'form-area w-full',
                 'placeholder': 'Poids (kg)'
               }
             }) }}
           </div>
-        </div>
 
         <div>
           <button type="submit"
-                  class="group relative w-full flex justify-center py-2 px-4
-                         border border-transparent text-sm font-medium rounded-md
-                         text-white bg-indigo-600 hover:bg-indigo-700
-                         focus:outline-none focus:ring-2 focus:ring-offset-2
-                         focus:ring-indigo-500 mt-6">
+                  class="form-button__primary">
             Sauvegarder
           </button>
         </div>
@@ -137,17 +151,13 @@
       </div>
 
       <button id="edit-toggle"
-              class="group relative w-full flex justify-center py-2 px-4
-                   border border-transparent text-sm font-medium rounded-md
-                   text-white bg-blue-600 hover:bg-blue-700
-                   focus:outline-none focus:ring-2 focus:ring-offset-2
-                   focus:ring-blue-500">
+              class="group form-button__primary">
         Modifier le profil
       </button>
 
       <div class="text-center">
         <a href="{{ path('app_user_edit') }}"
-           class="font-medium text-indigo-600 hover:text-indigo-500 mt-4 inline-block">
+           class="font-medium text-primary-600 hover:text-primary-700 mt-4 inline-block">
           Modifier vos informations personnelles
         </a>
       </div>
@@ -155,27 +165,5 @@
     </div>
   </div>
 
-  <!-- Script pour basculer entre mode vue et mode édition -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const editToggle = document.getElementById("edit-toggle");
-      const viewMode = document.getElementById("view-mode");
-      const editMode = document.getElementById("edit-mode");
 
-      let editActive = false;
-
-      editToggle.addEventListener("click", function() {
-        editActive = !editActive;
-        if (editActive) {
-          editToggle.textContent = "Annuler";
-          viewMode.classList.add("hidden");
-          editMode.classList.remove("hidden");
-        } else {
-          editToggle.textContent = "Modifier le profil";
-          viewMode.classList.remove("hidden");
-          editMode.classList.add("hidden");
-        }
-      });
-    });
-  </script>
 {% endblock %}
