@@ -25,7 +25,7 @@ class Outfit
     private ?string $name = null;
 
     #[ORM\Column(length: 4000, nullable: true)]
-    #[Assert\Length(min: 10, max: 4000, minMessage: 'Votre description doit comporter au moins {{ limit }} caractères', maxMessage: 'Votre description ne peut pas dépasser {{ limit }} caractères')]
+    #[Assert\Length(max: 4000, maxMessage: 'Votre description ne peut pas dépasser {{ limit }} caractères')]
     private ?string $description = null;
 
     #[ORM\Column]
@@ -58,7 +58,7 @@ class Outfit
     /**
      * @var Collection<int, OutfitItem>
      */
-    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'outfit', cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\ManyToMany(targetEntity: OutfitItem::class, inversedBy: 'outfits')]
     private Collection $outfitItems;
 
     public function __construct()
@@ -230,7 +230,7 @@ class Outfit
     {
         if (!$this->outfitItems->contains($outfitItem)) {
             $this->outfitItems->add($outfitItem);
-            $outfitItem->setOutfit($this);
+            $outfitItem->addOutfit($this);
         }
 
         return $this;
@@ -239,10 +239,7 @@ class Outfit
     public function removeOutfitItem(OutfitItem $outfitItem): static
     {
         if ($this->outfitItems->removeElement($outfitItem)) {
-            // set the owning side to null (unless already changed)
-            if ($outfitItem->getOutfit() === $this) {
-                $outfitItem->setOutfit(null);
-            }
+            $outfitItem->removeOutfit($this);
         }
 
         return $this;

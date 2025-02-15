@@ -3,76 +3,76 @@
 {% block title %}Ma Garde-robe{% endblock %}
 
 {% block body %}
-    <div class="container-fluid py-4">
+    <div class="container mx-auto px-4 py-4">
         {# Section Garde-robes #}
-        <div class="category-section mb-4">
-            <div class="category-header d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-door-closed me-2 text-primary"></i>
-                    <h2 class="category-title mb-0">Garde-robes</h2>
+        <div class="mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                    <i class="fas fa-door-closed mr-2 text-blue-600"></i>
+                    <h2 class="text-xl font-semibold mb-0">Garde-robes</h2>
                 </div>
-                <span class="category-count">{{ wardrobes|length }}</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{{ wardrobes|length }}</span>
             </div>
 
             {% if wardrobes|length > 0 %}
-                <div class="items-grid">
+                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {% for wardrobe in wardrobes %}
-                        <a href="{{ path('wardrobe_details', {'id': wardrobe.id}) }}" class="item-link">
-                            <div class="item-card">
-                                <div class="item-image bg-light d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-door-closed fa-2x text-primary"></i>
+                        <a href="{{ path('wardrobe_details', {'id': wardrobe.id}) }}" class="block group">
+                            <div class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                                <div class="aspect-square bg-gray-50 flex items-center justify-center">
+                                    <i class="fas fa-door-closed text-2xl text-blue-600 transform transition-transform duration-300 group-hover:scale-110"></i>
                                 </div>
-                                <div class="item-info p-2">
-                                    <h3 class="item-title">{{ wardrobe.name }}</h3>
-                                    <p class="item-description text-muted small mb-0">{{ wardrobe.description }}</p>
+                                <div class="p-2">
+                                    <h3 class="text-sm font-medium text-gray-900 truncate">{{ wardrobe.name }}</h3>
+                                    <p class="text-xs text-gray-500 line-clamp-2">{{ wardrobe.description }}</p>
                                 </div>
                             </div>
                         </a>
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>Vous n'avez pas encore de garde-robe.
+                <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+                    <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore de garde-robe.
                 </div>
             {% endif %}
         </div>
 
         {# Section Tenues #}
-        <div class="category-section mb-4">
-            <div class="category-header d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-tshirt me-2 text-success"></i>
-                    <h2 class="category-title mb-0">Tenues</h2>
+        <div class="mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                    <i class="fas fa-tshirt mr-2 text-green-600"></i>
+                    <h2 class="text-xl font-semibold mb-0">Tenues</h2>
                 </div>
-                <span class="category-count">{{ outfits|length }}</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{{ outfits|length }}</span>
             </div>
 
             {% if outfits|length > 0 %}
-                <div class="items-grid">
+                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {% for outfit in outfits %}
-                        <a href="{{ path('outfit_details', {'id': outfit.id}) }}" class="item-link">
-                            <div class="item-card">
-                                <div class="item-image bg-light d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-tshirt fa-2x {% if outfit.isPublished %}text-success{% else %}text-secondary{% endif %}"></i>
+                        <a href="{{ path('outfit_details', {'id': outfit.id}) }}" class="block group">
+                            <div class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                                <div class="aspect-square bg-gray-50 flex items-center justify-center">
+                                    <i class="fas fa-tshirt text-2xl {% if outfit.isPublished %}text-green-600{% else %}text-gray-400{% endif %} transform transition-transform duration-300 group-hover:scale-110"></i>
                                 </div>
-                                <div class="item-info p-2">
-                                    <h3 class="item-title">{{ outfit.name }}</h3>
-                                    <div class="d-flex gap-2 mb-2">
-                                        <span class="badge bg-primary">
-                                            <i class="fas fa-heart me-1"></i>{{ outfit.likesCount }}
+                                <div class="p-2">
+                                    <h3 class="text-sm font-medium text-gray-900 truncate">{{ outfit.name }}</h3>
+                                    <div class="flex gap-2 mb-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                            <i class="fas fa-heart mr-1"></i>{{ outfit.likesCount }}
                                         </span>
                                         {% if outfit.isPublished %}
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-check me-1"></i>Publié
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-check mr-1"></i>Publié
                                             </span>
                                         {% else %}
-                                            <span class="badge bg-secondary">
-                                                <i class="fas fa-clock me-1"></i>Non publié
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                <i class="fas fa-clock mr-1"></i>Non publié
                                             </span>
                                         {% endif %}
                                     </div>
                                     {% if outfit.outfitItems|length > 0 %}
-                                        <div class="items-count text-muted small">
+                                        <div class="text-xs text-gray-500">
                                             {{ outfit.outfitItems|length }} éléments
                                         </div>
                                     {% endif %}
@@ -82,24 +82,24 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>Vous n'avez pas encore créé de tenues.
+                <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+                    <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore créé de tenues.
                 </div>
             {% endif %}
         </div>
 
         {# Section Vêtements #}
-        <div class="category-section mb-4">
-            <div class="category-header d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-tags me-2 text-info"></i>
-                    <h2 class="category-title mb-0">Vêtements</h2>
+        <div class="mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                    <i class="fas fa-tags mr-2 text-blue-600"></i>
+                    <h2 class="text-xl font-semibold mb-0">Vêtements</h2>
                 </div>
                 {% set totalItems = 0 %}
                 {% for outfit in outfits %}
                     {% set totalItems = totalItems + outfit.outfitItems|length %}
                 {% endfor %}
-                <span class="category-count">{{ totalItems }}</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{{ totalItems }}</span>
             </div>
 
             {% set hasItems = false %}
@@ -110,36 +110,36 @@
             {% endfor %}
 
             {% if hasItems %}
-                <div class="items-grid">
+                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {% for outfit in outfits %}
                         {% for item in outfit.outfitItems %}
                             {% if item.clothingItem %}
-                                <a href="{{ path('clothing_details', {'id': item.id}) }}" class="item-link">
-                                    <div class="item-card">
-                                        <div class="item-image bg-light d-flex align-items-center justify-content-center">
+                                <a href="{{ path('clothing_details', {'id': item.id}) }}" class="block group">
+                                    <div class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                                        <div class="aspect-square bg-gray-50 flex items-center justify-center">
                                             {% if item.clothingItem.category %}
                                                 <i class="fas fa-{{ item.clothingItem.category.name|lower == 'chaussures' ? 'shoe-prints' : 
-                                                                  item.clothingItem.category.name|lower == 'accessoires' ? 'glasses' : 
-                                                                  'tshirt' }} fa-2x text-info"></i>
+                                                                item.clothingItem.category.name|lower == 'accessoires' ? 'glasses' : 
+                                                                'tshirt' }} text-2xl text-blue-600 transform transition-transform duration-300 group-hover:scale-110"></i>
                                             {% else %}
-                                                <i class="fas fa-tshirt fa-2x text-info"></i>
+                                                <i class="fas fa-tshirt text-2xl text-blue-600 transform transition-transform duration-300 group-hover:scale-110"></i>
                                             {% endif %}
                                         </div>
-                                        <div class="item-info p-2">
-                                            <h3 class="item-title">{{ item.clothingItem.name }}</h3>
-                                            <div class="d-flex gap-2 align-items-center">
+                                        <div class="p-2">
+                                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ item.clothingItem.name }}</h3>
+                                            <div class="flex gap-2 items-center">
                                                 {% if item.clothingItem.brand %}
-                                                    <span class="badge bg-secondary">
-                                                        <i class="fas fa-tag me-1"></i>{{ item.clothingItem.brand }}
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                        <i class="fas fa-tag mr-1"></i>{{ item.clothingItem.brand }}
                                                     </span>
                                                 {% endif %}
-                                                <span class="badge bg-info">
-                                                    <i class="fas fa-ruler me-1"></i>{{ item.size }}
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                    <i class="fas fa-ruler mr-1"></i>{{ item.size }}
                                                 </span>
                                             </div>
                                             {% if item.clothingItem.color %}
-                                                <div class="text-muted small mt-1">
-                                                    <i class="fas fa-palette me-1"></i>{{ item.clothingItem.color }}
+                                                <div class="text-xs text-gray-500 mt-1">
+                                                    <i class="fas fa-palette mr-1"></i>{{ item.clothingItem.color }}
                                                 </div>
                                             {% endif %}
                                         </div>
@@ -150,8 +150,8 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>Vous n'avez pas encore de vêtements dans vos tenues.
+                <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+                    <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore de vêtements dans vos tenues.
                 </div>
             {% endif %}
         </div>
@@ -161,100 +161,15 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .category-section {
-            padding: 0 1rem;
-        }
-
-        .category-header {
-            padding: 0.5rem 0;
-        }
-
-        .category-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .category-count {
-            background: #e9ecef;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            color: #6c757d;
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            overflow-x: auto;
-            padding-bottom: 1rem;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .item-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .item-link:hover .item-card {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .item-link:hover .item-image i {
-            transform: scale(1.1);
-        }
-
-        .item-card {
-            background: white;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            min-width: 140px;
-            transition: all 0.3s ease;
-        }
-
-        .item-image {
-            aspect-ratio: 1;
-            background: #f8f9fa;
-        }
-
-        .item-image i {
-            transition: transform 0.3s ease;
-        }
-
-        .item-title {
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #212529;
-        }
-
-        .item-description {
-            font-size: 0.75rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .items-count {
-            font-size: 0.75rem;
-        }
-
         @media (min-width: 768px) {
-            .items-grid {
-                grid-template-columns: repeat(4, 1fr);
+            .grid-cols-4 {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
             }
         }
 
-        @media (min-width: 992px) {
-            .items-grid {
-                grid-template-columns: repeat(6, 1fr);
+        @media (min-width: 1024px) {
+            .grid-cols-6 {
+                grid-template-columns: repeat(6, minmax(0, 1fr));
             }
         }
     </style>

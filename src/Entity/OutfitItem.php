@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\OutfitItemRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OutfitItemRepository::class)]
@@ -13,9 +15,8 @@ class OutfitItem
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'outfitItems')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?Outfit $outfit = null;
+    #[ORM\ManyToMany(targetEntity: Outfit::class, mappedBy: 'outfitItems')]
+    private Collection $outfits;
 
     #[ORM\ManyToOne(inversedBy: 'outfitItems')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
@@ -31,19 +32,39 @@ class OutfitItem
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $purchaseAt = null;
 
+    public function __construct()
+    {
+        $this->outfits = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getOutfit(): ?Outfit
+    /**
+     * @return Collection<int, Outfit>
+     */
+    public function getOutfits(): Collection
     {
-        return $this->outfit;
+        return $this->outfits;
     }
 
-    public function setOutfit(?Outfit $outfit): static
+    public function addOutfit(Outfit $outfit): static
     {
-        $this->outfit = $outfit;
+        if (!$this->outfits->contains($outfit)) {
+            $this->outfits->add($outfit);
+            $outfit->addOutfitItem($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOutfit(Outfit $outfit): static
+    {
+        if ($this->outfits->removeElement($outfit)) {
+            $outfit->removeOutfitItem($this);
+        }
 
         return $this;
     }

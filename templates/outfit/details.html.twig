@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ outfit.name }}{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-4">
+        {# Bouton retour #}
+        {% include 'components/back_button.html.twig' %}
+
+        {# Fil d'ariane #}
+        {% include 'components/breadcrumb.html.twig' with {
+            'wardrobe': outfit.outfitItems|first ? outfit.outfitItems|first.wardrobe : null,
+            'outfit': outfit
+        } %}
+
+        {# Section principale #}
+        {% embed 'components/wardrobe_card.html.twig' with {
+            'name': outfit.name,
+            'description': outfit.description,
+            'stats': [
+                {'color': 'success', 'value': outfit.outfitItems|length, 'label': 'éléments'},
+                {'color': 'success', 'value': outfit.likesCount, 'label': 'likes'}
+            ]
+        } %}
+            {% block card_content %}
+                {% if outfit.images|length > 0 %}
+                    <div class="w-full mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {% for imagePath in outfit.images %}
+                                <div class="aspect-square">
+                                    <div class="relative h-full w-full overflow-hidden rounded-lg shadow-sm">
+                                        <img src="{{ asset(imagePath) }}" 
+                                            alt="{{ outfit.name }}"
+                                            class="h-full w-full object-cover">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-center text-gray-500">
+                        <i class="far fa-calendar-alt mr-2"></i>
+                        Créée le {{ outfit.createdAt|date('d/m/Y') }}
+                    </div>
+                    <div class="flex items-center text-gray-500">
+                        <i class="fas fa-user mr-2"></i>
+                        Par {{ outfit.author.username }}
+                    </div>
+                    <div class="flex items-center">
+                        {% if outfit.isPublished %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check mr-1"></i>Publié
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <i class="fas fa-clock mr-1"></i>Non publié
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        {# Section Vêtements #}
+        {% embed 'components/category_section.html.twig' with {
+            'title': 'Vêtements de la tenue',
+            'icon': 'tshirt',
+            'color': 'success',
+            'items': outfit.outfitItems,
+            'empty_message': 'Cette tenue ne contient aucun vêtement.'
+        } %}
+            {% block button %}
+                <div class="flex gap-2">
+                    {# Bouton pour ajouter un nouveau vêtement #}
+                    {% include 'components/add_clothing_modal.html.twig' with {
+                        'categories': categories,
+                        'wardrobe_id': outfit.outfitItems|first ? outfit.outfitItems|first.wardrobe.id : null,
+                        'outfit_id': outfit.id
+                    } %}
+
+                    {# Bouton pour ajouter un vêtement existant #}
+                    {% include 'components/add_existing_clothing_modal.html.twig' with {
+                        'outfit': outfit,
+                        'wardrobe': outfit.outfitItems|first ? outfit.outfitItems|first.wardrobe : null
+                    } %}
+                </div>
+            {% endblock %}
+
+            {% block items %}
+                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {% for item in outfit.outfitItems %}
+                        {% include 'components/outfit_clothing_card.html.twig' with {
+                            'item': item,
+                            'outfit': outfit,
+                            'color': 'success'
+                        } %}
+                    {% endfor %}
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        {# Section Commentaires #}
+        {% if outfit.reviews|length > 0 %}
+            {% embed 'components/category_section.html.twig' with {
+                'title': 'Commentaires',
+                'icon': 'comments',
+                'color': 'secondary',
+                'items': outfit.reviews,
+                'empty_message': 'Aucun commentaire pour le moment.'
+            } %}
+                {% block items %}
+                    {% for review in outfit.reviews %}
+                        <div class="bg-white rounded-lg shadow-sm p-4">
+                            <div class="flex items-center mb-2">
+                                <span class="font-medium">{{ review.author.username }}</span>
+                                <span class="text-gray-500 text-sm ml-2">{{ review.createdAt|date('d/m/Y H:i') }}</span>
+                            </div>
+                            <p class="text-gray-700">{{ review.content }}</p>
+                        </div>
+                    {% endfor %}
+                {% endblock %}
+            {% endembed %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% include 'components/card_styles.html.twig' %}
+{% endblock %} 

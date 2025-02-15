@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Entity\OutfitItem;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\User;
+use App\Entity\Outfit;
 
 /**
  * @extends ServiceEntityRepository<OutfitItem>
@@ -16,28 +18,27 @@ class OutfitItemRepository extends ServiceEntityRepository
         parent::__construct($registry, OutfitItem::class);
     }
 
-    //    /**
-    //     * @return OutfitItem[] Returns an array of OutfitItem objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findOutfitItemWithAccessCheck(int $outfitItemId, int $outfitId, User $user): ?OutfitItem
+    {
+        return $this->createQueryBuilder('oi')
+            ->join('oi.outfit', 'o')
+            ->andWhere('oi.id = :outfitItemId')
+            ->andWhere('o.id = :outfitId')
+            ->andWhere('o.author = :user')
+            ->setParameter('outfitItemId', $outfitItemId)
+            ->setParameter('outfitId', $outfitId)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
-    //    public function findOneBySomeField($value): ?OutfitItem
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOutfitItemsByOutfit(Outfit $outfit): array
+    {
+        return $this->createQueryBuilder('oi')
+            ->join('oi.outfits', 'o')
+            ->andWhere('o = :outfit')
+            ->setParameter('outfit', $outfit)
+            ->getQuery()
+            ->getResult();
+    }
 }

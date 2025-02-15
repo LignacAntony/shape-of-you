@@ -18,6 +18,8 @@ use App\Entity\ClothingItem;
 use App\Form\ClothingItemType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use App\Repository\CategoryItemRepository;
+use App\Form\OutfitItemType;
+use App\Form\OutfitType;
 
 final class WardrobeController extends AbstractController
 {
@@ -101,7 +103,7 @@ final class WardrobeController extends AbstractController
         $outfits = $user->getOutfits();
 
         return $this->render('wardrobe/index.html.twig', [
-            'wardrobes' => $wardrobes,
+            'wardrobes' => $wardrobes,  
             'outfits' => $outfits,
         ]);
     }
@@ -114,22 +116,20 @@ final class WardrobeController extends AbstractController
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette garde-robe.');
         }
 
+        $clothingItem = new ClothingItem();
+        $form = $this->createForm(ClothingItemType::class, $clothingItem, [
+            'user' => $this->getUser(),
+            'wardrobe' => $wardrobe
+        ]);
+
+        $outfit = new Outfit();
+        $outfitForm = $this->createForm(OutfitType::class, $outfit);
+
         return $this->render('wardrobe/details.html.twig', [
             'wardrobe' => $wardrobe,
             'categories' => $categoryRepository->findAll(),
-        ]);
-    }
-
-    #[Route('/outfit/{id}/details', name: 'outfit_details', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
-    public function outfitDetails(Outfit $outfit): Response
-    {
-        if ($outfit->getAuthor() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette tenue.');
-        }
-
-        return $this->render('wardrobe/outfit_details.html.twig', [
-            'outfit' => $outfit,
+            'form' => $form,
+            'outfit_form' => $outfitForm
         ]);
     }
 
@@ -137,7 +137,7 @@ final class WardrobeController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function clothingDetails(OutfitItem $outfitItem): Response
     {
-        if ($outfitItem->getOutfit()->getAuthor() !== $this->getUser()) {
+        if ($outfitItem->getWardrobe()->getAuthor() !== $this->getUser()) {
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce vêtement.');
         }
 
@@ -150,55 +150,202 @@ final class WardrobeController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function addClothing(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $wardrobeId = $request->request->get('wardrobe_id');
+        if (!$wardrobeId) {
+            throw new \InvalidArgumentException('L\'ID de la garde-robe est manquant.');
+        }
+
+        $wardrobe = $entityManager->getRepository(Wardrobe::class)->find($wardrobeId);
+        if (!$wardrobe) {
+            throw $this->createNotFoundException('Garde-robe non trouvée');
+        }
+
+        if ($wardrobe->getAuthor() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette garde-robe.');
+        }
+
+        $outfitId = $request->request->get('outfit');
+        $outfit = null;
+        if ($outfitId) {
+            $outfit = $entityManager->getRepository(Outfit::class)->find($outfitId);
+            if (!$outfit || $outfit->getAuthor() !== $this->getUser()) {
+                throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette tenue.');
+            }
+        }
+
         $clothingItem = new ClothingItem();
-        $form = $this->createForm(ClothingItemType::class, $clothingItem);
+        $form = $this->createForm(ClothingItemType::class, $clothingItem, [
+            'user' => $this->getUser(),
+            'wardrobe' => $wardrobe,
+            'default_outfit' => $outfit
+        ]);
+        
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if (!$form->isSubmitted()) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Le formulaire n\'a pas été soumis correctement.',
+                'debug' => [
+                    'request_method' => $request->getMethod(),
+                    'content_type' => $request->headers->get('Content-Type'),
+                    'post_data' => $request->request->all(),
+                ]
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!$form->isValid()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = [
+                    'field' => $error->getOrigin()->getName(),
+                    'message' => $error->getMessage()
+                ];
+            }
+
+            $fieldErrors = [];
+            foreach ($form->all() as $field) {
+                if ($field->getErrors()->count() > 0) {
+                    $fieldErrors[$field->getName()] = [];
+                    foreach ($field->getErrors() as $error) {
+                        $fieldErrors[$field->getName()][] = $error->getMessage();
+                    }
+                }
+            }
+
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Le formulaire contient des erreurs.',
+                'errors' => $errors,
+                'field_errors' => $fieldErrors,
+                'form_data' => $request->request->all(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
             $clothingItem->setCreatedAt(new \DateTimeImmutable());
             
-            // Gestion des images
             /** @var UploadedFile[] $images */
             $images = $form->get('images')->getData();
             if ($images) {
                 $uploadDir = $this->getParameter('upload_directory');
+                
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                
                 foreach ($images as $image) {
                     $newFilename = uniqid().'.'.$image->guessExtension();
                     $image->move($uploadDir, $newFilename);
-                    $clothingItem->addImage($newFilename);
+                    $clothingItem->addImage('uploads/images/'.$newFilename);
                 }
-            }
-
-            // Création de l'OutfitItem pour lier le vêtement à la garde-robe
-            $wardrobeId = $request->request->get('wardrobe_id');
-            $wardrobe = $entityManager->getRepository(Wardrobe::class)->find($wardrobeId);
-            
-            if (!$wardrobe) {
-                throw $this->createNotFoundException('Garde-robe non trouvée');
-            }
-
-            if ($wardrobe->getAuthor() !== $this->getUser()) {
-                throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette garde-robe.');
             }
 
             $outfitItem = new OutfitItem();
             $outfitItem->setClothingItem($clothingItem);
             $outfitItem->setWardrobe($wardrobe);
+            $outfitItem->setSize($form->get('size')->getData());
+
+            $selectedOutfit = $form->get('outfit')->getData();
+            if ($selectedOutfit) {
+                $selectedOutfit->addOutfitItem($outfitItem);
+                $entityManager->persist($selectedOutfit);
+            }
 
             $entityManager->persist($clothingItem);
             $entityManager->persist($outfitItem);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Le vêtement a été ajouté avec succès.');
-            return $this->redirectToRoute('wardrobe_details', [
-                'id' => $wardrobeId
+            return $this->json([
+                'status' => 'success',
+                'message' => 'Le vêtement a été ajouté avec succès.',
+                'redirect' => $selectedOutfit ? $this->generateUrl('outfit_details', ['id' => $selectedOutfit->getId()]) : $this->generateUrl('wardrobe_details', ['id' => $wardrobe->getId()])
             ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Une erreur est survenue lors de l\'ajout du vêtement.',
+                'error_details' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/clothing/{id}/edit', name: 'clothing_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function editClothing(Request $request, OutfitItem $outfitItem, EntityManagerInterface $entityManager): Response
+    {
+        if ($outfitItem->getWardrobe()->getAuthor() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce vêtement.');
         }
 
-        return $this->json([
-            'status' => 'error',
-            'message' => 'Le formulaire contient des erreurs.',
-            'errors' => $form->getErrors(true)
-        ], Response::HTTP_BAD_REQUEST);
+        $clothingItem = $outfitItem->getClothingItem();
+        $clothingForm = $this->createForm(ClothingItemType::class, $clothingItem, [
+            'user' => $this->getUser(),
+            'wardrobe' => $outfitItem->getWardrobe()
+        ]);
+        
+        $outfitForm = $this->createForm(OutfitItemType::class, $outfitItem, [
+            'user' => $this->getUser()
+        ]);
+        
+        $outfitForm->handleRequest($request);
+        $clothingForm->handleRequest($request);
+
+        if ($outfitForm->isSubmitted() && $outfitForm->isValid()) {
+            try {
+                $entityManager->persist($outfitItem);
+                $entityManager->flush();
+                $this->addFlash('success', 'Les tenues ont été mises à jour avec succès.');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la mise à jour des tenues.');
+            }
+            return $this->redirectToRoute('clothing_details', ['id' => $outfitItem->getId()]);
+        }
+
+        if ($clothingForm->isSubmitted() && $clothingForm->isValid()) {
+            try {
+                /** @var UploadedFile[] $images */
+                $images = $clothingForm->get('images')->getData();
+                if ($images) {
+                    $uploadDir = $this->getParameter('upload_directory');
+                    
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
+                    
+                    foreach ($images as $image) {
+                        if ($image instanceof UploadedFile) {
+                            $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+                            $newFilename = $originalFilename . '-' . uniqid() . '.' . $image->guessExtension();
+                            
+                            try {
+                                $image->move($uploadDir, $newFilename);
+                                $clothingItem->addImage('uploads/images/' . $newFilename);
+                            } catch (\Exception $e) {
+                                $this->addFlash('error', 'Une erreur est survenue lors de l\'upload de l\'image ' . $originalFilename);
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                $outfitItem->setSize($clothingForm->get('size')->getData());
+                
+                $entityManager->persist($clothingItem);
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Le vêtement a été modifié avec succès.');
+                return $this->redirectToRoute('clothing_details', ['id' => $outfitItem->getId()]);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la modification du vêtement : ' . $e->getMessage());
+            }
+        }
+
+        return $this->render('wardrobe/edit_clothing.html.twig', [
+            'outfitItem' => $outfitItem,
+            'clothing_form' => $clothingForm,
+            'outfit_form' => $outfitForm
+        ]);
     }
 }
