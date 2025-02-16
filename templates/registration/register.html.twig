@@ -3,15 +3,22 @@
 {% block title %}Inscription{% endblock %}
 
 {% block body %}
-    <div class="min-h-full flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            {# Affichage d'éventuels messages d'erreur de confirmation d'email #}
+    <h2 class="title-text">
+        Inscription
+        <span class="title-underline"></span>
+    </h2>
+
+
+    <div class="flex justify-center py-12 md:px-4 sm:px-6 lg:px-8">
+        <div class="max-w-lg w-full px-4 lg:px-8 rounded-2xl bg-white shadow-lg p-8">
             {% for flash_error in app.flashes('verify_email_error') %}
                 <div class="rounded-md bg-red-50 p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.938 18h12.124c1.07 0 1.93-.79 1.993-1.85L21 15V9c0-1.07-.79-1.93-1.85-1.993L19 7H5c-1.07 0-1.93.79-1.993 1.85L3 9v6c0 1.07.79 1.93 1.85 1.993L5.938 18z" />
+                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 9v2m0 4h.01M5.938 18h12.124c1.07 0 1.93-.79 1.993-1.85L21 15V9c0-1.07-.79-1.93-1.85-1.993L19 7H5c-1.07 0-1.93.79-1.993 1.85L3 9v6c0 1.07.79 1.93 1.85 1.993L5.938 18z"/>
                             </svg>
                         </div>
                         <div class="ml-3">
@@ -20,82 +27,94 @@
                     </div>
                 </div>
             {% endfor %}
-
             <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Créer votre compte</h2>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    Créer votre compte
+                </h2>
             </div>
 
-            {{ form_start(registrationForm, { 'attr': { 'class': 'mt-8 space-y-6' } }) }}
-            <div class="rounded-md shadow-sm -space-y-px">
-                <div>
-                    {# Champ Prénom #}
-                    {{ form_label(registrationForm.firstname, 'Prénom', { 'label_attr': { 'class': 'sr-only' } }) }}
-                    {{ form_widget(registrationForm.firstname, {
-                        'attr': {
-                            'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                            'placeholder': 'Prénom'
-                        }
-                    }) }}
-                    {{ form_errors(registrationForm.firstname) }}
-                </div>
-                <div>
-                    {# Champ Nom #}
-                    {{ form_label(registrationForm.lastname, 'Nom', { 'label_attr': { 'class': 'sr-only' } }) }}
-                    {{ form_widget(registrationForm.lastname, {
-                        'attr': {
-                            'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                            'placeholder': 'Nom'
-                        }
-                    }) }}
-                    {{ form_errors(registrationForm.lastname) }}
-                </div>
-                <div>
-                    {{ form_label(registrationForm.username, 'Nom d’utilisateur', { 'label_attr': { 'class': 'sr-only' } }) }}
-                    {{ form_widget(registrationForm.username, {
-                        'attr': {
-                            'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                            'placeholder': 'Nom d’utilisateur'
-                        }
-                    }) }}
-                    {{ form_errors(registrationForm.username) }}
-                </div>
-                <div>
-                    {{ form_label(registrationForm.email, 'Adresse email', { 'label_attr': { 'class': 'sr-only' } }) }}
-                    {{ form_widget(registrationForm.email, {
-                        'attr': {
-                            'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                            'placeholder': 'Adresse email'
-                        }
-                    }) }}
-                    {{ form_errors(registrationForm.email) }}
-                </div>
-                <div>
-                    {{ form_label(registrationForm.plainPassword, 'Mot de passe', { 'label_attr': { 'class': 'sr-only' } }) }}
-                    {{ form_widget(registrationForm.plainPassword, {
-                        'attr': {
-                            'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
-                            'placeholder': 'Mot de passe'
-                        }
-                    }) }}
-                    {{ form_errors(registrationForm.plainPassword) }}
-                </div>
-                <div class="flex items-center mt-4">
-                    {{ form_widget(registrationForm.agreeTerms, {
-                        'attr': {
-                            'class': 'h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded'
-                        }
-                    }) }}
-                    {{ form_label(registrationForm.agreeTerms, 'J’accepte les conditions d’utilisation', { 'label_attr': { 'class': 'ml-2 block text-sm text-gray-900' } }) }}
-                    {{ form_errors(registrationForm.agreeTerms) }}
+
+            <div class="space-y-6 mt-8">
+                <div class="flex flex-col items-center">
+                    {{ form_start(registrationForm, { 'attr': { 'class': 'mt-8 space-y-6 w-full' } }) }}
+                    <div class="rounded-md shadow-sm -space-y-px">
+                        <div>
+                            {# Champ Prénom #}
+                            {{ form_label(registrationForm.firstname, 'Prénom', { 'label_attr': { 'class': 'sr-only' } }) }}
+                            {{ form_widget(registrationForm.firstname, {
+                                'attr': {
+                                    'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                                    'placeholder': 'Prénom'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.firstname) }}
+                        </div>
+                        <div>
+                            {# Champ Nom #}
+                            {{ form_label(registrationForm.lastname, 'Nom', { 'label_attr': { 'class': 'sr-only' } }) }}
+                            {{ form_widget(registrationForm.lastname, {
+                                'attr': {
+                                    'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                                    'placeholder': 'Nom'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.lastname) }}
+                        </div>
+                        <div>
+                            {{ form_label(registrationForm.username, 'Nom d’utilisateur', { 'label_attr': { 'class': 'sr-only' } }) }}
+                            {{ form_widget(registrationForm.username, {
+                                'attr': {
+                                    'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                                    'placeholder': 'Nom d’utilisateur'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.username) }}
+                        </div>
+                        <div>
+                            {{ form_label(registrationForm.email, 'Adresse email', { 'label_attr': { 'class': 'sr-only' } }) }}
+                            {{ form_widget(registrationForm.email, {
+                                'attr': {
+                                    'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                                    'placeholder': 'Adresse email'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.email) }}
+                        </div>
+                        <div>
+                            {{ form_label(registrationForm.plainPassword, 'Mot de passe', { 'label_attr': { 'class': 'sr-only' } }) }}
+                            {{ form_widget(registrationForm.plainPassword, {
+                                'attr': {
+                                    'class': 'appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+                                    'placeholder': 'Mot de passe'
+                                }
+                            }) }}
+                            {{ form_errors(registrationForm.plainPassword) }}
+                        </div>
+                        <div class="flex items-center mt-4">
+                            {{ form_widget(registrationForm.agreeTerms, {
+                                'attr': {
+                                    'class': 'h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-4'
+                                }
+                            }) }}
+
+                                {{ form_label(registrationForm.agreeTerms, 'J’accepte les conditions d’utilisation', { 'label_attr': { 'class': 'ml-2 block text-sm text-gray-900 mt-4' } }) }}
+                                {{ form_errors(registrationForm.agreeTerms) }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="form-button__primary">
+                            S'inscrire
+                        </button>
+                    </div>
+                    {{ form_end(registrationForm) }}
                 </div>
             </div>
 
-            <div>
-                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    S'inscrire
-                </button>
-            </div>
-            {{ form_end(registrationForm) }}
         </div>
     </div>
+
+
+
+
 {% endblock %}
