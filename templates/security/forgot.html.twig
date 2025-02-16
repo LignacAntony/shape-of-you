@@ -3,16 +3,21 @@
 {% block title %}Mot de passe oublié{% endblock %}
 
 {% block body %}
-<div class="h-full flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Réinitialiser votre mot de passe
-            </h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                Entrez votre adresse email pour recevoir un lien de réinitialisation
-            </p>
-        </div>
+    <h2 class="title-text">
+        Mot de passe oublié ?
+        <span class="title-underline"></span>
+    </h2>
+
+
+<div class="flex justify-center py-12 md:px-4 sm:px-6 lg:px-8">
+    <div class="max-w-lg w-full px-4 lg:px-8 rounded-2xl bg-white shadow-lg p-8">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Réinitialiser votre mot de passe
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+            Entrez votre adresse email pour recevoir un lien de réinitialisation
+        </p>
+
         <form class="mt-8 space-y-6" method="POST" action="{{ path('auth_forgot_post') }}">
 
 
@@ -20,26 +25,24 @@
                 <div>
                     <label for="_email" class="sr-only">Email</label>
                     <input id="_email" name="_email" type="email" autocomplete="email" required
-                        class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                        class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                         placeholder="Votre email">
                 </div>
             </div>
 
             <div>
                 <button type="submit"
-                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    class="group form-button__primary relative flex justify-center">
                     <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm2 0a2 2 0 012 2h8a2 2 0 012-2H4zm0 4h12v6H4V9z" clip-rule="evenodd" />
-                        </svg>
+<i class="fa-solid fa-envelope"></i>
                     </span>
                     Envoyer le lien de réinitialisation
                 </button>
             </div>
         </form>
 
-        <div class="text-center text-sm">
-            <a href="{{ path('app_login') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
+        <div class="text-center text-sm mt-4">
+            <a href="{{ path('app_login') }}" class="font-medium text-primary-600 hover:text-primary-500">
                 Retour à la connexion
             </a>
         </div>

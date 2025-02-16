@@ -1,34 +1,95 @@
-<aside class="w-64 bg-gray-800 text-white flex-shrink-0 overflow-y-auto flex flex-col">
-    <div class="p-4">
-        <h1 class="text-2xl font-semibold">Mon Application</h1>
-    </div>
-    <nav class="mt-6 flex-grow">
-        <a href="{{ path('app_home') }}" class="block py-2 px-4 text-sm hover:bg-gray-700">
-            Accueil
-        </a>
+<div class="fixed z-50">
+    <button id="sidebar-toggle" data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar"
+            aria-controls="default-sidebar" type="button"
+            class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg bg-primary-600 sm:hidden hover:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-primary-900 dark:focus:ring-gray-600">
+        <svg class=" w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+             xmlns="http://www.w3.org/2000/svg">
+            <path clip-rule="evenodd" fill-rule="evenodd" fill="white"
+                  d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
+        </svg>
+    </button>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden sm:hidden"></div>
 
-        {% if app.user %}
-            {% if is_granted('ROLE_USER') %}
-            <a href="{{ path('profile_show') }}" class="block py-2 px-4 text-sm hover:bg-gray-700">
-                Profil
-            </a>
-            {% endif %}
-            {% if is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('app_admin_index') }}" class="block py-2 px-4 text-sm hover:bg-gray-700">
-                    Administration
-                </a>
-            {% endif %}
-        {% endif %}
-    </nav>
-    <div class="p-4">
-        {% if app.user %}
-            <a href="{{ path('app_logout') }}" class="block w-full text-center py-2 px-4 bg-red-600 hover:bg-red-700 rounded transition duration-300">
-                Déconnexion
-            </a>
-        {% else %}
-            <a href="{{ path('app_login') }}" class="block w-full text-center py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded transition duration-300">
-                Connexion
-            </a>
-        {% endif %}
-    </div>
-</aside>
+
+    <aside id="default-sidebar"
+           class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+           aria-label="Sidebar">
+        <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 flex flex-col justify-between">
+            <ul class="space-y-2 font-medium">
+                <li class="mb-8">
+                    <a href="{{ path('app_home') }}"
+                       class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white ">
+                        <h1 class="w-full text-center text-2xl pacifico-regular">ShapeOfYou</h1>
+                    </a>
+                </li>
+                {% if not app.user %}
+                <li>
+                    <a href="{{ path('app_login') }}"
+                       class="sidebar-link group">
+                        <span class="ms-3">Connexion</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ path('app_register') }}"
+                       class="sidebar-link group">
+                        <span class="ms-3">Inscription</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if app.user %}
+                    {% if is_granted('ROLE_USER') %}
+                        <li>
+                            <a href="{{ path('app_home') }}"
+                               class="sidebar-link group">
+                                <i class="fa-solid fa-house sidebar-icon"></i>
+                                <span class="ms-3">Accueil</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ path('user_wardrobe') }}"
+                               class="sidebar-link group">
+                                <i class="fa-solid fa-shirt sidebar-icon"></i>
+                                <span class="ms-3">Garde robe</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ path('profile_show') }}"
+                               class="sidebar-link group">
+                                <img src="{{ asset('/uploads/avatars/' ~ app.user.profile.avatar) }}"
+                                     alt="Photo de profil"
+                                     class="w-6 h-6 rounded-full me-2">
+                                <span class="ms-3">Profil</span>
+                            </a>
+                        </li>
+
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <li>
+                            <a href="{{ path('app_admin_index') }}"
+                               class="sidebar-link group">
+                                <i class="fa-solid fa-lock sidebar-icon"></i>
+                                <span class="ms-3">Administration</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+
+            </ul>
+            <ul class="pt-4 mt-4 space-y-2 font-medium border-t border-gray-200 dark:border-gray-700">
+                {% if app.user %}
+                    <li>
+                        <a href="{{ path('app_logout') }}"
+                           class="sidebar-link group">
+                            <i class="fa-solid fa-right-from-bracket sidebar-icon"></i>
+                            <span class="ms-3">Déconnexion</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </div>
+    </aside>
+</div>
+
+
