@@ -2,35 +2,33 @@
 
 namespace App\Form;
 
-use App\Entity\ClothingItem;
-use App\Entity\Outfit;
 use App\Entity\OutfitItem;
-use App\Entity\Wardrobe;
+use App\Entity\Outfit;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use App\Entity\User;
+use Doctrine\ORM\EntityRepository;
 
 class OutfitItemType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('size')
-            ->add('purchaseAt', null, [
-                'widget' => 'single_text',
-            ])
-            ->add('outfit', EntityType::class, [
+            ->add('outfits', EntityType::class, [
                 'class' => Outfit::class,
-                'choice_label' => 'id',
-            ])
-            ->add('clothingItem', EntityType::class, [
-                'class' => ClothingItem::class,
-                'choice_label' => 'id',
-            ])
-            ->add('wardrobe', EntityType::class, [
-                'class' => Wardrobe::class,
-                'choice_label' => 'id',
+                'choice_label' => 'name',
+                'label' => 'Tenues',
+                'multiple' => true,
+                'expanded' => true,
+                'query_builder' => function (EntityRepository $er) use ($options) {
+                    return $er->createQueryBuilder('o')
+                        ->where('o.author = :user')
+                        ->setParameter('user', $options['user'])
+                        ->orderBy('o.name', 'ASC');
+                },
+                'by_reference' => false,
             ])
         ;
     }
@@ -39,6 +37,9 @@ class OutfitItemType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => OutfitItem::class,
+            'user' => null,
         ]);
+
+        $resolver->setAllowedTypes('user', ['null', User::class]);
     }
 }

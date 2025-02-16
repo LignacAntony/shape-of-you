@@ -2,29 +2,32 @@
 {% set stats = stats|default([]) %}
 {% set image = image|default(null) %}
 
-<div class="bg-white rounded-lg shadow-sm mb-4">
-    <div class="bg-gray-50 px-4 py-3 flex justify-between items-center border-b">
-        <div class="flex items-center">
+<div class="bg-white rounded-lg shadow-sm mb-6">
+    <div class="bg-gray-50 px-6 py-4 flex justify-between items-center border-b border-gray-200">
+        <div class="flex items-center space-x-3">
             {% if image %}
-                <img src="{{ asset(image) }}" alt="{{ name }}" class="w-10 h-10 rounded-full mr-2 object-cover">
+                <img src="{{ asset(image) }}" alt="{{ name }}" class="w-12 h-12 rounded-full object-cover shadow-sm">
             {% else %}
-                <i class="fas fa-door-closed mr-2 text-blue-500"></i>
+                <i class="fas fa-door-closed text-xl text-blue-500"></i>
             {% endif %}
-            <h1 class="text-xl font-semibold m-0">{{ name }}</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">{{ name }}</h1>
         </div>
-        {% if stats|length > 0 %}
-            <div class="flex gap-2">
-                {% for stat in stats %}
-                    <span class="px-2 py-1 text-sm rounded-full {% if stat.color == 'primary' %}bg-blue-500 text-white{% elseif stat.color == 'success' %}bg-green-500 text-white{% else %}bg-gray-500 text-white{% endif %}">
-                        {{ stat.value }} {{ stat.label }}
-                    </span>
-                {% endfor %}
-            </div>
-        {% endif %}
+        <div class="flex items-center space-x-4">
+            {% if stats|length > 0 %}
+                <div class="flex gap-3">
+                    {% for stat in stats %}
+                        <span class="px-3 py-1.5 text-sm font-medium rounded-full {% if stat.color == 'primary' %}bg-blue-500 text-white{% elseif stat.color == 'success' %}bg-green-500 text-white{% else %}bg-gray-500 text-white{% endif %}">
+                            {{ stat.value }} {{ stat.label }}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block card_header_actions %}{% endblock %}
+        </div>
     </div>
-    <div class="p-4">
+    <div class="p-6">
         {% if description %}
-            <p class="text-lg mb-4 text-gray-600">{{ description }}</p>
+            <p class="text-lg text-gray-600 mb-6">{{ description }}</p>
         {% endif %}
         
         <div class="grid gap-4">

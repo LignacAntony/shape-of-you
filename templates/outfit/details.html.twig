@@ -1,0 +1,196 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ outfit.name }}{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-4">
+        {# Bouton retour #}
+        {% include 'components/back_button.html.twig' %}
+
+        {# Fil d'ariane #}
+        {% include 'components/breadcrumb.html.twig' with {
+            'wardrobe': outfit.wardrobe,
+            'outfit': outfit
+        } %}
+
+        {# Section principale #}
+        {% embed 'components/wardrobe_card.html.twig' with {
+            'name': outfit.name,
+            'description': outfit.description,
+            'stats': [
+                {'color': 'success', 'value': outfit.outfitItems|length, 'label': 'éléments'},
+                {'color': 'success', 'value': outfit.likesCount, 'label': 'likes'}
+            ]
+        } %}
+            {% block card_header_actions %}
+                <div x-data="{ 
+                    showOptions: false,
+                    isDeleting: false,
+                    deleteOutfit() {
+                        if (this.isDeleting) return;
+                        if (!confirm('Êtes-vous sûr de vouloir supprimer cette tenue ?')) return;
+                        
+                        this.isDeleting = true;
+                        
+                        fetch('{{ path('outfit_delete_user', {'id': outfit.id}) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                window.location.href = data.redirect;
+                            } else {
+                                alert(data.message || 'Une erreur est survenue');
+                                this.isDeleting = false;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Une erreur est survenue lors de la suppression');
+                            this.isDeleting = false;
+                        });
+                    }
+                }" class="relative" @click.away="showOptions = false">
+                    <button @click="showOptions = !showOptions" 
+                            class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                        <i class="fas fa-ellipsis-v text-gray-600"></i>
+                    </button>
+
+                    <div x-show="showOptions"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+                        
+                        <a href="{{ path('outfit_edit_user', {'id': outfit.id}) }}" 
+                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                            <i class="fas fa-edit w-5 mr-2"></i>
+                            <span>Modifier</span>
+                        </a>
+
+                        <button @click="deleteOutfit" 
+                                :disabled="isDeleting"
+                                class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
+                            <i class="fas" :class="isDeleting ? 'fa-spinner fa-spin' : 'fa-trash'" class="w-5 mr-2"></i>
+                            <span x-text="isDeleting ? 'Suppression...' : 'Supprimer'"></span>
+                        </button>
+                    </div>
+                </div>
+            {% endblock %}
+            {% block card_content %}
+                {% if outfit.images|length > 0 %}
+                    <div class="w-full mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {% for imagePath in outfit.images %}
+                                <div class="aspect-square">
+                                    <div class="relative h-full w-full overflow-hidden rounded-lg shadow-sm">
+                                        <img src="{{ asset(imagePath) }}" 
+                                            alt="{{ outfit.name }}"
+                                            class="h-full w-full object-cover">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-center text-gray-500">
+                        <i class="far fa-calendar-alt mr-2"></i>
+                        Créée le {{ outfit.createdAt|date('d/m/Y') }}
+                    </div>
+                    <div class="flex items-center text-gray-500">
+                        <i class="fas fa-user mr-2"></i>
+                        Par {{ outfit.author.username }}
+                    </div>
+                    <div class="flex items-center">
+                        {% if outfit.isPublished %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check mr-1"></i>Publié
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <i class="fas fa-clock mr-1"></i>Non publié
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endblock %}
+        {% endembed %}
+
+        {# Section Vêtements #}
+        {% embed 'components/category_section.html.twig' with {
+            'title': 'Vêtements de la tenue',
+            'icon': 'tshirt',
+            'color': 'success',
+            'items': outfit.outfitItems,
+            'empty_message': 'Cette tenue ne contient aucun vêtement.'
+        } %}
+            {% block button %}
+                <div class="flex gap-2">
+                    {# Bouton pour ajouter un nouveau vêtement #}
+                    {% include 'components/add_clothing_modal.html.twig' with {
+                        'categories': categories,
+                        'wardrobe_id': outfit.wardrobe.id,
+                        'outfit_id': outfit.id
+                    } %}
+
+                    {# Bouton pour ajouter un vêtement existant #}
+                    {% include 'components/add_existing_clothing_modal.html.twig' with {
+                        'outfit': outfit,
+                        'wardrobe': outfit.wardrobe
+                    } %}
+                </div>
+            {% endblock %}
+
+            {% block items %}
+                {% for item in outfit.outfitItems %}
+                    {% include 'components/outfit_clothing_card.html.twig' with {
+                        'item': item,
+                        'outfit': outfit,
+                        'color': 'success'
+                    } %}
+                {% endfor %}
+            {% endblock %}
+        {% endembed %}
+
+        {# Section Commentaires #}
+        {% if outfit.reviews|length > 0 %}
+            {% embed 'components/category_section.html.twig' with {
+                'title': 'Commentaires',
+                'icon': 'comments',
+                'color': 'secondary',
+                'items': outfit.reviews,
+                'empty_message': 'Aucun commentaire pour le moment.'
+            } %}
+                {% block items %}
+                    {% for review in outfit.reviews %}
+                        <div class="bg-white rounded-lg shadow-sm p-4">
+                            <div class="flex items-center mb-2">
+                                <span class="font-medium">{{ review.author.username }}</span>
+                                <span class="text-gray-500 text-sm ml-2">{{ review.createdAt|date('d/m/Y H:i') }}</span>
+                            </div>
+                            <p class="text-gray-700">{{ review.content }}</p>
+                        </div>
+                    {% endfor %}
+                {% endblock %}
+            {% endembed %}
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% include 'components/card_styles.html.twig' %}
+{% endblock %} 

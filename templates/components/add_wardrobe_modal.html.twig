@@ -1,0 +1,132 @@
+<div x-data="{ 
+    open: false,
+    isSubmitting: false,
+    errorMessage: null,
+    fieldErrors: {},
+
+    submitForm(event) {
+        event.preventDefault();
+        this.isSubmitting = true;
+        this.errorMessage = null;
+        this.fieldErrors = {};
+
+        const formData = new FormData(event.target);
+
+        fetch(event.target.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.isSubmitting = false;
+            if (data.status === 'success') {
+                window.location.href = data.redirect;
+            } else {
+                this.errorMessage = data.message;
+                this.fieldErrors = data.field_errors || {};
+            }
+        })
+        .catch(error => {
+            this.isSubmitting = false;
+            this.errorMessage = 'Une erreur est survenue lors de la création de la garde-robe.';
+        });
+    }
+}" 
+@keydown.escape.window="open = false">
+    {# Bouton pour ouvrir la modale #}
+    <button @click="open = true" class="px-4 py-2 text-sm font-medium rounded-lg bg-blue-500 text-white hover:opacity-90 transition-opacity">
+        <i class="fas fa-plus mr-2"></i>Créer une garde-robe
+    </button>
+
+    {# Fond de la modale #}
+    <div x-show="open" 
+        class="fixed inset-0 bg-black bg-opacity-50 z-40"
+        x-cloak
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0">
+    </div>
+
+    {# Contenu de la modale #}
+    <div x-show="open"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        x-cloak
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform translate-y-4"
+        x-transition:enter-end="opacity-100 transform translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 transform translate-y-0"
+        x-transition:leave-end="opacity-0 transform translate-y-4">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                {# En-tête de la modale #}
+                <div class="flex items-center justify-between p-4 border-b">
+                    <h3 class="text-xl font-semibold text-gray-900">Créer une nouvelle garde-robe</h3>
+                    <button @click="open = false" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                {# Message d'erreur global #}
+                <div x-show="errorMessage" class="p-4 bg-red-50 text-red-700 border-b">
+                    <p x-text="errorMessage"></p>
+                </div>
+
+                {# Corps de la modale #}
+                <div class="p-4">
+                    {{ form_start(wardrobe_form, {
+                        'action': path('wardrobe_create'),
+                        'method': 'POST',
+                        'attr': {
+                            'class': 'space-y-4',
+                            '@submit': 'submitForm',
+                            'enctype': 'multipart/form-data'
+                        }
+                    }) }}
+
+                        <div>
+                            {{ form_label(wardrobe_form.name, 'Nom', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                            {{ form_widget(wardrobe_form.name, {'attr': {'class': 'w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500'}}) }}
+                            <div x-show="fieldErrors.name" class="mt-1 text-sm text-red-600" x-text="fieldErrors.name"></div>
+                            {{ form_errors(wardrobe_form.name) }}
+                        </div>
+
+                        <div>
+                            {{ form_label(wardrobe_form.description, 'Description', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                            {{ form_widget(wardrobe_form.description, {'attr': {'class': 'w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500', 'rows': '3'}}) }}
+                            <div x-show="fieldErrors.description" class="mt-1 text-sm text-red-600" x-text="fieldErrors.description"></div>
+                            {{ form_errors(wardrobe_form.description) }}
+                        </div>
+
+                        <div>
+                            {{ form_label(wardrobe_form.image, 'Image', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                            {{ form_widget(wardrobe_form.image, {'attr': {'class': 'w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'}}) }}
+                            <div x-show="fieldErrors.image" class="mt-1 text-sm text-red-600" x-text="fieldErrors.image"></div>
+                            {{ form_errors(wardrobe_form.image) }}
+                        </div>
+
+                        {# Boutons d'action #}
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" @click="open = false"
+                                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                Annuler
+                            </button>
+                            <button type="submit"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                    :disabled="isSubmitting">
+                                <span x-show="!isSubmitting">Créer</span>
+                                <span x-show="isSubmitting">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i>Création en cours...
+                                </span>
+                            </button>
+                        </div>
+
+                    {{ form_end(wardrobe_form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
