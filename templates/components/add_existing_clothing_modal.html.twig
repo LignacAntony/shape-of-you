@@ -20,13 +20,12 @@
         this.isSubmitting = true;
         this.errorMessage = null;
 
-        // Envoyer la requête AJAX pour chaque item sélectionné
         Promise.all(this.selectedItems.map(itemId => 
             fetch('{{ path('outfit_add_existing_item', {'id': outfit.id}) }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ outfitItemId: itemId })
             }).then(response => response.json())
@@ -34,7 +33,6 @@
         .then(results => {
             const hasError = results.some(data => data.status !== 'success');
             if (!hasError) {
-                // Recharger la page pour voir les changements
                 window.location.reload();
             } else {
                 this.errorMessage = 'Une erreur est survenue lors de l\'ajout de certains vêtements.';
@@ -90,19 +88,19 @@
 
                 {# Corps de la modale #}
                 <div class="p-4">
-                    {% if wardrobe and wardrobe.outfitItems|length > 0 %}
+                    {% if allOutfitItems|length > 0 %}
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto p-2">
-                            {% for item in wardrobe.outfitItems %}
-                                {% if item not in outfit.outfitItems %}
+                            {% for item in allOutfitItems %}
+                                {% if not (outfit in item.outfits) %}
                                     <div class="relative">
                                         <div @click="toggleItem({{ item.id }})"
-                             class="cursor-pointer bg-white rounded-lg shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-                             :class="{ 'ring-2 ring-green-500': selectedItems.includes({{ item.id }}) }">
+                                            class="cursor-pointer bg-white rounded-lg shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                                            :class="{ 'ring-2 ring-green-500': selectedItems.includes({{ item.id }}) }">
                                             <div class="aspect-square bg-gray-50 flex items-center justify-center">
                                                 {% if item.clothingItem.images|length > 0 %}
                                                     <img src="{{ asset(item.clothingItem.images|first) }}" 
-                                                         alt="{{ item.clothingItem.name }}" 
-                                                         class="object-cover w-full h-full">
+                                                        alt="{{ item.clothingItem.name }}" 
+                                                        class="object-cover w-full h-full">
                                                 {% else %}
                                                     {% if item.clothingItem.category %}
                                                         <i class="fas fa-{{ item.clothingItem.category.name|lower == 'chaussures' ? 'shoe-prints' : 
@@ -132,7 +130,7 @@
                                         </div>
                                         {# Indicateur de sélection #}
                                         <div x-show="selectedItems.includes({{ item.id }})"
-                                             class="absolute top-2 right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">
+                                            class="absolute top-2 right-2 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">
                                             <i class="fas fa-check"></i>
                                         </div>
                                     </div>
@@ -159,7 +157,7 @@
                         </div>
                     {% else %}
                         <div class="text-center py-8">
-                            <p class="text-gray-500">Aucun vêtement disponible dans cette garde-robe.</p>
+                            <p class="text-gray-500">Aucun vêtement disponible.</p>
                         </div>
                     {% endif %}
                 </div>

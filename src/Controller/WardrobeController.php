@@ -20,9 +20,15 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use App\Repository\CategoryItemRepository;
 use App\Form\OutfitItemType;
 use App\Form\OutfitType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class WardrobeController extends AbstractController
 {
+    public function __construct(
+        private EntityManagerInterface $entityManager
+    ) {
+    }
+
     #[Route('/admin/wardrobe', name: 'app_wardrobe_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function index(WardrobeRepository $wardrobeRepository): Response
@@ -97,14 +103,26 @@ final class WardrobeController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function userWardrobe(WardrobeRepository $wardrobeRepository): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
-        $wardrobes = $wardrobeRepository->findBy(['author' => $user]);
-        $outfits = $user->getOutfits();
+        $wardrobes = $wardrobeRepository->findBy(['author' => $this->getUser()]);
+        $outfits = [];
+        $allItems = [];
+
+        foreach ($wardrobes as $wardrobe) {
+            foreach ($wardrobe->getOutfits() as $outfit) {
+                $outfits[] = $outfit;
+            }
+            foreach ($wardrobe->getOutfitItems() as $item) {
+                $allItems[] = $item;
+            }
+        }
+
+        $wardrobe_form = $this->createForm(WardrobeType::class);
 
         return $this->render('wardrobe/index.html.twig', [
-            'wardrobes' => $wardrobes,  
+            'wardrobes' => $wardrobes,
             'outfits' => $outfits,
+            'allItems' => $allItems,
+            'wardrobe_form' => $wardrobe_form
         ]);
     }
 
@@ -241,32 +259,31 @@ final class WardrobeController extends AbstractController
                 }
             }
 
+            $entityManager->persist($clothingItem);
+
+            // Créer l'OutfitItem avec la taille
             $outfitItem = new OutfitItem();
             $outfitItem->setClothingItem($clothingItem);
             $outfitItem->setWardrobe($wardrobe);
             $outfitItem->setSize($form->get('size')->getData());
 
+            // Récupérer la tenue sélectionnée depuis le formulaire
             $selectedOutfit = $form->get('outfit')->getData();
             if ($selectedOutfit) {
-                $selectedOutfit->addOutfitItem($outfitItem);
-                $entityManager->persist($selectedOutfit);
+                $outfitItem->addOutfit($selectedOutfit);
             }
 
-            $entityManager->persist($clothingItem);
             $entityManager->persist($outfitItem);
             $entityManager->flush();
 
             return $this->json([
                 'status' => 'success',
-                'message' => 'Le vêtement a été ajouté avec succès.',
-                'redirect' => $selectedOutfit ? $this->generateUrl('outfit_details', ['id' => $selectedOutfit->getId()]) : $this->generateUrl('wardrobe_details', ['id' => $wardrobe->getId()])
+                'redirect' => $this->generateUrl('wardrobe_details', ['id' => $wardrobe->getId()])
             ]);
-
         } catch (\Exception $e) {
             return $this->json([
                 'status' => 'error',
-                'message' => 'Une erreur est survenue lors de l\'ajout du vêtement.',
-                'error_details' => $e->getMessage()
+                'message' => 'Une erreur est survenue lors de l\'ajout du vêtement : ' . $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -347,5 +364,161 @@ final class WardrobeController extends AbstractController
             'clothing_form' => $clothingForm,
             'outfit_form' => $outfitForm
         ]);
+    }
+
+    #[Route('/wardrobe/create', name: 'wardrobe_create', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function createWardrobe(Request $request): JsonResponse
+    {
+        $wardrobe = new Wardrobe();
+        $form = $this->createForm(WardrobeType::class, $wardrobe);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted()) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Le formulaire n\'a pas été soumis correctement.'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!$form->isValid()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = [
+                    'field' => $error->getOrigin()->getName(),
+                    'message' => $error->getMessage()
+                ];
+            }
+
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Le formulaire contient des erreurs.',
+                'field_errors' => $errors
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $wardrobe->setAuthor($this->getUser());
+            $wardrobe->setCreatedAt(new \DateTimeImmutable());
+
+            // Gestion de l'image
+            /** @var UploadedFile $imageFile */
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $uploadDir = $this->getParameter('upload_directory');
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                
+                try {
+                    $imageFile->move($uploadDir, $newFilename);
+                    $wardrobe->setImage('uploads/images/' . $newFilename);
+                } catch (\Exception $e) {
+                    return $this->json([
+                        'status' => 'error',
+                        'message' => 'Une erreur est survenue lors de l\'upload de l\'image.'
+                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
+            }
+
+            $this->entityManager->persist($wardrobe);
+            $this->entityManager->flush();
+
+            return $this->json([
+                'status' => 'success',
+                'message' => 'La garde-robe a été créée avec succès.',
+                'redirect' => $this->generateUrl('wardrobe_details', ['id' => $wardrobe->getId()])
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Une erreur est survenue lors de la création de la garde-robe.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/wardrobe/{id}/edit-user', name: 'wardrobe_edit_user', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function editWardrobeUser(Request $request, int $id): Response
+    {
+        $wardrobe = $this->entityManager->getRepository(Wardrobe::class)->find($id);
+        
+        if (!$wardrobe || $wardrobe->getAuthor() !== $this->getUser()) {
+            throw $this->createNotFoundException('Garde-robe non trouvée');
+        }
+
+        $form = $this->createForm(WardrobeType::class, $wardrobe);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $imageFile */
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $uploadDir = $this->getParameter('upload_directory');
+                
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                // Supprimer l'ancienne image si elle existe
+                if ($wardrobe->getImage()) {
+                    $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/' . $wardrobe->getImage();
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+
+                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $imageFile->move($uploadDir, $newFilename);
+                $wardrobe->setImage('uploads/images/'.$newFilename);
+            }
+
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'La garde-robe a été modifiée avec succès.');
+            return $this->redirectToRoute('wardrobe_details', ['id' => $wardrobe->getId()]);
+        }
+
+        return $this->render('wardrobe/edit.html.twig', [
+            'wardrobe' => $wardrobe,
+            'form' => $form->createView()
+        ]);
+    }
+
+    #[Route('/wardrobe/{id}/delete-user', name: 'wardrobe_delete_user', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function deleteWardrobeUser(int $id): JsonResponse
+    {
+        $wardrobe = $this->entityManager->getRepository(Wardrobe::class)->find($id);
+        
+        if (!$wardrobe || $wardrobe->getAuthor() !== $this->getUser()) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Garde-robe non trouvée'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            // Supprimer l'image si elle existe
+            if ($wardrobe->getImage()) {
+                $imagePath = $this->getParameter('kernel.project_dir') . '/public/' . $wardrobe->getImage();
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+
+            $this->entityManager->remove($wardrobe);
+            $this->entityManager->flush();
+
+            return $this->json([
+                'status' => 'success',
+                'message' => 'La garde-robe a été supprimée avec succès',
+                'redirect' => $this->generateUrl('user_wardrobe')
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Une erreur est survenue lors de la suppression de la garde-robe'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -167,10 +167,10 @@ class AppFixtures extends Fixture
         }
 
         // Création des catégories
-        $this->createCategories($manager);
+        $this->categories = $this->createCategories($manager);
 
         // Création des vêtements
-        $this->createClothingItems($manager);
+        $this->createClothingItems($manager, $this->categories);
 
         // Création des garde-robes pour chaque utilisateur
         $allWardrobes = [];
@@ -226,127 +226,111 @@ class AppFixtures extends Fixture
         return $user;
     }
 
-    private function createCategories(ObjectManager $manager): void
+    private function createCategories(ObjectManager $manager): array
     {
-        $mainCategories = [
-            'Vêtements' => [
-                'Hauts' => ['T-shirts', 'Chemises', 'Pulls', 'Sweats'],
-                'Bas' => ['Pantalons', 'Jeans', 'Shorts', 'Jupes'],
-                'Vestes' => ['Blazers', 'Manteaux', 'Blousons']
-            ],
-            'Chaussures' => [
-                'Sneakers' => ['Baskets basses', 'Baskets montantes'],
-                'Chaussures ville' => ['Derbies', 'Mocassins'],
-                'Bottes' => ['Chelsea boots', 'Bottines']
-            ],
-            'Accessoires' => [
-                'Bijoux' => ['Colliers', 'Bracelets', 'Bagues'],
-                'Sacs' => ['Sacs à main', 'Sacs à dos', 'Pochettes'],
-                'Ceintures' => ['Ceintures cuir', 'Ceintures tissu']
-            ]
+        $categoryNames = [
+            'T-shirts',
+            'Chemises',
+            'Débardeurs',
+            'Pulls',
+            'Robes',
+            'Manteaux',
+            'Vestes',
+            'Pantalons',
+            'Shorts',
+            'Jupes',
+            'Chaussures',
+            'Bottes',
+            'Sandales',
+            'Accessoires',
+            'Ceintures',
+            'Écharpes',
+            'Maillots de bain',
+            'Lingerie',
+            'Pyjamas'
         ];
 
-        foreach ($mainCategories as $mainName => $subCategories) {
-            $mainCategory = new CategoryItem();
-            $mainCategory->setName($mainName);
-            $mainCategory->setDescription("Catégorie $mainName");
-            $manager->persist($mainCategory);
-            $this->categories[$mainName] = $mainCategory;
-
-            foreach ($subCategories as $subName => $items) {
-                $subCategory = new CategoryItem();
-                $subCategory->setName($subName);
-                $subCategory->setDescription("Sous-catégorie $subName");
-                $subCategory->setCategoryParent($mainCategory);
-                $manager->persist($subCategory);
-                $this->categories[$subName] = $subCategory;
-
-                foreach ($items as $itemName) {
-                    $itemCategory = new CategoryItem();
-                    $itemCategory->setName($itemName);
-                    $itemCategory->setDescription("Type $itemName");
-                    $itemCategory->setCategoryParent($subCategory);
-                    $manager->persist($itemCategory);
-                    $this->categories[$itemName] = $itemCategory;
-                }
-            }
+        $categories = [];
+        foreach ($categoryNames as $name) {
+            $category = new CategoryItem();
+            $category->setName($name);
+            $manager->persist($category);
+            $categories[] = $category;
         }
+
+        return $categories;
     }
 
-    private function createClothingItems(ObjectManager $manager): void
+    private function createClothingItems(ObjectManager $manager, array $categories): void
     {
-        $items = [
+        $clothingData = [
             // Hauts
-            ['T-shirts', 'T-shirt basique', 'H&M', 'Noir', '19.99'],
-            ['T-shirts', 'T-shirt imprimé', 'Zara', 'Blanc', '25.99'],
-            ['T-shirts', 'T-shirt rayé', 'Uniqlo', 'Bleu/Blanc', '15.99'],
-            ['Chemises', 'Chemise oxford', 'Ralph Lauren', 'Bleu ciel', '89.99'],
-            ['Chemises', 'Chemise à carreaux', 'Tommy Hilfiger', 'Rouge/Noir', '79.99'],
-            ['Pulls', 'Pull cachemire', 'Uniqlo', 'Gris', '79.99'],
-            ['Pulls', 'Pull col roulé', 'COS', 'Noir', '69.99'],
-            ['Sweats', 'Sweat à capuche', 'Nike', 'Gris chiné', '59.99'],
+            ['name' => 'T-shirt basique', 'description' => 'T-shirt blanc en coton', 'category' => 'T-shirts', 'brand' => 'Uniqlo', 'color' => 'Blanc', 'imageUrl' => $this->imageUrls['T-shirt basique'][0]],
+            ['name' => 'T-shirt imprimé', 'description' => 'T-shirt avec motif', 'category' => 'T-shirts', 'brand' => 'H&M', 'color' => 'Noir', 'imageUrl' => $this->imageUrls['T-shirt imprimé'][0]],
+            ['name' => 'Chemise oxford', 'description' => 'Chemise en coton oxford', 'category' => 'Chemises', 'brand' => 'Ralph Lauren', 'color' => 'Bleu', 'imageUrl' => $this->imageUrls['Chemise oxford'][0]],
             
             // Bas
-            ['Jeans', 'Jean slim', 'Levis', 'Bleu foncé', '99.99'],
-            ['Jeans', 'Jean mom', 'Mango', 'Bleu clair', '49.99'],
-            ['Pantalons', 'Chino', 'Dockers', 'Beige', '69.99'],
-            ['Pantalons', 'Pantalon de costume', 'Hugo Boss', 'Noir', '129.99'],
-            ['Shorts', 'Short en jean', 'Levis', 'Bleu', '59.99'],
-            ['Jupes', 'Jupe plissée', 'Zara', 'Noir', '39.99'],
+            ['name' => 'Jean slim', 'description' => 'Jean coupe slim', 'category' => 'Pantalons', 'brand' => 'Levi\'s', 'color' => 'Bleu', 'imageUrl' => $this->imageUrls['Jean slim'][0]],
+            ['name' => 'Chino', 'description' => 'Pantalon chino', 'category' => 'Pantalons', 'brand' => 'Dockers', 'color' => 'Beige', 'imageUrl' => $this->imageUrls['Chino'][0]],
             
             // Chaussures
-            ['Baskets basses', 'Air Force 1', 'Nike', 'Blanc', '109.99'],
-            ['Baskets basses', 'Stan Smith', 'Adidas', 'Blanc/Vert', '94.99'],
-            ['Baskets montantes', 'Chuck Taylor', 'Converse', 'Noir', '79.99'],
-            ['Derbies', 'Derby cuir', 'Clarks', 'Noir', '129.99'],
-            ['Mocassins', 'Mocassins cuir', 'Tod\'s', 'Marron', '299.99'],
-            ['Bottes', 'Chelsea boots', 'Dr Martens', 'Noir', '189.99'],
-            
-            // Accessoires
-            ['Colliers', 'Chaîne fine', 'Pandora', 'Argent', '49.99'],
-            ['Bracelets', 'Bracelet jonc', 'Swarovski', 'Or', '79.99'],
-            ['Sacs à main', 'Tote bag', 'Michael Kors', 'Marron', '199.99'],
-            ['Sacs à dos', 'Sac à dos city', 'Herschel', 'Noir', '89.99'],
-            ['Ceintures cuir', 'Ceinture classique', 'Hugo Boss', 'Noir', '79.99']
+            ['name' => 'Stan Smith', 'description' => 'Sneakers classiques', 'category' => 'Chaussures', 'brand' => 'Adidas', 'color' => 'Blanc', 'imageUrl' => $this->imageUrls['Stan Smith'][0]],
+            ['name' => 'Chelsea boots', 'description' => 'Boots en cuir', 'category' => 'Bottes', 'brand' => 'Church\'s', 'color' => 'Noir', 'imageUrl' => $this->imageUrls['Chelsea boots'][0]]
         ];
 
-        foreach ($items as [$category, $name, $brand, $color, $price]) {
-            $item = new ClothingItem();
-            $item->setCategory($this->categories[$category]);
-            $item->setName($name);
-            $item->setDescription("Superbe $name de la marque $brand");
-            $item->setBrand($brand);
-            $item->setColor($color);
-            $item->setPrice($price);
-            $item->setCreatedAt(new \DateTimeImmutable());
-
-            // Télécharger et associer les images
-            if (isset($this->imageUrls[$name])) {
-                foreach ($this->imageUrls[$name] as $imageUrl) {
-                    $imagePath = $this->downloadAndSaveImage($imageUrl, $name);
-                    if ($imagePath) {
-                        $item->addImage($imagePath);
-                    }
+        $this->clothingItems = [];
+        foreach ($clothingData as $index => $data) {
+            $clothingItem = new ClothingItem();
+            $clothingItem->setName($data['name']);
+            $clothingItem->setDescription($data['description']);
+            $clothingItem->setBrand($data['brand']);
+            $clothingItem->setColor($data['color']);
+            $clothingItem->setCreatedAt(new \DateTimeImmutable());
+            
+            // Trouver la catégorie correspondante
+            $categoryFound = false;
+            foreach ($categories as $category) {
+                if (strtolower($category->getName()) === strtolower($data['category'])) {
+                    $clothingItem->setCategory($category);
+                    $categoryFound = true;
+                    break;
                 }
             }
 
-            $manager->persist($item);
-            $this->clothingItems[] = $item;
+            if (!$categoryFound) {
+                throw new \Exception(sprintf('Catégorie "%s" non trouvée pour le vêtement "%s"', $data['category'], $data['name']));
+            }
+
+            // Télécharger l'image
+            if (isset($data['imageUrl'])) {
+                $imagePath = $this->downloadAndSaveImage($data['imageUrl'], strtolower(str_replace([' ', '\''], '-', $data['name'])));
+                if ($imagePath) {
+                    $clothingItem->addImage($imagePath);
+                }
+            }
+
+            $manager->persist($clothingItem);
+            $this->clothingItems[$index] = $clothingItem;
         }
     }
 
     private function downloadAndSaveImage(string $url, string $name): ?string
     {
+        $uploadDir = 'public/uploads/images/';
+        $filename = $name . '.webp';
+        $filePath = $uploadDir . $filename;
+
+        // Vérifier si le fichier existe déjà
+        if (file_exists($filePath)) {
+            return 'uploads/images/' . $filename;
+        }
+
+        // Créer le répertoire s'il n'existe pas
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
         try {
-            $uploadDir = 'public/uploads/images/fixtures/';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            $extension = 'webp';
-            $filename = sprintf('%s-%s.%s', uniqid(), strtolower(preg_replace('/[^A-Za-z0-9\-]/', '-', $name)), $extension);
-            $filepath = $uploadDir . $filename;
-
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -354,11 +338,12 @@ class AppFixtures extends Fixture
             curl_close($ch);
 
             if ($imageData) {
-                file_put_contents($filepath, $imageData);
-                return 'uploads/images/fixtures/' . $filename;
+                file_put_contents($filePath, $imageData);
+                return 'uploads/images/' . $filename;
             }
         } catch (\Exception $e) {
-            // Gérer silencieusement l'erreur
+            // Log l'erreur ou la gérer selon les besoins
+            return null;
         }
 
         return null;
@@ -367,30 +352,51 @@ class AppFixtures extends Fixture
     private function createWardrobes(ObjectManager $manager, User $user): array
     {
         $wardrobeData = [
-            'Garde-robe principale' => 'Ma garde-robe de tous les jours',
-            'Tenues de sport' => 'Pour mes activités sportives',
-            'Tenues de soirée' => 'Pour les occasions spéciales',
-            'Tenues de travail' => 'Pour le bureau',
-            'Collection été' => 'Mes tenues estivales'
+            [
+                'name' => 'Garde-robe principale',
+                'description' => 'Ma garde-robe de tous les jours',
+                'imageUrl' => $this->wardrobeImageUrls['Garde-robe principale']
+            ],
+            [
+                'name' => 'Tenues de sport',
+                'description' => 'Mes vêtements de sport',
+                'imageUrl' => $this->wardrobeImageUrls['Tenues de sport']
+            ],
+            [
+                'name' => 'Tenues de soirée',
+                'description' => 'Mes tenues pour les occasions spéciales',
+                'imageUrl' => $this->wardrobeImageUrls['Tenues de soirée']
+            ],
+            [
+                'name' => 'Vêtements d\'été',
+                'description' => 'Ma collection estivale',
+                'imageUrl' => $this->wardrobeImageUrls['Collection été']
+            ],
+            [
+                'name' => 'Vêtements d\'hiver',
+                'description' => 'Ma collection hivernale',
+                'imageUrl' => $this->wardrobeImageUrls['Tenues de travail']
+            ]
         ];
 
         $wardrobes = [];
-        foreach ($wardrobeData as $name => $description) {
+        foreach ($wardrobeData as $data) {
             $wardrobe = new Wardrobe();
-            $wardrobe->setAuthor($user);
-            $wardrobe->setName($name);
-            $wardrobe->setDescription($description);
-            $wardrobe->setCreatedAt(new \DateTimeImmutable());
-
-            // Télécharger et associer l'image de la garde-robe
-            if (isset($this->wardrobeImageUrls[$name])) {
-                $imagePath = $this->downloadAndSaveImage($this->wardrobeImageUrls[$name], 'wardrobe-' . $name);
+            $wardrobe->setName($data['name']);
+            $wardrobe->setDescription($data['description']);
+            
+            // Télécharger l'image
+            if (isset($data['imageUrl'])) {
+                $imagePath = $this->downloadAndSaveImage($data['imageUrl'], 'wardrobe-' . strtolower(str_replace([' ', '\''], '-', $data['name'])));
                 if ($imagePath) {
                     $wardrobe->setImage($imagePath);
                 }
             }
-
-            $manager->persist($wardrobe);
+            
+        $wardrobe->setAuthor($user);
+            $wardrobe->setCreatedAt(new \DateTimeImmutable());
+            
+        $manager->persist($wardrobe);
             $wardrobes[] = $wardrobe;
         }
 
@@ -400,106 +406,114 @@ class AppFixtures extends Fixture
     private function createOutfits(ObjectManager $manager, User $user, array $wardrobes): void
     {
         $outfitData = [
-            [
-                'name' => 'Tenue décontractée',
-                'description' => 'Parfait pour une journée détendue',
-                'items' => [0, 8, 14], // T-shirt basique, Jean slim, Air Force 1
-                'wardrobe' => 0
+            'Garde-robe principale' => [
+                [
+                    'name' => 'Tenue décontractée',
+                    'description' => 'Look casual pour tous les jours',
+                    'items' => [0, 3, 5], // T-shirt basique, Jean slim, Stan Smith
+                    'imageUrl' => $this->outfitImageUrls['Tenue décontractée'][0],
+                    'likes' => 12,
+                    'reviews' => [
+                        ['content' => 'Super tenue, très confortable !'],
+                        ['content' => 'J\'adore le style décontracté']
+                    ]
+                ],
+                [
+                    'name' => 'Business casual',
+                    'description' => 'Tenue professionnelle décontractée',
+                    'items' => [2, 4, 6], // Chemise oxford, Chino, Chelsea boots
+                    'imageUrl' => $this->outfitImageUrls['Style business'][0],
+                    'likes' => 8,
+                    'reviews' => [
+                        ['content' => 'Parfait pour le bureau'],
+                        ['content' => 'Élégant et professionnel']
+                    ]
+                ]
             ],
-            [
-                'name' => 'Style business',
-                'description' => 'Pour une journée au bureau',
-                'items' => [3, 11, 17], // Chemise oxford, Pantalon costume, Derby
-                'wardrobe' => 3
+            'Tenues de sport' => [
+                [
+                    'name' => 'Tenue de running',
+                    'description' => 'Pour mes séances de course à pied',
+                    'items' => [1, 3, 5], // T-shirt imprimé, Jean slim, Stan Smith
+                    'imageUrl' => $this->outfitImageUrls['Look streetwear'][0],
+                    'likes' => 15,
+                    'reviews' => [
+                        ['content' => 'Très confortable pour courir'],
+                        ['content' => 'Parfait pour le sport']
+                    ]
+                ]
             ],
-            [
-                'name' => 'Look streetwear',
-                'description' => 'Style urbain et tendance',
-                'items' => [7, 9, 15], // Sweat capuche, Jean mom, Stan Smith
-                'wardrobe' => 0
-            ],
-            [
-                'name' => 'Tenue de soirée',
-                'description' => 'Pour les événements chics',
-                'items' => [4, 11, 18], // Chemise carreaux, Pantalon costume, Mocassins
-                'wardrobe' => 2
-            ],
-            [
-                'name' => 'Style casual chic',
-                'description' => 'Un look élégant mais décontracté',
-                'items' => [5, 10, 16], // Pull cachemire, Chino, Baskets montantes
-                'wardrobe' => 0
-            ],
-            [
-                'name' => 'Tenue d\'été',
-                'description' => 'Parfait pour les journées chaudes',
-                'items' => [2, 12, 15], // T-shirt rayé, Short jean, Stan Smith
-                'wardrobe' => 4
+            'Tenues de soirée' => [
+                [
+                    'name' => 'Tenue de gala',
+                    'description' => 'Pour les événements formels',
+                    'items' => [2, 4, 6], // Chemise oxford, Chino, Chelsea boots
+                    'imageUrl' => $this->outfitImageUrls['Tenue de soirée'][0],
+                    'likes' => 20,
+                    'reviews' => [
+                        ['content' => 'Superbe tenue de soirée'],
+                        ['content' => 'Très élégant']
+                    ]
+                ]
             ]
         ];
 
-        foreach ($outfitData as $data) {
-            $outfit = new Outfit();
-            $outfit->setAuthor($user);
-            $outfit->setName($data['name']);
-            $outfit->setDescription($data['description']);
-            $outfit->setIsPublished(true);
-            $outfit->setCreatedAt(new \DateTimeImmutable());
-            $outfit->setLikesCount(random_int(0, 100));
+        foreach ($wardrobes as $wardrobe) {
+            if (isset($outfitData[$wardrobe->getName()])) {
+                foreach ($outfitData[$wardrobe->getName()] as $data) {
+                    $outfit = new Outfit();
+                    $outfit->setName($data['name']);
+                    $outfit->setDescription($data['description']);
+                    $outfit->setAuthor($user);
+                    $outfit->setWardrobe($wardrobe);
+                    $outfit->setCreatedAt(new \DateTimeImmutable());
+                    $outfit->setLikesCount($data['likes']);
+                    $outfit->setIsPublished(true);
+                    
+                    // Télécharger l'image de la tenue
+                    if (isset($data['imageUrl'])) {
+                        $imagePath = $this->downloadAndSaveImage($data['imageUrl'], 'outfit-' . strtolower(str_replace([' ', '\''], '-', $data['name'])));
+                        if ($imagePath) {
+                            $outfit->addImage($imagePath);
+                        }
+                    }
 
-            // Télécharger et associer les images de la tenue
-            if (isset($this->outfitImageUrls[$data['name']])) {
-                foreach ($this->outfitImageUrls[$data['name']] as $imageUrl) {
-                    $imagePath = $this->downloadAndSaveImage($imageUrl, 'outfit-' . strtolower(preg_replace('/[^A-Za-z0-9\-]/', '-', $data['name'])));
-                    if ($imagePath) {
-                        $outfit->addImage($imagePath);
+                    $manager->persist($outfit);
+
+                    // Ajouter les vêtements à la tenue
+                    foreach ($data['items'] as $index) {
+                        if (isset($this->clothingItems[$index])) {
+        $outfitItem = new OutfitItem();
+                            $outfitItem->setClothingItem($this->clothingItems[$index]);
+        $outfitItem->setWardrobe($wardrobe);
+        $outfitItem->setSize('M');
+        $manager->persist($outfitItem);
+
+                            // Ajouter le vêtement à la collection de l'outfit
+                            $outfit->addOutfitItem($outfitItem);
+                            $outfitItem->addOutfit($outfit);
+                        }
+                    }
+
+                    // Ajouter les likes
+                    for ($i = 0; $i < $data['likes']; $i++) {
+                        $like = new Like();
+                        $like->setOutfit($outfit);
+                        $like->setAuthor($user);
+                        $like->setCreatedAt(new \DateTimeImmutable());
+                        $manager->persist($like);
+                    }
+
+                    // Ajouter les reviews
+                    foreach ($data['reviews'] as $reviewData) {
+                        $review = new Review();
+                        $review->setOutfit($outfit);
+                        $review->setAuthor($user);
+                        $review->setContent($reviewData['content']);
+                        $review->setCreatedAt(new \DateTimeImmutable());
+                        $manager->persist($review);
                     }
                 }
-            }
-
-            $manager->persist($outfit);
-
-            // Création des OutfitItems
-            foreach ($data['items'] as $itemIndex) {
-                $outfitItem = new OutfitItem();
-                $outfitItem->setClothingItem($this->clothingItems[$itemIndex]);
-                $outfitItem->setWardrobe($wardrobes[$data['wardrobe']]);
-                $outfitItem->setSize(['XS', 'S', 'M', 'L', 'XL'][random_int(0, 4)]);
-                $outfitItem->setPurchaseAt(new \DateTimeImmutable('-' . random_int(1, 365) . ' days'));
-                $outfitItem->addOutfit($outfit);
-                $manager->persist($outfitItem);
-            }
-
-            // Ajout de likes et reviews
-            $numLikes = random_int(5, 20);
-            $numReviews = random_int(3, 8);
-
-            for ($i = 0; $i < $numLikes; $i++) {
-                $like = new Like();
-                $like->setAuthor($user);
-                $like->setOutfit($outfit);
-                $like->setCreatedAt(new \DateTimeImmutable());
-                $manager->persist($like);
-            }
-
-            $reviews = [
-                'Super tenue, j\'adore le style !',
-                'Très belle association de couleurs',
-                'Parfait pour toutes les occasions',
-                'Cette tenue est vraiment élégante',
-                'J\'aime beaucoup l\'association des pièces',
-                'Look très tendance',
-                'Superbe composition',
-                'Style parfaitement maîtrisé'
-            ];
-
-            for ($i = 0; $i < $numReviews; $i++) {
-                $review = new Review();
-                $review->setAuthor($user);
-                $review->setOutfit($outfit);
-                $review->setContent($reviews[array_rand($reviews)]);
-                $review->setCreatedAt(new \DateTimeImmutable());
-                $manager->persist($review);
             }
         }
     }

@@ -21,6 +21,10 @@ class Outfit
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
 
+    #[ORM\ManyToOne(inversedBy: 'outfits')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Wardrobe $wardrobe = null;
+
     #[ORM\Column(length: 100)]
     private ?string $name = null;
 
@@ -83,6 +87,17 @@ class Outfit
     {
         $this->author = $author;
 
+        return $this;
+    }
+
+    public function getWardrobe(): ?Wardrobe
+    {
+        return $this->wardrobe;
+    }
+
+    public function setWardrobe(?Wardrobe $wardrobe): static
+    {
+        $this->wardrobe = $wardrobe;
         return $this;
     }
 

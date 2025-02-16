@@ -119,6 +119,7 @@ final class OutfitController extends AbstractController
         return $this->render('outfit/details.html.twig', [
             'outfit' => $outfit,
             'outfitItems' => $this->outfitItemRepository->findOutfitItemsByOutfit($outfit),
+            'allOutfitItems' => $this->outfitItemRepository->findOutfitItemsByUser($this->getUser()),
             'categories' => $this->entityManager->getRepository(CategoryItem::class)->findAll(),
             'form' => $form
         ]);
@@ -138,12 +139,12 @@ final class OutfitController extends AbstractController
         }
 
         $outfitItem = $this->outfitItemRepository->find($outfitItemId);
-        if (!$outfitItem) {
+        if (!$outfitItem || !$outfitItem->getOutfits()->contains($outfit)) {
             return $this->json(['status' => 'error', 'message' => 'Item non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
         try {
-            $outfit->removeOutfitItem($outfitItem);
+            $outfitItem->removeOutfit($outfit);
             $this->entityManager->flush();
             return $this->json(['status' => 'success']);
         } catch (\Exception $e) {
@@ -151,41 +152,51 @@ final class OutfitController extends AbstractController
         }
     }
 
-    #[Route('/outfit/{id}/add-existing-item', name: 'outfit_add_existing_item', methods: ['GET', 'POST'])]
+    #[Route('/outfit/{id}/add-existing-item', name: 'outfit_add_existing_item', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function addExistingItem(Request $request, int $id): Response
+    public function addExistingItem(Request $request, int $id): JsonResponse
     {
         $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
         
         if (!$outfit) {
-            throw $this->createNotFoundException('Tenue non trouvée');
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Tenue non trouvée'
+            ], Response::HTTP_NOT_FOUND);
         }
 
-        if ($request->isMethod('POST')) {
-            $clothingItemIds = $request->request->all('clothing_items');
-            
-            foreach ($clothingItemIds as $clothingItemId) {
-                $clothingItem = $this->entityManager->getRepository(ClothingItem::class)->find($clothingItemId);
-                
-                if ($clothingItem && $clothingItem->getWardrobe()->getOwner() === $this->getUser()) {
-                    $outfitItem = new OutfitItem();
-                    $outfit->addOutfitItem($outfitItem);
-                    $outfitItem->setClothingItem($clothingItem);
-                    $outfitItem->setWardrobe($clothingItem->getWardrobe());
-                    $outfitItem->setSize($clothingItem->getSize());
-                    
-                    $this->entityManager->persist($outfitItem);
-                }
-            }
-            
+        $data = json_decode($request->getContent(), true);
+        $outfitItemId = $data['outfitItemId'] ?? null;
+
+        if (!$outfitItemId) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'ID du vêtement manquant'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $outfitItem = $this->outfitItemRepository->find($outfitItemId);
+        if (!$outfitItem || $outfitItem->getWardrobe()->getAuthor() !== $this->getUser()) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Vêtement non trouvé'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $outfitItem->addOutfit($outfit);
             $this->entityManager->flush();
-            
-            return $this->redirectToRoute('outfit_details', ['id' => $outfit->getId()]);
-        }
 
-        return $this->render('outfit/add_existing_item.html.twig', [
-            'outfit' => $outfit
-        ]);
+            return $this->json([
+                'status' => 'success',
+                'message' => 'Vêtement ajouté à la tenue avec succès'
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Une erreur est survenue lors de l\'ajout du vêtement'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route('/outfit/create/{wardrobeId}', name: 'outfit_create', methods: ['POST'])]
@@ -232,7 +243,18 @@ final class OutfitController extends AbstractController
             $outfit->setAuthor($this->getUser());
             $outfit->setCreatedAt(new \DateTimeImmutable());
             $outfit->setLikesCount(0);
-            $outfit->setIsPublished(false);
+            $outfit->setWardrobe($wardrobe);
+
+            // Debug de la valeur de isPublished
+            $formData = $request->request->all();
+            $isPublished = $formData['outfit']['isPublished'] ?? null;
+            $this->addFlash('debug', sprintf('Form isPublished: %s, Entity isPublished: %s', 
+                var_export($isPublished, true),
+                var_export($outfit->getIsPublished(), true)
+            ));
+
+            // Forcer la valeur de isPublished depuis le formulaire
+            $outfit->setIsPublished($form->get('isPublished')->getData());
 
             // Gestion des images
             /** @var UploadedFile[] $imageFiles */
@@ -272,6 +294,84 @@ final class OutfitController extends AbstractController
                 'message' => 'Une erreur est survenue lors de la création de la tenue.',
                 'error_details' => $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/outfit/{id}/edit-user', name: 'outfit_edit_user', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function editOutfitUser(Request $request, int $id): Response
+    {
+        $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
+        
+        if (!$outfit) {
+            throw $this->createNotFoundException('Tenue non trouvée');
+        }
+
+        $form = $this->createForm(OutfitType::class, $outfit);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $outfit->setUpdateDateAt(new \DateTime());
+
+            // Gérer les images
+            /** @var UploadedFile[] $images */
+            $images = $form->get('images')->getData();
+            if ($images) {
+                $uploadDir = $this->getParameter('upload_directory');
+                foreach ($images as $image) {
+                    $newFilename = uniqid() . '.' . $image->guessExtension();
+                    $image->move($uploadDir, $newFilename);
+                    $outfit->addImage('uploads/images/' . $newFilename);
+                }
+            }
+
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'La tenue a été modifiée avec succès.');
+            return $this->redirectToRoute('outfit_details', ['id' => $outfit->getId()]);
+        }
+
+        return $this->render('outfit/edit.html.twig', [
+            'outfit' => $outfit,
+            'form' => $form
+        ]);
+    }
+
+    #[Route('/outfit/{id}/delete-user', name: 'outfit_delete_user', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function deleteOutfitUser(Request $request, int $id): JsonResponse
+    {
+        $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
+        
+        if (!$outfit) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Tenue non trouvée'
+            ], 404);
+        }
+
+        try {
+            // Supprimer les images physiques si nécessaire
+            foreach ($outfit->getImages() as $imagePath) {
+                $fullPath = $this->getParameter('kernel.project_dir') . '/public/' . $imagePath;
+                if (file_exists($fullPath)) {
+                    unlink($fullPath);
+                }
+            }
+
+            $this->entityManager->remove($outfit);
+            $this->entityManager->flush();
+
+            return new JsonResponse([
+                'status' => 'success',
+                'message' => 'Tenue supprimée avec succès',
+                'redirect' => $this->generateUrl('user_wardrobe')
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Une erreur est survenue lors de la suppression de la tenue'
+            ], 500);
         }
     }
 }

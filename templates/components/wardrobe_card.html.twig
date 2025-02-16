@@ -12,15 +12,18 @@
             {% endif %}
             <h1 class="text-2xl font-semibold text-gray-900">{{ name }}</h1>
         </div>
-        {% if stats|length > 0 %}
-            <div class="flex gap-3">
-                {% for stat in stats %}
-                    <span class="px-3 py-1.5 text-sm font-medium rounded-full {% if stat.color == 'primary' %}bg-blue-500 text-white{% elseif stat.color == 'success' %}bg-green-500 text-white{% else %}bg-gray-500 text-white{% endif %}">
-                        {{ stat.value }} {{ stat.label }}
-                    </span>
-                {% endfor %}
-            </div>
-        {% endif %}
+        <div class="flex items-center space-x-4">
+            {% if stats|length > 0 %}
+                <div class="flex gap-3">
+                    {% for stat in stats %}
+                        <span class="px-3 py-1.5 text-sm font-medium rounded-full {% if stat.color == 'primary' %}bg-blue-500 text-white{% elseif stat.color == 'success' %}bg-green-500 text-white{% else %}bg-gray-500 text-white{% endif %}">
+                            {{ stat.value }} {{ stat.label }}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block card_header_actions %}{% endblock %}
+        </div>
     </div>
     <div class="p-6">
         {% if description %}

@@ -32,8 +32,7 @@ class OutfitRepository extends ServiceEntityRepository
     public function findOutfitsForWardrobe(Wardrobe $wardrobe, User $user): array
     {
         return $this->createQueryBuilder('o')
-            ->join('o.outfitItems', 'oi')
-            ->andWhere('oi.wardrobe = :wardrobe')
+            ->andWhere('o.wardrobe = :wardrobe')
             ->andWhere('o.author = :user')
             ->setParameter('wardrobe', $wardrobe)
             ->setParameter('user', $user)

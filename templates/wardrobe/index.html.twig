@@ -11,7 +11,10 @@
                     <i class="fas fa-door-closed mr-2 text-blue-600"></i>
                     <h2 class="text-xl font-semibold mb-0">Garde-robes</h2>
                 </div>
-                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{{ wardrobes|length }}</span>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{{ wardrobes|length }}</span>
+                    {% include 'components/add_wardrobe_modal.html.twig' %}
+                </div>
             </div>
 
             {% if wardrobes|length > 0 %}
@@ -95,63 +98,50 @@
                     <i class="fas fa-tags mr-2 text-blue-600"></i>
                     <h2 class="text-xl font-semibold mb-0">Vêtements</h2>
                 </div>
-                {% set totalItems = 0 %}
-                {% for outfit in outfits %}
-                    {% set totalItems = totalItems + outfit.outfitItems|length %}
-                {% endfor %}
-                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{{ totalItems }}</span>
+                <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">{{ allItems|length }}</span>
             </div>
 
-            {% set hasItems = false %}
-            {% for outfit in outfits %}
-                {% if outfit.outfitItems|length > 0 %}
-                    {% set hasItems = true %}
-                {% endif %}
-            {% endfor %}
-
-            {% if hasItems %}
+            {% if allItems|length > 0 %}
                 <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {% for outfit in outfits %}
-                        {% for item in outfit.outfitItems %}
-                            {% if item.clothingItem %}
-                                <a href="{{ path('clothing_details', {'id': item.id}) }}" class="block group">
-                                    <div class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-                                        <div class="aspect-square bg-gray-50 flex items-center justify-center">
-                                            {% if item.clothingItem.category %}
-                                                <i class="fas fa-{{ item.clothingItem.category.name|lower == 'chaussures' ? 'shoe-prints' : 
-                                                                item.clothingItem.category.name|lower == 'accessoires' ? 'glasses' : 
-                                                                'tshirt' }} text-2xl text-blue-600 transform transition-transform duration-300 group-hover:scale-110"></i>
-                                            {% else %}
-                                                <i class="fas fa-tshirt text-2xl text-blue-600 transform transition-transform duration-300 group-hover:scale-110"></i>
-                                            {% endif %}
-                                        </div>
-                                        <div class="p-2">
-                                            <h3 class="text-sm font-medium text-gray-900 truncate">{{ item.clothingItem.name }}</h3>
-                                            <div class="flex gap-2 items-center">
-                                                {% if item.clothingItem.brand %}
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                                        <i class="fas fa-tag mr-1"></i>{{ item.clothingItem.brand }}
-                                                    </span>
-                                                {% endif %}
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                    <i class="fas fa-ruler mr-1"></i>{{ item.size }}
-                                                </span>
-                                            </div>
-                                            {% if item.clothingItem.color %}
-                                                <div class="text-xs text-gray-500 mt-1">
-                                                    <i class="fas fa-palette mr-1"></i>{{ item.clothingItem.color }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
+                    {% for item in allItems %}
+                        {% if item.clothingItem %}
+                            <a href="{{ path('clothing_details', {'id': item.id}) }}" class="block group">
+                                <div class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                                    <div class="aspect-square bg-gray-50 flex items-center justify-center">
+                                        {% if item.clothingItem.category %}
+                                            <i class="fas fa-{{ item.clothingItem.category.name|lower == 'chaussures' ? 'shoe-prints' : 
+                                                            item.clothingItem.category.name|lower == 'accessoires' ? 'glasses' : 
+                                                            'tshirt' }} text-2xl text-blue-600 transform transition-transform duration-300 group-hover:scale-110"></i>
+                                        {% else %}
+                                            <i class="fas fa-tshirt text-2xl text-blue-600 transform transition-transform duration-300 group-hover:scale-110"></i>
+                                        {% endif %}
                                     </div>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
+                                    <div class="p-2">
+                                        <h3 class="text-sm font-medium text-gray-900 truncate">{{ item.clothingItem.name }}</h3>
+                                        <div class="flex gap-2 items-center">
+                                            {% if item.clothingItem.brand %}
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                    <i class="fas fa-tag mr-1"></i>{{ item.clothingItem.brand }}
+                                                </span>
+                                            {% endif %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                <i class="fas fa-ruler mr-1"></i>{{ item.size }}
+                                            </span>
+                                        </div>
+                                        {% if item.clothingItem.color %}
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                <i class="fas fa-palette mr-1"></i>{{ item.clothingItem.color }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                        {% endif %}
                     {% endfor %}
                 </div>
             {% else %}
                 <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
-                    <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore de vêtements dans vos tenues.
+                    <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore de vêtements.
                 </div>
             {% endif %}
         </div>
@@ -161,6 +151,10 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
         @media (min-width: 768px) {
             .grid-cols-4 {
                 grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -173,4 +167,9 @@
             }
         }
     </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 {% endblock %}

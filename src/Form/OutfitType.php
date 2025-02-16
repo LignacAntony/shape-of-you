@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -42,6 +43,16 @@ class OutfitType extends AbstractType
                         'max' => 4000,
                         'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères'
                     ])
+                ]
+            ])
+            ->add('isPublished', CheckboxType::class, [
+                'label' => 'Publier la tenue',
+                'required' => false,
+                'false_values' => ['0', '', false, null],
+                'empty_data' => false,
+                'data' => false,
+                'attr' => [
+                    'x-model' => 'isPublished'
                 ]
             ])
             ->add('images', FileType::class, [

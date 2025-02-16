@@ -92,7 +92,8 @@ class ClothingItemType extends AbstractType
             ])
         ;
 
-        if ($options['default_outfit']) {
+        // Ajouter le champ outfit si une garde-robe est spécifiée
+        if ($options['wardrobe']) {
             $builder->add('outfit', EntityType::class, [
                 'class' => Outfit::class,
                 'choice_label' => 'name',
@@ -102,9 +103,13 @@ class ClothingItemType extends AbstractType
                 'data' => $options['default_outfit'],
                 'query_builder' => function ($er) use ($options) {
                     return $er->createQueryBuilder('o')
-                        ->where('o.author = :user')
-                        ->setParameter('user', $options['user']);
+                        ->where('o.wardrobe = :wardrobe')
+                        ->andWhere('o.author = :user')
+                        ->setParameter('wardrobe', $options['wardrobe'])
+                        ->setParameter('user', $options['user'])
+                        ->orderBy('o.name', 'ASC');
                 },
+                'placeholder' => 'Sélectionner une tenue (optionnel)',
             ]);
         }
     }

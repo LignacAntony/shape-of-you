@@ -3,16 +3,6 @@
 {% block title %}{{ wardrobe.name }}{% endblock %}
 
 {% block body %}
-    {# On récupère les tenues uniques à partir des outfitItems #}
-    {% set outfits = [] %}
-    {% for item in wardrobe.outfitItems %}
-        {% for outfit in item.outfits %}
-            {% if outfit not in outfits %}
-                {% set outfits = outfits|merge([outfit]) %}
-            {% endif %}
-        {% endfor %}
-    {% endfor %}
-
     <div class="container-fluid max-w-7xl mx-auto px-4 py-6">
         {# Bouton retour #}
         {% include 'components/back_button.html.twig' %}
@@ -27,9 +17,71 @@
             'image': wardrobe.image,
             'stats': [
                 {'color': 'primary', 'value': wardrobe.outfitItems|length, 'label': 'vêtements'},
-                {'color': 'success', 'value': outfits|length, 'label': 'tenues'}
+                {'color': 'success', 'value': wardrobe.outfits|length, 'label': 'tenues'}
             ]
         } %}
+            {% block card_header_actions %}
+                <div x-data="{ 
+                    showOptions: false,
+                    isDeleting: false,
+                    deleteWardrobe() {
+                        if (this.isDeleting) return;
+                        if (!confirm('Êtes-vous sûr de vouloir supprimer cette garde-robe ? Cette action supprimera également tous les vêtements et tenues associés.')) return;
+                        
+                        this.isDeleting = true;
+                        
+                        fetch('{{ path('wardrobe_delete_user', {'id': wardrobe.id}) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                window.location.href = data.redirect;
+                            } else {
+                                alert(data.message || 'Une erreur est survenue');
+                                this.isDeleting = false;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Une erreur est survenue lors de la suppression');
+                            this.isDeleting = false;
+                        });
+                    }
+                }" class="relative" @click.away="showOptions = false">
+                    <button @click="showOptions = !showOptions" 
+                            class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                        <i class="fas fa-ellipsis-v text-gray-600"></i>
+                    </button>
+
+                    <div x-show="showOptions"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+                        
+                        <a href="{{ path('wardrobe_edit_user', {'id': wardrobe.id}) }}" 
+                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                            <i class="fas fa-edit w-5 mr-2"></i>
+                            <span>Modifier</span>
+                        </a>
+
+                        <button @click="deleteWardrobe" 
+                                :disabled="isDeleting"
+                                class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200">
+                            <i class="fas" :class="isDeleting ? 'fa-spinner fa-spin' : 'fa-trash'" class="w-5 mr-2"></i>
+                            <span x-text="isDeleting ? 'Suppression...' : 'Supprimer'"></span>
+                        </button>
+                    </div>
+                </div>
+            {% endblock %}
             {% block card_content %}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="flex items-center text-gray-600">
@@ -49,7 +101,7 @@
             'title': 'Tenues',
             'icon': 'tshirt',
             'color': 'success',
-            'items': outfits,
+            'items': wardrobe.outfits,
             'empty_message': 'Aucune tenue n\'a été créée dans cette garde-robe.'
         } %}
             {% block button %}
@@ -60,7 +112,7 @@
             {% endblock %}
             
             {% block items %}
-                {% for outfit in outfits %}
+                {% for outfit in wardrobe.outfits %}
                     {% include 'components/outfit_card.html.twig' with {
                         'outfit': outfit,
                         'color': 'success'

@@ -21,12 +21,12 @@ class OutfitItemRepository extends ServiceEntityRepository
     public function findOutfitItemWithAccessCheck(int $outfitItemId, int $outfitId, User $user): ?OutfitItem
     {
         return $this->createQueryBuilder('oi')
-            ->join('oi.outfit', 'o')
             ->andWhere('oi.id = :outfitItemId')
-            ->andWhere('o.id = :outfitId')
+            ->join('oi.outfits', 'o')
+            ->andWhere('o.id = :outfit')
             ->andWhere('o.author = :user')
             ->setParameter('outfitItemId', $outfitItemId)
-            ->setParameter('outfitId', $outfitId)
+            ->setParameter('outfit', $outfitId)
             ->setParameter('user', $user)
             ->getQuery()
             ->getOneOrNullResult();
@@ -38,6 +38,16 @@ class OutfitItemRepository extends ServiceEntityRepository
             ->join('oi.outfits', 'o')
             ->andWhere('o = :outfit')
             ->setParameter('outfit', $outfit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOutfitItemsByUser(User $user): array
+    {
+        return $this->createQueryBuilder('oi')
+            ->join('oi.wardrobe', 'w')
+            ->andWhere('w.author = :user')
+            ->setParameter('user', $user)
             ->getQuery()
             ->getResult();
     }
