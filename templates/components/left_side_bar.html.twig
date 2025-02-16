@@ -22,15 +22,37 @@
                         <h1 class="w-full text-center text-2xl pacifico-regular">ShapeOfYou</h1>
                     </a>
                 </li>
+                {% if not app.user %}
                 <li>
-                    <a href="{{ path('app_home') }}"
+                    <a href="{{ path('app_login') }}"
                        class="sidebar-link group">
-                        <i class="fa-solid fa-house me-2 w-6 h-6"></i>
-                        <span class="ms-3">Accueil</span>
+                        <span class="ms-3">Connexion</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ path('app_register') }}"
+                       class="sidebar-link group">
+                        <span class="ms-3">Inscription</span>
+                    </a>
+                </li>
+                {% endif %}
+
                 {% if app.user %}
                     {% if is_granted('ROLE_USER') %}
+                        <li>
+                            <a href="{{ path('app_home') }}"
+                               class="sidebar-link group">
+                                <i class="fa-solid fa-house sidebar-icon"></i>
+                                <span class="ms-3">Accueil</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ path('user_wardrobe') }}"
+                               class="sidebar-link group">
+                                <i class="fa-solid fa-shirt sidebar-icon"></i>
+                                <span class="ms-3">Garde robe</span>
+                            </a>
+                        </li>
                         <li>
                             <a href="{{ path('profile_show') }}"
                                class="sidebar-link group">
@@ -46,7 +68,7 @@
                         <li>
                             <a href="{{ path('app_admin_index') }}"
                                class="sidebar-link group">
-                                <i class="fa-solid fa-lock me-2 w-6 h-6"></i>
+                                <i class="fa-solid fa-lock sidebar-icon"></i>
                                 <span class="ms-3">Administration</span>
                             </a>
                         </li>
@@ -59,16 +81,8 @@
                     <li>
                         <a href="{{ path('app_logout') }}"
                            class="sidebar-link group">
-                            <i class="fa-solid fa-right-from-bracket me-2 w-6 h-6"></i>
+                            <i class="fa-solid fa-right-from-bracket sidebar-icon"></i>
                             <span class="ms-3">Déconnexion</span>
-                        </a>
-                    </li>
-                {% else %}
-                    <li>
-                        <a href="{{ path('app_login') }}"
-                           class="sidebar-link group">
-                            <i class="fa-solid fa-right-to-bracket me-2 w-6 h-6"></i>
-                            <span class="ms-3">Connexion</span>
                         </a>
                     </li>
                 {% endif %}
