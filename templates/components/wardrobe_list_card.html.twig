@@ -1,0 +1,15 @@
+<a href="{{ path('wardrobe_details', {'id': wardrobe.id}) }}" class="block group">
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
+        <div class="aspect-square bg-primary-400 flex items-center justify-center">
+            {% if wardrobe.image != null %}
+            <img  src="{{ asset(wardrobe.image) }}" alt="{{ wardrobe.name }}" class="w-full h-full object-cover" />
+            {% else %}
+            <i class="fa-solid fa-door-open text-2xl text-white transform transition-transform duration-300 group-hover:scale-110"></i>
+            {% endif %}
+        </div>
+        <div class="p-2">
+            <h3 class="text-sm font-medium text-gray-900 truncate">{{ wardrobe.name }}</h3>
+            <p class="text-xs text-gray-500 line-clamp-2">{{ wardrobe.description }}</p>
+        </div>
+    </div>
+</a>
