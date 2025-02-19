@@ -183,7 +183,7 @@ class AppFixtures extends Fixture
         // Création des tenues pour chaque utilisateur
         foreach ($users as $user) {
             if (!in_array('ROLE_ADMIN', $user->getRoles())) {
-                $this->createOutfits($manager, $user, $allWardrobes[$user->getEmail()]);
+                $this->createOutfits($manager, $user, $allWardrobes[$user->getEmail()], $users);
             }
         }
 
@@ -403,7 +403,7 @@ class AppFixtures extends Fixture
         return $wardrobes;
     }
 
-    private function createOutfits(ObjectManager $manager, User $user, array $wardrobes): void
+    private function createOutfits(ObjectManager $manager, User $user, array $wardrobes, array $users): void
     {
         $outfitData = [
             'Garde-robe principale' => [
@@ -467,7 +467,7 @@ class AppFixtures extends Fixture
                     $outfit->setAuthor($user);
                     $outfit->setWardrobe($wardrobe);
                     $outfit->setCreatedAt(new \DateTimeImmutable());
-                    $outfit->setLikesCount($data['likes']);
+                    $outfit->setLikesCount(0);
                     $outfit->setIsPublished(true);
                     
                     // Télécharger l'image de la tenue
@@ -495,14 +495,35 @@ class AppFixtures extends Fixture
                         }
                     }
 
-                    // Ajouter les likes
-                    for ($i = 0; $i < $data['likes']; $i++) {
-                        $like = new Like();
-                        $like->setOutfit($outfit);
-                        $like->setAuthor($user);
-                        $like->setCreatedAt(new \DateTimeImmutable());
-                        $manager->persist($like);
+                    // Distribution aléatoire des likes parmi les utilisateurs
+                    $potentialLikers = array_filter($users, function($potentialUser) use ($user) {
+                        return $potentialUser !== $user && !in_array('ROLE_ADMIN', $potentialUser->getRoles());
+                    });
+                    
+                    // On prend un nombre aléatoire d'utilisateurs qui vont liker
+                    $numberOfLikes = random_int(0, count($potentialLikers));
+                    $likesCount = 0;
+                    
+                    if ($numberOfLikes > 0) {
+                        $potentialLikersArray = array_values($potentialLikers);
+                        $likerIndices = $numberOfLikes === count($potentialLikers) 
+                            ? range(0, count($potentialLikers) - 1)
+                            : (array) array_rand($potentialLikersArray, $numberOfLikes);
+                        
+                        foreach ((array) $likerIndices as $likerIndex) {
+                            $liker = $potentialLikersArray[$likerIndex];
+                            $like = new Like();
+                            $like->setOutfit($outfit);
+                            $like->setAuthor($liker);
+                            $like->setCreatedAt(new \DateTimeImmutable());
+                            $manager->persist($like);
+                            $likesCount++;
+                        }
                     }
+                    
+                    // Mettre à jour le nombre total de likes
+                    $outfit->setLikesCount($likesCount);
+                    $manager->persist($outfit);
 
                     // Ajouter les reviews
                     foreach ($data['reviews'] as $reviewData) {

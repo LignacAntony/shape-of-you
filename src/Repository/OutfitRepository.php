@@ -40,6 +40,17 @@ class OutfitRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findOutfitWithPublicAccess(int $id, User $user): ?Outfit
+    {
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.id = :id')
+            ->andWhere('o.author = :user OR (o.isPublished = true)')
+            ->setParameter('id', $id)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return Outfit[] Returns an array of Outfit objects
     //     */

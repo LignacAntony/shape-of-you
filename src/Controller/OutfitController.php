@@ -7,6 +7,8 @@ use App\Entity\OutfitItem;
 use App\Entity\ClothingItem;
 use App\Entity\CategoryItem;
 use App\Entity\Wardrobe;
+use App\Entity\Like;
+use App\Entity\Review;
 use App\Form\OutfitType;
 use App\Form\ClothingItemType;
 use App\Repository\OutfitRepository;
@@ -103,25 +105,30 @@ final class OutfitController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function details(int $id): Response
     {
-        $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
+        $outfit = $this->outfitRepository->findOutfitWithPublicAccess($id, $this->getUser());
         
         if (!$outfit) {
             throw $this->createNotFoundException('Tenue non trouvée');
         }
 
-        $clothingItem = new ClothingItem();
-        $form = $this->createForm(ClothingItemType::class, $clothingItem, [
-            'user' => $this->getUser(),
-            'wardrobe' => $outfit->getOutfitItems()->first() ? $outfit->getOutfitItems()->first()->getWardrobe() : null,
-            'default_outfit' => $outfit
-        ]);
+        // Seul l'auteur peut voir le formulaire d'ajout de vêtements
+        $form = null;
+        if ($outfit->getAuthor() === $this->getUser()) {
+            $clothingItem = new ClothingItem();
+            $form = $this->createForm(ClothingItemType::class, $clothingItem, [
+                'user' => $this->getUser(),
+                'wardrobe' => $outfit->getOutfitItems()->first() ? $outfit->getOutfitItems()->first()->getWardrobe() : null,
+                'default_outfit' => $outfit
+            ]);
+        }
 
         return $this->render('outfit/details.html.twig', [
             'outfit' => $outfit,
             'outfitItems' => $this->outfitItemRepository->findOutfitItemsByOutfit($outfit),
-            'allOutfitItems' => $this->outfitItemRepository->findOutfitItemsByUser($this->getUser()),
+            'allOutfitItems' => $outfit->getAuthor() === $this->getUser() ? $this->outfitItemRepository->findOutfitItemsByUser($this->getUser()) : [],
             'categories' => $this->entityManager->getRepository(CategoryItem::class)->findAll(),
-            'form' => $form
+            'form' => $form,
+            'canEdit' => $outfit->getAuthor() === $this->getUser()
         ]);
     }
 
@@ -373,5 +380,100 @@ final class OutfitController extends AbstractController
                 'message' => 'Une erreur est survenue lors de la suppression de la tenue'
             ], 500);
         }
+    }
+
+    #[Route('/outfit/{id}/toggle-like', name: 'outfit_toggle_like', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function toggleLike(int $id): JsonResponse
+    {
+        $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
+        
+        if (!$outfit) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Tenue non trouvée'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $existingLike = $this->entityManager->getRepository(Like::class)->findOneBy([
+            'author' => $this->getUser(),
+            'outfit' => $outfit
+        ]);
+
+        if ($existingLike) {
+            // Unlike
+            $this->entityManager->remove($existingLike);
+            $isLiked = false;
+        } else {
+            // Like
+            $like = new Like();
+            $like->setAuthor($this->getUser());
+            $like->setOutfit($outfit);
+            $like->setCreatedAt(new \DateTimeImmutable());
+            $this->entityManager->persist($like);
+            $isLiked = true;
+        }
+
+        $this->entityManager->flush();
+
+        return $this->json([
+            'status' => 'success',
+            'likesCount' => $outfit->getLikesCount(),
+            'isLiked' => $isLiked
+        ]);
+    }
+
+    #[Route('/outfit/{id}/is-liked', name: 'outfit_is_liked', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function isLiked(int $id): JsonResponse
+    {
+        $outfit = $this->outfitRepository->find($id);
+        
+        if (!$outfit) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Tenue non trouvée'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $isLiked = $outfit->getLikes()->exists(function($key, $like) {
+            return $like->getAuthor() === $this->getUser();
+        });
+
+        return $this->json([
+            'status' => 'success',
+            'isLiked' => $isLiked
+        ]);
+    }
+
+    #[Route('/outfit/{id}/review', name: 'outfit_add_review', methods: ['POST'])]
+    public function addReview(Request $request, Outfit $outfit, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $content = json_decode($request->getContent(), true)['content'] ?? null;
+
+        if (!$content) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Le contenu du commentaire est requis'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $review = new Review();
+        $review->setContent($content);
+        $review->setAuthor($this->getUser());
+        $review->setOutfit($outfit);
+        $review->setCreatedAt(new \DateTimeImmutable());
+
+        $entityManager->persist($review);
+        $entityManager->flush();
+
+        return $this->json([
+            'status' => 'success',
+            'review' => [
+                'content' => $review->getContent(),
+                'author' => $review->getAuthor()->getUsername(),
+                'createdAt' => $review->getCreatedAt()->format('d/m/Y H:i')
+            ]
+        ]);
     }
 }

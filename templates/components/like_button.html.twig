@@ -1,0 +1,31 @@
+<div x-data="{ 
+    isLiked: false,
+    likesCount: {{ outfit.likesCount }},
+    init() {
+        fetch('{{ path('outfit_is_liked', {'id': outfit.id}) }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    this.isLiked = data.isLiked;
+                    console.log('isLiked:', this.isLiked);
+                }
+            });
+    },
+    toggleLike() {
+        fetch('{{ path('outfit_toggle_like', {'id': outfit.id}) }}', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                this.isLiked = !this.isLiked;
+                this.likesCount = data.likesCount;
+            }
+        });
+    }
+}" class="flex items-center gap-1">
+    <i class="cursor-pointer transition-all duration-200 hover:scale-110 text-red-500"
+       :class="isLiked ? 'fas fa-heart' : 'far fa-heart'"
+       @click="toggleLike"></i>
+    <span class="text-gray-500 ml-2" x-text="likesCount"></span>
+</div>
