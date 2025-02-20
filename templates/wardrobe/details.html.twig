@@ -3,33 +3,36 @@
 {% block title %}{{ wardrobe.name }}{% endblock %}
 
 {% block body %}
-    <div class="container-fluid max-w-7xl mx-auto px-4 py-6">
-        {# Bouton retour #}
+
+
+
+
+    <div class="container-fluid py-4">
         {% include 'components/back_button.html.twig' %}
 
         {# Fil d'ariane #}
-        {% include 'components/breadcrumb.html.twig' %}
 
-        {# Section principale #}
-        {% embed 'components/wardrobe_card.html.twig' with {
-            'name': wardrobe.name,
-            'description': wardrobe.description,
-            'image': wardrobe.image,
-            'stats': [
-                {'color': 'primary', 'value': wardrobe.outfitItems|length, 'label': 'vêtements'},
-                {'color': 'success', 'value': wardrobe.outfits|length, 'label': 'tenues'}
-            ]
-        } %}
-            {% block card_header_actions %}
-                <div x-data="{ 
+        <div class="max-w-4xl mx-auto">
+        {% include 'components/breadcrumb.html.twig' %}
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h1 class="text-xl font-semibold text-gray-900">{{ wardrobe.name }}</h1>
+                    <div class="flex flex-row items-center">
+                        <span class="px-3 py-1.5 text-xs font-medium rounded-full bg-primary-400 text-white">
+                            {{ wardrobe.outfitItems|length }} vétements
+                        </span>
+                        <span class="px-3 py-1.5 text-xs font-medium rounded-full bg-primary-400 text-white ml-2">
+                            {{ wardrobe.outfits|length }} tenues
+                        </span>
+                        <div x-data="{
                     showOptions: false,
                     isDeleting: false,
                     deleteWardrobe() {
                         if (this.isDeleting) return;
                         if (!confirm('Êtes-vous sûr de vouloir supprimer cette garde-robe ? Cette action supprimera également tous les vêtements et tenues associés.')) return;
-                        
+
                         this.isDeleting = true;
-                        
+
                         fetch('{{ path('wardrobe_delete_user', {'id': wardrobe.id}) }}', {
                             method: 'POST',
                             headers: {
@@ -53,99 +56,168 @@
                         });
                     }
                 }" class="relative" @click.away="showOptions = false">
-                    <button @click="showOptions = !showOptions" 
-                            class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
-                        <i class="fas fa-ellipsis-v text-gray-600"></i>
-                    </button>
+                            <button @click="showOptions = !showOptions"
+                                    class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 ml-4">
+                                <i class="fas fa-ellipsis-v text-gray-600"></i>
+                            </button>
 
-                    <div x-show="showOptions"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 scale-95"
-                         x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 scale-100"
-                         x-transition:leave-end="opacity-0 scale-95"
-                         class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
-                        
-                        <a href="{{ path('wardrobe_edit_user', {'id': wardrobe.id}) }}" 
-                           class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
-                            <i class="fas fa-edit w-5 mr-2"></i>
-                            <span>Modifier</span>
-                        </a>
+                            <div x-show="showOptions"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
 
-                        <button @click="deleteWardrobe" 
-                                :disabled="isDeleting"
-                                class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200">
-                            <i class="fas" :class="isDeleting ? 'fa-spinner fa-spin' : 'fa-trash'" class="w-5 mr-2"></i>
-                            <span x-text="isDeleting ? 'Suppression...' : 'Supprimer'"></span>
-                        </button>
+                                <a href="{{ path('wardrobe_edit_user', {'id': wardrobe.id}) }}"
+                                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-edit w-5 mr-2"></i>
+                                    <span>Modifier</span>
+                                </a>
+
+                                <button @click="deleteWardrobe"
+                                        :disabled="isDeleting"
+                                        class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-200">
+                                    <i class="fas" :class="isDeleting ? 'fa-spinner fa-spin' : 'fa-trash'" class="w-5 mr-2"></i>
+                                    <span x-text="isDeleting ? 'Suppression...' : 'Supprimer'"></span>
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            {% endblock %}
-            {% block card_content %}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex items-center text-gray-600">
-                        <i class="far fa-calendar-alt mr-3 text-gray-500"></i>
-                        <span>Créée le {{ wardrobe.createdAt|date('d/m/Y') }}</span>
-                    </div>
-                    <div class="flex items-center text-gray-600">
-                        <i class="fas fa-user mr-3 text-gray-500"></i>
-                        <span>Par {{ wardrobe.author.username }}</span>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="lg:col-span-1">
+                            {% if wardrobe.image|length > 0 %}
+                                <div class="relative overflow-hidden aspect-square rounded-lg">
+                                    <div class="carousel w-full h-full relative" data-id="{{ wardrobe.id }}">
+                                            <div class="carousel-item absolute inset-0 w-full h-full transition-opacity duration-500">
+                                                <img src="{{ asset(wardrobe.image) }}"
+                                                     alt="{{ wardrobe.name }}"
+                                                     class="w-full h-full object-cover rounded-lg">
+                                            </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="aspect-square rounded-lg bg-primary-400 flex items-center justify-center">
+                                    <i class="fa-solid fa-door-open text-4xl text-white"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="space-y-1 flex flex-col">
+                            <div class="p-3">
+                                <div class="space-y-3">
+
+                                    <div class="flex items-center">
+                                        <img src="{{ asset('/uploads/avatars/' ~ wardrobe.author.profile.avatar) }}"
+                                             alt="Photo de profil"
+                                             class="w-10 h-10 rounded-full me-2 border-2 border-primary-600">
+                                        <div class="flex flex-col">
+                                            <h2 class="font-medium mr-2 text-xl">{{ wardrobe.author.username }}</h2>
+                                            <p class="text-xs text-gray-500">Le {{ wardrobe.createdAt|date('d/m/Y') }}</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="h-80 overflow-y-auto">
+                                {% if wardrobe.description %}
+                                    <p class="py-2 px-4 text-sm text-gray-600">{{ wardrobe.description }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            {% endblock %}
-        {% endembed %}
+            </div>
 
-        {# Section Tenues #}
-        {% embed 'components/category_section.html.twig' with {
-            'title': 'Tenues',
-            'icon': 'tshirt',
-            'color': 'success',
-            'items': wardrobe.outfits,
-            'empty_message': 'Aucune tenue n\'a été créée dans cette garde-robe.'
-        } %}
-            {% block button %}
-                {% include 'components/add_outfit_modal.html.twig' with {
-                    'wardrobe': wardrobe,
-                    'form': outfit_form
-                } %}
-            {% endblock %}
-            
-            {% block items %}
-                {% for outfit in wardrobe.outfits %}
-                    {% include 'components/outfit_card.html.twig' with {
-                        'outfit': outfit,
-                        'color': 'success'
-                    } %}
-                {% endfor %}
-            {% endblock %}
-        {% endembed %}
 
-        {# Section Vêtements #}
-        {% embed 'components/category_section.html.twig' with {
-            'title': 'Vêtements',
-            'icon': 'tags',
-            'color': 'info',
-            'items': wardrobe.outfitItems,
-            'empty_message': 'Cette garde-robe ne contient aucun vêtement.'
-        } %}
-            {% block button %}
-                {% include 'components/add_clothing_modal.html.twig' with {
-                    'categories': categories,
-                    'wardrobe_id': wardrobe.id
-                } %}
-            {% endblock %}
-            
-            {% block items %}
-                {% for item in wardrobe.outfitItems %}
-                    {% include 'components/clothing_card.html.twig' with {
-                        'item': item,
-                        'color': 'info'
-                    } %}
-                {% endfor %}
-            {% endblock %}
-        {% endembed %}
+
+
+            {# Section Tenues #}
+            <div class="mb-4 border rounded-lg overflow-hidden mt-8" data-accordion-section>
+                <div
+                        class="flex flex-col md:flex-row justify-between md:items-center px-4 py-3 bg-secondary-400 cursor-pointer"
+                        data-accordion-header
+                >
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-person mr-2 text-white w-5 h-5"></i>
+                        <h2 class="text-lg font-semibold mb-0 text-white">Tenues</h2>
+                    </div>
+                    <div class="flex flex-row gap-2 items-center">
+                        <span class="px-3 py-1 text-white font-bold rounded-full border-white border-2 text-sm">
+                            {{ wardrobe.outfits|length }}
+                        </span>
+                        {% include 'components/add_outfit_modal.html.twig' with {
+                            'wardrobe': wardrobe,
+                            'form': outfit_form
+                        } %}
+                    </div>
+
+                </div>
+
+                <div class="px-4 py-4 hidden bg-white" data-accordion-content>
+                    {% if wardrobe.outfits|length > 0 %}
+                        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                            {% for outfit in wardrobe.outfits %}
+                                {% include 'components/outfit_list_card.html.twig' with { 'outfit': outfit } %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+                            <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore créé de tenues.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+
+
+            <div class="mb-4 border rounded-lg overflow-hidden mt-8" data-accordion-section>
+                <div
+                    class="flex flex-col md:flex-row justify-between md:items-center px-4 py-3 bg-tertiary-500 cursor-pointer"
+                    data-accordion-header
+                >
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-shirt mr-2  text-white"></i>
+                        <h2 class="text-lg font-semibold mb-0 text-white">Vêtements</h2>
+                    </div>
+                    <div>
+                        <div class="flex flex-row gap-2 items-center">
+                            <div>
+                                <span class="px-3 py-1 text-white font-bold rounded-full border-white border-2 text-sm">
+                                    {{ wardrobe.outfititems|length }}
+                                </span>
+                            </div>
+                                {% include 'components/add_clothing_modal.html.twig' with {
+                                    'categories': categories,
+                                    'wardrobe_id': wardrobe.id
+                                } %}
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 py-4 bg-white" data-accordion-content>
+                    {% if wardrobe.outfititems|length > 0 %}
+                        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                            {% for item in wardrobe.outfititems %}
+                                {% if item.clothingItem %}
+                                    {% include 'components/item_list_card.html.twig' with { 'item': item } %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+                            <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore de vêtements.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
     </div>
+
 {% endblock %}
 
 {% block javascripts %}

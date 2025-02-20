@@ -8,6 +8,8 @@
         {% include 'components/back_button.html.twig' %}
 
         <div class="max-w-4xl mx-auto">
+            {% include 'components/breadcrumb.html.twig' %}
+
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h1 class="text-xl font-semibold text-gray-900">{{ outfit.name }}</h1>
@@ -53,7 +55,7 @@
                         }"
                              class="relative" @click.away="showOptions = false">
                             <button @click="showOptions = !showOptions"
-                                    class="p-2 rounded-full  transition-colors duration-200">
+                                    class="p-2 rounded-full  transition-colors duration-200 ml-4">
                                 <i class="fas fa-ellipsis-v text-gray-600"></i>
                             </button>
 
