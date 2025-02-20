@@ -50,7 +50,6 @@ class OutfitType extends AbstractType
                 'required' => false,
                 'false_values' => ['0', '', false, null],
                 'empty_data' => false,
-                'data' => false,
                 'attr' => [
                     'x-model' => 'isPublished'
                 ]
