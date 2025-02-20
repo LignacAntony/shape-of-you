@@ -12,6 +12,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\ProfileRepository;
 use App\Entity\Profile;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\User;
+use App\Repository\OutfitRepository;
 
 class ProfileController extends AbstractController
 {
@@ -64,6 +66,19 @@ class ProfileController extends AbstractController
         return $this->render('profile/profile.html.twig', [
             'profile' => $profile,
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/profile/user/{id}', name: 'profile_show_user', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function showUser(User $user, OutfitRepository $outfitRepository): Response
+    {
+        // Récupérer uniquement les tenues publiées de l'utilisateur
+        $outfits = $outfitRepository->findPublishedOutfitsByUser($user);
+
+        return $this->render('profile/show_user.html.twig', [
+            'user' => $user,
+            'outfits' => $outfits,
         ]);
     }
 }

@@ -386,7 +386,7 @@ final class OutfitController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function toggleLike(int $id): JsonResponse
     {
-        $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
+        $outfit = $this->outfitRepository->findOutfitWithPublicAccess($id, $this->getUser());
         
         if (!$outfit) {
             return $this->json([
@@ -427,7 +427,7 @@ final class OutfitController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function isLiked(int $id): JsonResponse
     {
-        $outfit = $this->outfitRepository->find($id);
+        $outfit = $this->outfitRepository->findOutfitWithPublicAccess($id, $this->getUser());
         
         if (!$outfit) {
             return $this->json([
@@ -447,6 +447,7 @@ final class OutfitController extends AbstractController
     }
 
     #[Route('/outfit/{id}/review', name: 'outfit_add_review', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function addReview(Request $request, Outfit $outfit, EntityManagerInterface $entityManager): JsonResponse
     {
         $content = json_decode($request->getContent(), true)['content'] ?? null;

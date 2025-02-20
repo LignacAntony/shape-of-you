@@ -2,7 +2,7 @@
     <div class="flex items-center space-x-4 mb-4">
         <img src="{{ asset('/uploads/avatars/' ~ outfit.author.profile.avatar) }}" alt="Avatar" class="w-12 h-12 rounded-full border-primary-600 border-4">
         <div>
-            <h2 class="font-bold text-primary-600">{{ outfit.author.username }}</h2>
+            <a href="{{ path('profile_show_user', {'id': outfit.author.id}) }}" class="font-bold text-primary-600 hover:text-primary-700 transition-colors">{{ outfit.author.username }}</a>
             <p class="text-sm text-gray-500">Posté le {{ outfit.createdAt|date('d/m/Y') }}</p>
         </div>
     </div>
@@ -10,7 +10,7 @@
     <p class="mb-4">{{ outfit.description }}</p>
     <a href="{{ path('outfit_details', {'id': outfit.id}) }}" class="block">
         {% if outfit.images|length > 0 %}
-            <img src="{{ outfit.images[0] }}" alt="Image Outfit" class="rounded-lg w-full">
+            <img src="{{ asset(outfit.images[0]) }}" alt="Image Outfit" class="rounded-lg w-full">
         {% endif %}
     </a>
 
