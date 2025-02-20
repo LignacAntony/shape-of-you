@@ -4,17 +4,14 @@
 
 {% block body %}
     <div class="container-fluid py-4">
-        {# Bouton retour #}
         {% include 'components/back_button.html.twig' %}
 
-        {# Fil d'ariane #}
+        <div class="max-w-2xl mx-auto">
         {% include 'components/breadcrumb.html.twig' with {
             'wardrobe': outfitItem.wardrobe,
             'outfitItem': outfitItem
         } %}
 
-        {# Section principale #}
-        <div class="max-w-2xl mx-auto">
             <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
                     <h1 class="text-lg font-medium text-gray-900">
@@ -23,40 +20,33 @@
                 </div>
 
                 <div class="px-4 py-5 sm:p-6">
-                    {# Section Tenues #}
                     {{ form_start(outfit_form, {
                         'attr': {
                             'class': 'space-y-6'
                         }
                     }) }}
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <h2 class="text-base font-medium text-gray-900 mb-4">Tenues associées</h2>
-                        
-                        <div class="space-y-4">
-                            {{ form_widget(outfit_form.outfits, {
-                                'attr': {
-                                    'class': 'space-y-2'
-                                },
-                                'row_attr': {
-                                    'class': 'flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100'
-                                },
-                                'label_attr': {
-                                    'class': 'text-sm font-medium text-gray-700 cursor-pointer'
-                                }
-                            }) }}
-                            {{ form_errors(outfit_form.outfits) }}
+                    <div class="p-4">
+                        <h2 class="text-xl font-bold text-tertiary-600 mb-4">Tenues associées</h2>
+
+                        <div class="space-y-3 h-44 overflow-y-auto">
+                                {% for child in outfit_form.outfits %}
+                                    <div class="custom-choice-item">
+                                        {{ form_widget(child, { 'attr': { 'class': '' } }) }}
+                                        {{ form_label(child, null, { 'label_attr': { 'class': '' } }) }}
+                                    </div>
+                                {% endfor %}
+
                         </div>
 
                         <div class="mt-4 flex justify-end">
                             <button type="submit"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    class="px-4 py-2 text-sm font-medium text-white bg-tertiary-500 rounded-md hover:bg-tertiary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tertiary-500">
                                 Mettre à jour les tenues
                             </button>
                         </div>
                     </div>
                     {{ form_end(outfit_form) }}
 
-                    {# Formulaire principal #}
                     {{ form_start(clothing_form, {
                         'attr': {
                             'class': 'space-y-6 mt-6'
@@ -64,70 +54,82 @@
                     }) }}
 
                     {# Informations de base #}
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <h2 class="text-base font-medium text-gray-900 mb-4">Informations générales</h2>
+                    <div class="p-4">
+                        <h2 class="text-xl font-bold text-tertiary-600 mb-4">Informations générales</h2>
                         
                         <div class="space-y-4">
                             <div>
-                                {{ form_label(clothing_form.category, 'Catégorie', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(clothing_form.category, {'attr': {'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'}}) }}
+                                {{ form_label(clothing_form.category, 'Catégorie', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(clothing_form.category, {'attr': {'class': 'form-area w-full'}}) }}
                                 {{ form_errors(clothing_form.category) }}
                             </div>
 
                             <div>
-                                {{ form_label(clothing_form.name, 'Nom', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(clothing_form.name, {'attr': {'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'}}) }}
+                                {{ form_label(clothing_form.name, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(clothing_form.name, {'attr': {'class': 'form-area w-full'}}) }}
                                 {{ form_errors(clothing_form.name) }}
                             </div>
 
                             <div>
-                                {{ form_label(clothing_form.description, 'Description', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(clothing_form.description, {'attr': {'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm', 'rows': '3'}}) }}
+                                {{ form_label(clothing_form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(clothing_form.description, {'attr': {'class': 'form-area w-full', 'rows': '3'}}) }}
                                 {{ form_errors(clothing_form.description) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h2 class="text-xl font-bold text-tertiary-600 mb-4">Tenue spécifique</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                {{ form_label(clothing_form.outfit, 'Marque', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(clothing_form.outfit, {'attr': {'class': 'form-area w-full'}}) }}
+                                {{ form_errors(clothing_form.outfit) }}
                             </div>
                         </div>
                     </div>
 
                     {# Caractéristiques #}
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <h2 class="text-base font-medium text-gray-900 mb-4">Caractéristiques</h2>
+                    <div class="p-4">
+                        <h2 class="text-xl font-bold text-tertiary-600 mb-4">Caractéristiques</h2>
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                {{ form_label(clothing_form.brand, 'Marque', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(clothing_form.brand, {'attr': {'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'}}) }}
+                                {{ form_label(clothing_form.brand, 'Marque', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(clothing_form.brand, {'attr': {'class': 'form-area w-full'}}) }}
                                 {{ form_errors(clothing_form.brand) }}
                             </div>
 
                             <div>
-                                {{ form_label(clothing_form.color, 'Couleur', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(clothing_form.color, {'attr': {'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'}}) }}
+                                {{ form_label(clothing_form.color, 'Couleur', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(clothing_form.color, {'attr': {'class': 'form-area w-full'}}) }}
                                 {{ form_errors(clothing_form.color) }}
                             </div>
 
                             <div>
-                                {{ form_label(clothing_form.size, 'Taille', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
+                                {{ form_label(clothing_form.size, 'Taille', {'label_attr': {'class': 'form-label'}}) }}
                                 {{ form_widget(clothing_form.size, {
-                                    'attr': {'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'},
+                                    'attr': {'class': 'form-area w-full'},
                                     'value': outfitItem.size
                                 }) }}
                                 {{ form_errors(clothing_form.size) }}
                             </div>
 
+
+
                             <div>
-                                {{ form_label(clothing_form.price, 'Prix', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-                                {{ form_widget(clothing_form.price, {'attr': {'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'}}) }}
+                                {{ form_label(clothing_form.price, 'Prix', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(clothing_form.price, {'attr': {'class': 'form-area w-full'}}) }}
                                 {{ form_errors(clothing_form.price) }}
                             </div>
                         </div>
                     </div>
 
                     {# Images #}
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <h2 class="text-base font-medium text-gray-900 mb-4">Images</h2>
+                    <div class="p-4">
+                        <h2 class="text-xl font-bold text-tertiary-600 mb-4">Images</h2>
 
-                        {{ form_label(clothing_form.images, 'Ajouter des images', {'label_attr': {'class': 'block text-sm font-medium text-gray-700'}}) }}
-                        {{ form_widget(clothing_form.images, {'attr': {'class': 'mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'}}) }}
+                        {{ form_label(clothing_form.images, 'Ajouter des images', {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(clothing_form.images, {'attr': {'class': 'mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'}}) }}
                         {{ form_errors(clothing_form.images) }}
                         
                         {% if outfitItem.clothingItem.images|length > 0 %}
@@ -160,7 +162,7 @@
                             Annuler
                         </a>
                         <button type="submit"
-                                class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                class="px-4 py-2 text-sm font-medium text-white bg-tertiary-500 rounded-md hover:bg-tertiary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tertiary-500">
                             Enregistrer les modifications
                         </button>
                     </div>
