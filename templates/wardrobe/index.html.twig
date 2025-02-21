@@ -28,7 +28,7 @@
                         {% for wardrobe in wardrobes %}
                             {% include 'components/wardrobe_list_card.html.twig' with { 'wardrobe': wardrobe } %}
                         {% endfor %}
-                        {% include 'components/more_list_card.html.twig' with {'color': 'primary'} %}
+{#                        {% include 'components/more_list_card.html.twig' with {'color': 'primary'} %}#}
                     </div>
                 {% else %}
                     <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
@@ -59,7 +59,7 @@
                         {% for outfit in outfits %}
                             {% include 'components/outfit_list_card.html.twig' with { 'outfit': outfit } %}
                         {% endfor %}
-                            {% include 'components/more_list_card.html.twig' with {'color': 'secondary'} %}
+{#                            {% include 'components/more_list_card.html.twig' with {'color': 'secondary'} %}#}
                     </div>
                 {% else %}
                     <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
@@ -87,12 +87,12 @@
             <div class="px-4 py-4 hidden" data-accordion-content>
                 {% if allItems|length > 0 %}
                     <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {% for item in allItems |slice(0, 11) %}
+                        {% for item in allItems %}
                             {% if item.clothingItem %}
                                 {% include 'components/item_list_card.html.twig' with { 'item': item } %}
                             {% endif %}
                         {% endfor %}
-                                {% include 'components/more_list_card.html.twig' with {'color': 'tertiary'} %}
+{#                                {% include 'components/more_list_card.html.twig' with {'color': 'tertiary'} %}#}
                     </div>
                 {% else %}
                     <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">

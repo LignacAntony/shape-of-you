@@ -107,6 +107,7 @@
 
                             <div>
                                 {{ form_label(clothing_form.size, 'Taille', {'label_attr': {'class': 'form-label'}}) }}
+
                                 {{ form_widget(clothing_form.size, {
                                     'attr': {'class': 'form-area w-full'},
                                     'value': outfitItem.size
@@ -117,8 +118,12 @@
 
 
                             <div>
-                                {{ form_label(clothing_form.price, 'Prix', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(clothing_form.price, {'attr': {'class': 'form-area w-full'}}) }}
+                                {{ form_label(clothing_form.price, 'Prix (€)', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="w-full form-area flex flex-row-reverse relative">
+
+                                    {{ form_widget(clothing_form.price, {'attr': {'class': 'form-area w-full absolute top-0 left-0 m-0'}}) }}
+                                </div>
+
                                 {{ form_errors(clothing_form.price) }}
                             </div>
                         </div>

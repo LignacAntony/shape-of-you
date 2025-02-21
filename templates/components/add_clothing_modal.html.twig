@@ -154,8 +154,11 @@
                         {% endif %}
 
                         <div>
-                            {{ form_label(form.price, 'Prix', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.price, {'attr': {'class': 'form-area w-full'}}) }}
+                            {{ form_label(form.price, 'Prix (€)', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="w-full form-area flex flex-row-reverse relative">
+
+                                {{ form_widget(form.price, {'attr': {'class': 'form-area w-full absolute top-0 left-0 m-0'}}) }}
+                            </div>
                             <div x-show="fieldErrors.price" class="mt-1 text-sm text-red-600" x-text="fieldErrors.price"></div>
                             {{ form_errors(form.price) }}
                         </div>
