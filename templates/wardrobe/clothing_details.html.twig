@@ -1,0 +1,171 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ outfitItem.clothingItem.name }}{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4">
+        {# Bouton retour #}
+        {% include 'components/back_button.html.twig' %}
+
+        {# Fil d'ariane #}
+        {% include 'components/breadcrumb.html.twig' with {
+            'wardrobe': outfitItem.wardrobe,
+            'outfit': outfitItem.outfits|first,
+            'outfitItem': outfitItem
+        } %}
+
+        {# Section principale #}
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h1 class="text-xl font-semibold text-gray-900">{{ outfitItem.clothingItem.name }}</h1>
+                    <a href="{{ path('clothing_edit', {'id': outfitItem.id}) }}" 
+                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-colors duration-200">
+                        <i class="fas fa-edit mr-2"></i>Modifier
+                    </a>
+                </div>
+
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {# Colonne de gauche: Images #}
+                        <div class="lg:col-span-2">
+                            {% if outfitItem.clothingItem.images|length > 0 %}
+                                <div class="grid grid-cols-2 gap-4">
+                                    {% for imagePath in outfitItem.clothingItem.images %}
+                                        <div class="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                            <img src="{{ asset(imagePath) }}" 
+                                                alt="{{ outfitItem.clothingItem.name }}"
+                                                class="w-full h-full object-cover">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="aspect-square rounded-lg bg-gray-100 flex items-center justify-center">
+                                    <i class="fas fa-{{ outfitItem.clothingItem.category ? (outfitItem.clothingItem.category.name|lower == 'chaussures' ? 'shoe-prints' : outfitItem.clothingItem.category.name|lower == 'accessoires' ? 'glasses' : 'tshirt') : 'tshirt' }} text-4xl text-gray-400"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Colonne de droite: Informations #}
+                        <div class="space-y-6">
+                            {# Caractéristiques #}
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h2 class="text-lg font-medium text-gray-900 mb-4">Caractéristiques</h2>
+                                <div class="space-y-3">
+                                    {% if outfitItem.clothingItem.brand %}
+                                        <div class="flex items-center text-sm">
+                                            <i class="fas fa-tag w-5 text-blue-500"></i>
+                                            <span class="font-medium mr-2">Marque:</span>
+                                            {{ outfitItem.clothingItem.brand }}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="flex items-center text-sm">
+                                        <i class="fas fa-ruler w-5 text-blue-500"></i>
+                                        <span class="font-medium mr-2">Taille:</span>
+                                        {{ outfitItem.size }}
+                                    </div>
+                                    
+                                    {% if outfitItem.clothingItem.color %}
+                                        <div class="flex items-center text-sm">
+                                            <i class="fas fa-palette w-5 text-blue-500"></i>
+                                            <span class="font-medium mr-2">Couleur:</span>
+                                            {{ outfitItem.clothingItem.color }}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if outfitItem.clothingItem.category %}
+                                        <div class="flex items-center text-sm">
+                                            <i class="fas fa-tags w-5 text-blue-500"></i>
+                                            <span class="font-medium mr-2">Catégorie:</span>
+                                            {{ outfitItem.clothingItem.category.name }}
+                                        </div>
+                                    {% endif %}
+
+                                    {% if outfitItem.clothingItem.price %}
+                                        <div class="flex items-center text-sm">
+                                            <i class="fas fa-euro-sign w-5 text-blue-500"></i>
+                                            <span class="font-medium mr-2">Prix:</span>
+                                            {{ outfitItem.clothingItem.price }}€
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {# Tenues associées #}
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h2 class="text-lg font-medium text-gray-900 mb-4">Tenues associées</h2>
+                                {% if outfitItem.outfits|length > 0 %}
+                                    <div class="space-y-2">
+                                        {% for outfit in outfitItem.outfits %}
+                                            <a href="{{ path('outfit_details', {'id': outfit.id}) }}" 
+                                               class="flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                                                <i class="fas fa-tshirt text-green-500 mr-3"></i>
+                                                <span class="text-sm">{{ outfit.name }}</span>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-sm text-gray-500">Ce vêtement n'est associé à aucune tenue.</p>
+                                {% endif %}
+                            </div>
+
+                            {# Informations supplémentaires #}
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h2 class="text-lg font-medium text-gray-900 mb-4">Informations</h2>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex items-center">
+                                        <i class="far fa-calendar-alt w-5 text-blue-500"></i>
+                                        <span class="font-medium mr-2">Ajouté le:</span>
+                                        {{ outfitItem.clothingItem.createdAt|date('d/m/Y') }}
+                                    </div>
+                                    
+                                    <div class="flex items-center">
+                                        <i class="fas fa-door-closed w-5 text-blue-500"></i>
+                                        <span class="font-medium mr-2">Garde-robe:</span>
+                                        <a href="{{ path('wardrobe_details', {'id': outfitItem.wardrobe.id}) }}" 
+                                           class="text-blue-500 hover:underline">
+                                            {{ outfitItem.wardrobe.name }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if outfitItem.clothingItem.description %}
+                        <div class="mt-6 bg-gray-50 rounded-lg p-4">
+                            <h2 class="text-lg font-medium text-gray-900 mb-4">Description</h2>
+                            <p class="text-sm text-gray-600">{{ outfitItem.clothingItem.description }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .feature-item {
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .image-card {
+            aspect-ratio: 1;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+{% endblock %} 

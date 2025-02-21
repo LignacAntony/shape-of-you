@@ -21,26 +21,28 @@ class Outfit
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
 
+    #[ORM\ManyToOne(inversedBy: 'outfits')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Wardrobe $wardrobe = null;
+
     #[ORM\Column(length: 100)]
     private ?string $name = null;
 
     #[ORM\Column(length: 4000, nullable: true)]
-    #[Assert\Length(
-        min: 10,
-        max: 4000,
-        minMessage: 'Votre description doit comporter au moins {{ limit }} caractères',
-        maxMessage: 'Votre description ne peut pas dépasser {{ limit }} caractères'
-    )]
+    #[Assert\Length(max: 4000, maxMessage: 'Votre description ne peut pas dépasser {{ limit }} caractères')]
     private ?string $description = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $CreatedAt = null;
+    private ?bool $isPublished = false;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private array $images;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $UpdateDateAt = null;
-
-    #[ORM\Column]
-    private ?bool $isPublished = null;
 
     #[ORM\Column]
     private ?int $likesCount = null;
@@ -60,14 +62,15 @@ class Outfit
     /**
      * @var Collection<int, OutfitItem>
      */
-    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'outfit', cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\ManyToMany(targetEntity: OutfitItem::class, inversedBy: 'outfits')]
     private Collection $outfitItems;
 
     public function __construct()
     {
-        $this->likes = new ArrayCollection();
-        $this->reviews = new ArrayCollection();
         $this->outfitItems = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
+        $this->likes = new ArrayCollection();
+        $this->images = [];
     }
 
     public function getId(): ?int
@@ -84,6 +87,17 @@ class Outfit
     {
         $this->author = $author;
 
+        return $this;
+    }
+
+    public function getWardrobe(): ?Wardrobe
+    {
+        return $this->wardrobe;
+    }
+
+    public function setWardrobe(?Wardrobe $wardrobe): static
+    {
+        $this->wardrobe = $wardrobe;
         return $this;
     }
 
@@ -113,12 +127,12 @@ class Outfit
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->CreatedAt;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $CreatedAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->CreatedAt = $CreatedAt;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -231,7 +245,7 @@ class Outfit
     {
         if (!$this->outfitItems->contains($outfitItem)) {
             $this->outfitItems->add($outfitItem);
-            $outfitItem->setOutfit($this);
+            $outfitItem->addOutfit($this);
         }
 
         return $this;
@@ -240,12 +254,38 @@ class Outfit
     public function removeOutfitItem(OutfitItem $outfitItem): static
     {
         if ($this->outfitItems->removeElement($outfitItem)) {
-            // set the owning side to null (unless already changed)
-            if ($outfitItem->getOutfit() === $this) {
-                $outfitItem->setOutfit(null);
-            }
+            $outfitItem->removeOutfit($this);
         }
 
+        return $this;
+    }
+
+    public function getImages(): array
+    {
+        return $this->images ?? [];
+    }
+
+    public function setImages(?array $images): static
+    {
+        $this->images = $images ?? [];
+        return $this;
+    }
+
+    public function addImage(string $imagePath): static
+    {
+        if (!in_array($imagePath, $this->images)) {
+            $this->images[] = $imagePath;
+        }
+        return $this;
+    }
+
+    public function removeImage(string $imagePath): static
+    {
+        $key = array_search($imagePath, $this->images);
+        if ($key !== false) {
+            unset($this->images[$key]);
+            $this->images = array_values($this->images); // Réindexe le tableau
+        }
         return $this;
     }
 }

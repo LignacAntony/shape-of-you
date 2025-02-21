@@ -25,18 +25,28 @@ class Wardrobe
     #[ORM\Column(length: 1000, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     /**
      * @var Collection<int, OutfitItem>
      */
-    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'wardrobe')]
+    #[ORM\OneToMany(targetEntity: OutfitItem::class, mappedBy: 'wardrobe', orphanRemoval: true, cascade: ['remove'])]
     private Collection $outfitItems;
+
+    /**
+     * @var Collection<int, Outfit>
+     */
+    #[ORM\OneToMany(targetEntity: Outfit::class, mappedBy: 'wardrobe', orphanRemoval: true)]
+    private Collection $outfits;
 
     public function __construct()
     {
         $this->outfitItems = new ArrayCollection();
+        $this->outfits = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -80,6 +90,17 @@ class Wardrobe
         return $this;
     }
 
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -119,6 +140,34 @@ class Wardrobe
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Outfit>
+     */
+    public function getOutfits(): Collection
+    {
+        return $this->outfits;
+    }
+
+    public function addOutfit(Outfit $outfit): static
+    {
+        if (!$this->outfits->contains($outfit)) {
+            $this->outfits->add($outfit);
+            $outfit->setWardrobe($this);
+        }
+        return $this;
+    }
+
+    public function removeOutfit(Outfit $outfit): static
+    {
+        if ($this->outfits->removeElement($outfit)) {
+            // set the owning side to null (unless already changed)
+            if ($outfit->getWardrobe() === $this) {
+                $outfit->setWardrobe(null);
+            }
+        }
         return $this;
     }
 }

@@ -1,0 +1,35 @@
+{% set color = color|default('success') %}
+
+<a href="{{ path('outfit_details', {'id': outfit.id}) }}" class="block transform transition-all duration-300 hover:-translate-y-1">
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md">
+        <div class="aspect-square bg-gray-50 flex items-center justify-center">
+            {% if outfit.images|length > 0 %}
+                <img src="{{ asset(outfit.images|first) }}" 
+                     alt="{{ outfit.name }}"
+                     class="w-full h-full object-cover">
+            {% else %}
+                <i class="fas fa-tshirt text-3xl {% if color == 'success' %}text-green-500{% else %}text-gray-500{% endif %} transform transition-transform duration-300 group-hover:scale-110"></i>
+            {% endif %}
+        </div>
+        <div class="p-4">
+            <h3 class="text-sm font-medium text-gray-900 truncate mb-3">{{ outfit.name }}</h3>
+            <div class="flex flex-wrap gap-2 mb-3">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {% if color == 'success' %}bg-green-500{% else %}bg-gray-500{% endif %} text-white">
+                    <i class="fas fa-heart mr-1.5"></i>{{ outfit.likesCount }}
+                </span>
+                {% if outfit.isPublished %}
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {% if color == 'success' %}bg-green-500{% else %}bg-gray-500{% endif %} text-white">
+                        <i class="fas fa-check mr-1.5"></i>Publié
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-500 text-white">
+                        <i class="fas fa-clock mr-1.5"></i>Non publié
+                    </span>
+                {% endif %}
+            </div>
+            <div class="text-xs text-gray-500">
+                {{ outfit.outfitItems|length }} éléments
+            </div>
+        </div>
+    </div>
+</a> 

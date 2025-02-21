@@ -1,0 +1,41 @@
+{% set class = class|default('mb-4') %}
+
+<nav class="{{ class }}" aria-label="breadcrumb">
+    <ol class="flex items-center space-x-2 text-gray-600 text-sm">
+        <li class="flex items-center">
+            <a href="{{ path('user_wardrobe') }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                <i class="fas fa-home mr-1"></i>Mes garde-robes
+            </a>
+        </li>
+        {% if wardrobe is defined and wardrobe %}
+            <li class="flex items-center">
+                <span class="mx-2 text-gray-400">/</span>
+                {% if outfit is not defined and outfitItem is not defined %}
+                    <span>{{ wardrobe.name }}</span>
+                {% else %}
+                    <a href="{{ path('wardrobe_details', {'id': wardrobe.id}) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        {{ wardrobe.name }}
+                    </a>
+                {% endif %}
+            </li>
+        {% endif %}
+        {% if outfit is defined and outfit %}
+            <li class="flex items-center">
+                <span class="mx-2 text-gray-400">/</span>
+                {% if outfitItem is defined %}
+                    <a href="{{ path('outfit_details', {'id': outfit.id}) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                        {{ outfit.name }}
+                    </a>
+                {% else %}
+                    <span>{{ outfit.name }}</span>
+                {% endif %}
+            </li>
+        {% endif %}
+        {% if outfitItem is defined %}
+            <li class="flex items-center">
+                <span class="mx-2 text-gray-400">/</span>
+                <span>{{ outfitItem.clothingItem.name }}</span>
+            </li>
+        {% endif %}
+    </ol>
+</nav>

@@ -38,6 +38,9 @@ class ClothingItem
     #[ORM\Column(nullable: true)]
     private ?array $aiTags = null;
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private array $images;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -50,6 +53,7 @@ class ClothingItem
     public function __construct()
     {
         $this->outfitItems = new ArrayCollection();
+        $this->images = [];
     }
 
     public function getId(): ?int
@@ -180,6 +184,35 @@ class ClothingItem
             }
         }
 
+        return $this;
+    }
+
+    public function getImages(): array
+    {
+        return $this->images ?? [];
+    }
+
+    public function setImages(?array $images): static
+    {
+        $this->images = $images ?? [];
+        return $this;
+    }
+
+    public function addImage(string $imagePath): static
+    {
+        if (!in_array($imagePath, $this->images)) {
+            $this->images[] = $imagePath;
+        }
+        return $this;
+    }
+
+    public function removeImage(string $imagePath): static
+    {
+        $key = array_search($imagePath, $this->images);
+        if ($key !== false) {
+            unset($this->images[$key]);
+            $this->images = array_values($this->images); // Réindexe le tableau
+        }
         return $this;
     }
 }
