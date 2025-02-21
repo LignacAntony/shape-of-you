@@ -3,24 +3,24 @@
 {% block title %}{{ outfit.name }}{% endblock %}
 
 {% block body %}
-    <div class="container mx-auto px-4 py-4">
-        {# Bouton retour #}
-        {% include 'components/back_button.html.twig' %}
+<div class="container mx-auto px-4 py-4">
+    {# Bouton retour #}
+    {% include 'components/back_button.html.twig' %}
 
-        <div class="max-w-4xl mx-auto">
-            {% include 'components/breadcrumb.html.twig' %}
+    <div class="max-w-4xl mx-auto">
+        {% include 'components/breadcrumb.html.twig' %}
 
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                    <h1 class="text-xl font-semibold text-gray-900">{{ outfit.name }}</h1>
-                    <div class="flex flex-row items-center">
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h1 class="text-xl font-semibold text-gray-900">{{ outfit.name }}</h1>
+                <div class="flex flex-row items-center">
                         <span class="px-3 py-1.5 text-xs font-medium rounded-full bg-secondary-400 text-white">
                             {{ outfit.outfitItems|length }} vétements
                         </span>
-                        <span class="px-3 ml-2 py-1.5 text-xs font-medium rounded-full bg-secondary-400 text-white">
+                    <span class="px-3 ml-2 py-1.5 text-xs font-medium rounded-full bg-secondary-400 text-white">
                             {{ outfit.likesCount }} likes
                         </span>
-                        {% if canEdit %}
+                    {% if canEdit %}
                         <div x-data="{
                             showOptions: false,
                             isDeleting: false,
@@ -77,83 +77,103 @@
                                 <button @click="deleteOutfit"
                                         :disabled="isDeleting"
                                         class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
-                                    <i class="fas" :class="isDeleting ? 'fa-spinner fa-spin' : 'fa-trash'" class="w-5 mr-2"></i>
+                                    <i class="fas" :class="isDeleting ? 'fa-spinner fa-spin' : 'fa-trash'"
+                                       class="w-5 mr-2"></i>
                                     <span x-text="isDeleting ? 'Suppression...' : 'Supprimer'"></span>
                                 </button>
                             </div>
                         </div>
-                        {% endif %}
+                    {% endif %}
 
-                    </div>
                 </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {# Colonne de gauche: Images #}
-                        <div class="lg:col-span-1">
-                            {% if outfit.images|length > 0 %}
-                                <div class="relative overflow-hidden aspect-square rounded-lg">
-                                    <!-- Conteneur du carrousel -->
-                                    <div class="carousel w-full h-full relative" data-id="{{ outfit.id }}">
-                                        {% for imagePath in outfit.images %}
-                                            <div class="carousel-item absolute inset-0 w-full h-full transition-opacity duration-500 {% if loop.first %}opacity-100{% else %}opacity-0{% endif %}">
-                                                <img src="{{ asset(imagePath) }}"
-                                                     alt="{{ outfit.name }}"
-                                                     class="w-full h-full object-cover rounded-lg">
-                                            </div>
-                                        {% endfor %}
-                                    </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {# Colonne de gauche: Images #}
+                    <div class="lg:col-span-1">
+                        {% if outfit.images|length > 0 %}
+                            <div class="relative overflow-hidden aspect-square rounded-lg">
+                                <!-- Conteneur du carrousel -->
+                                <div class="carousel w-full h-full relative" data-id="{{ outfit.id }}">
+                                    {% for imagePath in outfit.images %}
+                                        <div class="carousel-item absolute inset-0 w-full h-full transition-opacity duration-500 {% if loop.first %}opacity-100{% else %}opacity-0{% endif %}">
+                                            <img src="{{ asset(imagePath) }}"
+                                                 alt="{{ outfit.name }}"
+                                                 class="w-full h-full object-cover rounded-lg">
+                                        </div>
+                                    {% endfor %}
+                                </div>
 
-                                    {% if outfit.images|length > 1 %}
-                                        <button class="carousel-prev absolute left-2 top-1/2 transform -translate-y-1/2 bg-secondary-600 text-white w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary-500 transition-all"
-                                                data-id="{{ outfit.id }}">
-                                            <i class="fas fa-chevron-left text-lg text-white"></i>
-                                        </button>
-                                        <button class="carousel-next absolute right-2 top-1/2 transform -translate-y-1/2 bg-secondary-600 text-white w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary-500 transition-all"
-                                                data-id="{{ outfit.id }}">
-                                            <i class="fas fa-chevron-right text-lg text-white"></i>
-                                        </button>
-                                    {% endif %}
-                                </div>
-                            {% else %}
-                                <div class="aspect-square rounded-lg bg-secondary-400 flex items-center justify-center">
-                                    <i class="fas fa-chaussures text-4xl text-white"></i>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="space-y-1 flex flex-col">
-                            <div class="p-3">
-                                <div class="space-y-3">
-                                    <div class="flex items-center justify-between">
-                                        {% if outfit.isPublished %}
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                {% if outfit.images|length > 1 %}
+                                    <button class="carousel-prev absolute left-2 top-1/2 transform -translate-y-1/2 bg-secondary-600 text-white w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary-500 transition-all"
+                                            data-id="{{ outfit.id }}">
+                                        <i class="fas fa-chevron-left text-lg text-white"></i>
+                                    </button>
+                                    <button class="carousel-next absolute right-2 top-1/2 transform -translate-y-1/2 bg-secondary-600 text-white w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary-500 transition-all"
+                                            data-id="{{ outfit.id }}">
+                                        <i class="fas fa-chevron-right text-lg text-white"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="aspect-square rounded-lg bg-secondary-400 flex items-center justify-center">
+                                <i class="fas fa-chaussures text-4xl text-white"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1 flex flex-col">
+                        <div class="p-3">
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    {% if outfit.isPublished %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 <i class="fas fa-check mr-1"></i>Publié
                             </span>
-                                        {% else %}
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                 <i class="fas fa-clock mr-1"></i>Non publié
                             </span>
-                                        {% endif %}
-                                        {% include 'components/like_button.html.twig' with { 'outfit': outfit } %}
-
-                                    </div>
-                                    <div class="flex items-center">
-                                        <img src="{{ asset('/uploads/avatars/' ~ outfit.author.profile.avatar) }}"
-                                             alt="Photo de profil"
-                                             class="w-10 h-10 rounded-full me-2 border-2 border-secondary-400">
-                                        <div class="flex flex-col">
-                                            <h2 class="font-medium mr-2 text-xl">{{ outfit.author.username }}</h2>
-                                            <p class="text-xs text-gray-500">Le {{ outfit.createdAt|date('d/m/Y') }}</p>
-                                        </div>
-                                    </div>
+                                    {% endif %}
+                                    {% include 'components/like_button.html.twig' with { 'outfit': outfit } %}
 
                                 </div>
+                                <a href="{{ path('profile_show_user', {'id': outfit.author.id}) }}" class="flex items-center">
+                                    <img src="{{ asset('/uploads/avatars/' ~ outfit.author.profile.avatar) }}"
+                                         alt="Photo de profil"
+                                         class="w-10 h-10 rounded-full me-2 border-2 border-secondary-400">
+                                    <div class="flex flex-col">
+                                        <h2 class="font-medium mr-2 text-xl">{{ outfit.author.username }}</h2>
+                                        <p class="text-xs text-gray-500">Le {{ outfit.createdAt|date('d/m/Y') }}</p>
+                                    </div>
+                                </a>
+
                             </div>
-                            <div class="h-96 overflow-y-auto">
-                                {% if outfit.description %}
-                                    <p class="py-2 px-4 text-sm text-gray-600">{{ outfit.description }}</p>
-                                {% endif %}
-                                {% if app.user %}
-                                    <div x-data="{
+                        </div>
+                        <div class="h-72 overflow-y-auto">
+                            {% if outfit.description %}
+                                <p class="py-2 px-4 text-sm text-gray-600">{{ outfit.description }}</p>
+                            {% endif %}
+
+                            <div id="reviews-container" class="space-y-0">
+                                {% for review in outfit.reviews|sort((a, b) => b.createdAt <=> a.createdAt) %}
+                                    <div class="p-2">
+                                        <a href="{{ path('profile_show_user', {'id': outfit.author.id}) }}" class="flex items-center mb-2">
+                                            <img src="{{ asset('/uploads/avatars/' ~ review.author.profile.avatar) }}"
+                                                 alt="Photo de profil"
+                                                 class="w-6 h-6 rounded-full me-2 border-2 border-secondary-400">
+                                            <div>
+
+                                                <span class="font-medium text-base">{{ review.author.username }}</span>
+                                                <span class="text-gray-500 text-xs ml-2">{{ review.createdAt|date('d/m/Y H:i') }}</span>
+                                            </div>
+                                        </a>
+                                        <p class="text-gray-700">{{ review.content }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if app.user %}
+                            <div x-data="{
                         content: '',
                         isSubmitting: false,
                         submitReview() {
@@ -175,11 +195,20 @@
 
                                     // Créer l'élément principal
                                     const newReview = document.createElement('div');
-                                    newReview.className = 'bg-white rounded-lg shadow-sm p-4';
+                                    newReview.className = 'p-2';
 
                                     // Créer l'en-tête avec l'auteur et la date
                                     const header = document.createElement('div');
                                     header.className = 'flex items-center mb-2';
+
+                                    const reviewHeader = document.createElement('div');
+                                    reviewHeader.className = 'flex items-center mb-2';
+
+                                    const avatarImg = document.createElement('img');
+                                    avatarImg.src = data.review.avatar;
+                                    avatarImg.alt = 'Photo de profil';
+                                    avatarImg.className = 'w-6 h-6 rounded-full me-2 border-2 border-secondary-400';
+
 
                                     const authorSpan = document.createElement('span');
                                     authorSpan.className = 'font-medium';
@@ -192,13 +221,16 @@
                                     header.appendChild(authorSpan);
                                     header.appendChild(dateSpan);
 
+                                    reviewHeader.appendChild(avatarImg);
+                                    reviewHeader.appendChild(header)
+
                                     // Créer le contenu
                                     const content = document.createElement('p');
                                     content.className = 'text-gray-700';
                                     content.textContent = data.review.content;
 
                                     // Assembler le tout
-                                    newReview.appendChild(header);
+                                    newReview.appendChild(reviewHeader);
                                     newReview.appendChild(content);
 
                                     // Ajouter au conteneur
@@ -218,122 +250,97 @@
                             });
                         }
                     }">
-                                        <div class="mb-4">
+                                <div class="mb-4">
                             <textarea
                                     x-model="content"
                                     placeholder="Écrivez votre commentaire..."
-                                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 resize-none"
+                                    class="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 resize-none"
                                     rows="3"
                             ></textarea>
-                                            <div class="flex justify-end mt-2">
-                                                <button
-                                                        @click="submitReview()"
-                                                        :disabled="isSubmitting || !content.trim()"
-                                                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    <span x-show="!isSubmitting">Publier</span>
-                                                    <span x-show="isSubmitting">
+                                    <div class="flex justify-end mt-2">
+                                        <button
+                                                @click="submitReview()"
+                                                :disabled="isSubmitting || !content.trim()"
+                                                class="px-4 py-2 bg-secondary-500 text-white rounded-lg hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <span x-show="!isSubmitting">Publier</span>
+                                            <span x-show="isSubmitting">
                                         <i class="fas fa-spinner fa-spin mr-2"></i>Envoi...
                                     </span>
-                                                </button>
-                                            </div>
-                                        </div>
+                                        </button>
                                     </div>
-                                {% else %}
-                                    <a href="{{ path('app_login') }}" class="text-sm text-gray-600 hover:text-gray-900">
-                                        Connectez-vous pour commenter
-                                    </a>
-                                {% endif %}
-                                <div id="reviews-container" class="space-y-4">
-                                    {% for review in outfit.reviews|sort((a, b) => b.createdAt <=> a.createdAt) %}
-                                    <div class="p-4">
-                                        <div class="flex items-center mb-2">
-                                            <img src="{{ asset('/uploads/avatars/' ~ review.author.profile.avatar) }}"
-                                                 alt="Photo de profil"
-                                                 class="w-6 h-6 rounded-full me-2 border-2 border-secondary-400">
-                                            <div>
-
-                                                <span class="font-medium text-base">{{ review.author.username }}</span>
-                                                <span class="text-gray-500 text-xs ml-2">{{ review.createdAt|date('d/m/Y H:i') }}</span>
-                                            </div>
-                                        </div>
-                                        <p class="text-gray-700">{{ review.content }}</p>
-                                    </div>
-                                {% endfor %}
+                                </div>
                             </div>
-                        </div>
+                        {% else %}
+                            <a href="{{ path('app_login') }}" class="text-sm text-gray-600 hover:text-gray-900">
+                                Connectez-vous pour commenter
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            <div class="mb-4 border rounded-lg overflow-hidden mt-8" data-accordion-section>
-                <div
+        </div>
+        <div class="mb-4 border rounded-lg overflow-hidden mt-8" data-accordion-section>
+            <div
                     class="flex flex-col md:flex-row justify-between md:items-center px-4 py-3 bg-tertiary-500 cursor-pointer"
                     data-accordion-header
-                >
-                    <div class="flex items-center">
-                        <i class="fa-solid fa-shirt mr-2  text-white"></i>
-                        <h2 class="text-lg font-semibold mb-0 text-white">Vêtements</h2>
-                    </div>
-                    <div>
+            >
+                <div class="flex items-center">
+                    <i class="fa-solid fa-shirt mr-2  text-white"></i>
+                    <h2 class="text-lg font-semibold mb-0 text-white">Vêtements</h2>
+                </div>
+                <div>
                     <div class="flex flex-row gap-2 items-center">
-                    <div>
+                        <div>
                         <span class="px-3 py-1 text-white font-bold rounded-full border-white border-2 text-sm">
                             {{ outfit.outfititems|length }}
                         </span>
-                    </div>
+                        </div>
                         {% if canEdit %}
 
-                        {% include 'components/add_clothing_modal.html.twig' with {
-                        'categories': categories,
-                        'wardrobe_id': outfit.wardrobe.id,
-                        'outfit_id': outfit.id
-                    } %}
-                    {% include 'components/add_existing_clothing_modal.html.twig' with {
-                        'outfit': outfit,
-                        'wardrobe': outfit.wardrobe
-                    } %}
+                            {% include 'components/add_clothing_modal.html.twig' with {
+                                'categories': categories,
+                                'wardrobe_id': outfit.wardrobe.id,
+                                'outfit_id': outfit.id
+                            } %}
+                            {% include 'components/add_existing_clothing_modal.html.twig' with {
+                                'outfit': outfit,
+                                'wardrobe': outfit.wardrobe
+                            } %}
                         {% endif %}
 
                     </div>
-                    </div>
                 </div>
+            </div>
 
-                <div class="px-4 py-4 bg-white" data-accordion-content>
-                    {% if outfit.outfititems|length > 0 %}
-                        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
-                            {% for item in outfit.outfititems %}
-                                {% if item.clothingItem %}
-                                    {% include 'components/item_list_card.html.twig' with { 'item': item } %}
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
-                            <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore de vêtements.
-                        </div>
-                    {% endif %}
-                </div>
+            <div class="px-4 py-4 bg-white" data-accordion-content>
+                {% if outfit.outfititems|length > 0 %}
+                    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                        {% for item in outfit.outfititems %}
+                            {% if item.clothingItem %}
+                                {% include 'components/item_list_card.html.twig' with { 'item': item } %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+                        <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore de vêtements.
+                    </div>
+                {% endif %}
             </div>
 
         </div>
     </div>
 
 
+    {% endblock %}
 
+    {% block javascripts %}
+        {{ parent() }}
+        <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {% endblock %}
 
-
-
-
-
-
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-{% endblock %}
-
-{% block stylesheets %}
-    {{ parent() }}
-    {% include 'components/card_styles.html.twig' %}
-{% endblock %} 
+    {% block stylesheets %}
+        {{ parent() }}
+        {% include 'components/card_styles.html.twig' %}
+    {% endblock %}

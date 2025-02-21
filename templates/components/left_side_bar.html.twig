@@ -54,7 +54,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ path('profile_show') }}"
+                            <a href="{{ path('profile_show_user', {'id': app.user.id}) }}"
                                class="sidebar-link group">
                                 <img src="{{ asset('/uploads/avatars/' ~ app.user.profile.avatar) }}"
                                      alt="Photo de profil"
