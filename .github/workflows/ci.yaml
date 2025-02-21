@@ -34,6 +34,8 @@ jobs:
       - name: "Install Dependencies"
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: "Run PHP Code Sniffer"
+        run: vendor/bin/phpcs || true
   # php-stan:
   #   name: "PHP-Stan"
   #   runs-on: ubuntu-latest
