@@ -79,4 +79,4 @@ class Image
         $this->createdAt = $createdAt;
         return $this;
     }
-} 
+}

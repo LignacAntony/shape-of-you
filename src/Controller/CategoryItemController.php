@@ -17,71 +17,67 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class CategoryItemController extends AbstractController
 {
     #[Route(name: 'app_category_item_index', methods: ['GET'])]
-public function index(CategoryItemRepository $categoryItemRepository): Response
-{
-    return $this->render('admin/category_item/index.html.twig', [
-        'category_items' => $categoryItemRepository->findAll(),
-    ]);
-}
+    public function index(CategoryItemRepository $categoryItemRepository): Response
+    {
+        return $this->render('admin/category_item/index.html.twig', [
+            'category_items' => $categoryItemRepository->findAll(),
+        ]);
+    }
 
     #[Route('/new', name: 'app_category_item_new', methods: ['GET', 'POST'])]
-public function new(Request $request, EntityManagerInterface $entityManager): Response
-{
-    $categoryItem = new CategoryItem();
-    $form = $this->createForm(CategoryItemType::class, $categoryItem);
-    $form->handleRequest($request);
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $categoryItem = new CategoryItem();
+        $form = $this->createForm(CategoryItemType::class, $categoryItem);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->persist($categoryItem);
-        $entityManager->flush();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($categoryItem);
+            $entityManager->flush();
 
-        return $this->redirectToRoute('app_category_item_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_category_item_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('admin/category_item/new.html.twig', [
+            'category_item' => $categoryItem,
+            'form' => $form,
+        ]);
     }
-
-    return $this->render('admin/category_item/new.html.twig', [
-        'category_item' => $categoryItem,
-        'form' => $form,
-    ]);
-}
 
     #[Route('/{id}', name: 'app_category_item_show', methods: ['GET'])]
-public function show(CategoryItem $categoryItem): Response
-{
-    return $this->render('admin/category_item/show.html.twig', [
-        'category_item' => $categoryItem,
-    ]);
-}
-
-    #[Route('/{id}/edit', name: 'app_category_item_edit', methods: ['GET', 'POST'])]
-public function edit(Request $request, CategoryItem $categoryItem, EntityManagerInterface $entityManager): Response
-{
-    $form = $this->createForm(CategoryItemType::class, $categoryItem);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->flush();
-
-        return $this->redirectToRoute('app_category_item_index', [], Response::HTTP_SEE_OTHER);
+    public function show(CategoryItem $categoryItem): Response
+    {
+        return $this->render('admin/category_item/show.html.twig', [
+            'category_item' => $categoryItem,
+        ]);
     }
 
-    return $this->render('admin/category_item/edit.html.twig', [
-        'category_item' => $categoryItem,
-        'form' => $form,
-    ]);
-}
+    #[Route('/{id}/edit', name: 'app_category_item_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, CategoryItem $categoryItem, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(CategoryItemType::class, $categoryItem);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_category_item_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('admin/category_item/edit.html.twig', [
+            'category_item' => $categoryItem,
+            'form' => $form,
+        ]);
+    }
 
     #[Route('/{id}', name: 'app_category_item_delete', methods: ['POST'])]
-public function delete(
-    Request $request,
-    CategoryItem $categoryItem,
-    EntityManagerInterface $entityManager
-): Response {
-        {
+    public function delete(Request $request, CategoryItem $categoryItem, EntityManagerInterface $entityManager): Response
+    {
         if ($this->isCsrfTokenValid('delete' . $categoryItem->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($categoryItem);
             $entityManager->flush();
         }
 
         return $this->redirectToRoute('app_category_item_index', [], Response::HTTP_SEE_OTHER);
-        }
+    }
 }

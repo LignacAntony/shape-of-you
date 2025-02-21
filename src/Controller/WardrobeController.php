@@ -119,7 +119,7 @@ final class WardrobeController extends AbstractController
         $wardrobe_form = $this->createForm(WardrobeType::class);
 
         return $this->render('wardrobe/index.html.twig', [
-            'wardrobes' => $wardrobes,  
+            'wardrobes' => $wardrobes,
             'outfits' => $outfits,
             'allItems' => $allItems,
             'wardrobe_form' => $wardrobe_form
@@ -197,7 +197,7 @@ final class WardrobeController extends AbstractController
             'wardrobe' => $wardrobe,
             'default_outfit' => $outfit
         ]);
-        
+
         $form->handleRequest($request);
 
         if (!$form->isSubmitted()) {
@@ -242,20 +242,20 @@ final class WardrobeController extends AbstractController
 
         try {
             $clothingItem->setCreatedAt(new \DateTimeImmutable());
-            
+
             /** @var UploadedFile[] $images */
             $images = $form->get('images')->getData();
             if ($images) {
                 $uploadDir = $this->getParameter('upload_directory');
-                
+
                 if (!file_exists($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
                 }
-                
+
                 foreach ($images as $image) {
-                    $newFilename = uniqid().'.'.$image->guessExtension();
+                    $newFilename = uniqid() . '.' . $image->guessExtension();
                     $image->move($uploadDir, $newFilename);
-                    $clothingItem->addImage('uploads/images/'.$newFilename);
+                    $clothingItem->addImage('uploads/images/' . $newFilename);
                 }
             }
 
@@ -301,11 +301,11 @@ final class WardrobeController extends AbstractController
             'user' => $this->getUser(),
             'wardrobe' => $outfitItem->getWardrobe()
         ]);
-        
+
         $outfitForm = $this->createForm(OutfitItemType::class, $outfitItem, [
             'user' => $this->getUser()
         ]);
-        
+
         $outfitForm->handleRequest($request);
         $clothingForm->handleRequest($request);
 
@@ -326,16 +326,16 @@ final class WardrobeController extends AbstractController
                 $images = $clothingForm->get('images')->getData();
                 if ($images) {
                     $uploadDir = $this->getParameter('upload_directory');
-                    
+
                     if (!file_exists($uploadDir)) {
                         mkdir($uploadDir, 0777, true);
                     }
-                    
+
                     foreach ($images as $image) {
                         if ($image instanceof UploadedFile) {
                             $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
                             $newFilename = $originalFilename . '-' . uniqid() . '.' . $image->guessExtension();
-                            
+
                             try {
                                 $image->move($uploadDir, $newFilename);
                                 $clothingItem->addImage('uploads/images/' . $newFilename);
@@ -348,7 +348,7 @@ final class WardrobeController extends AbstractController
                 }
 
                 $outfitItem->setSize($clothingForm->get('size')->getData());
-                
+
                 $entityManager->persist($clothingItem);
                 $entityManager->flush();
 
@@ -407,7 +407,7 @@ final class WardrobeController extends AbstractController
             if ($imageFile) {
                 $uploadDir = $this->getParameter('upload_directory');
                 $newFilename = uniqid() . '.' . $imageFile->guessExtension();
-                
+
                 try {
                     $imageFile->move($uploadDir, $newFilename);
                     $wardrobe->setImage('uploads/images/' . $newFilename);
@@ -427,7 +427,6 @@ final class WardrobeController extends AbstractController
                 'message' => 'La garde-robe a été créée avec succès.',
                 'redirect' => $this->generateUrl('wardrobe_details', ['id' => $wardrobe->getId()])
             ]);
-
         } catch (\Exception $e) {
             return $this->json([
                 'status' => 'error',
@@ -441,7 +440,7 @@ final class WardrobeController extends AbstractController
     public function editWardrobeUser(Request $request, int $id): Response
     {
         $wardrobe = $this->entityManager->getRepository(Wardrobe::class)->find($id);
-        
+
         if (!$wardrobe || $wardrobe->getAuthor() !== $this->getUser()) {
             throw $this->createNotFoundException('Garde-robe non trouvée');
         }
@@ -454,7 +453,7 @@ final class WardrobeController extends AbstractController
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
                 $uploadDir = $this->getParameter('upload_directory');
-                
+
                 if (!file_exists($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
                 }
@@ -467,9 +466,9 @@ final class WardrobeController extends AbstractController
                     }
                 }
 
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
                 $imageFile->move($uploadDir, $newFilename);
-                $wardrobe->setImage('uploads/images/'.$newFilename);
+                $wardrobe->setImage('uploads/images/' . $newFilename);
             }
 
             $this->entityManager->flush();
@@ -489,7 +488,7 @@ final class WardrobeController extends AbstractController
     public function deleteWardrobeUser(int $id): JsonResponse
     {
         $wardrobe = $this->entityManager->getRepository(Wardrobe::class)->find($id);
-        
+
         if (!$wardrobe || $wardrobe->getAuthor() !== $this->getUser()) {
             return $this->json([
                 'status' => 'error',
