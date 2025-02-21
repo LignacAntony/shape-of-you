@@ -40,28 +40,25 @@ class OutfitRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    //    /**
-    //     * @return Outfit[] Returns an array of Outfit objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findOutfitWithPublicAccess(int $id, User $user): ?Outfit
+    {
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.id = :id')
+            ->andWhere('o.author = :user OR (o.isPublished = true)')
+            ->setParameter('id', $id)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Outfit
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findPublishedOutfitsByUser(User $user): array
+    {
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.author = :user')
+            ->andWhere('o.isPublished = true')
+            ->setParameter('user', $user)
+            ->orderBy('o.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

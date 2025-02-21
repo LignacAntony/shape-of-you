@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil de {{ user.username }}{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-8">
+        {# En-tête du profil #}
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <div class="flex items-center space-x-4">
+                <img src="{{ asset('/uploads/avatars/' ~ user.profile.avatar) }}" 
+                    alt="Avatar de {{ user.username }}" 
+                    class="w-24 h-24 rounded-full border-4 border-primary-600">
+                <div>
+                    <div class="flex items-center gap-4">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ user.username }}</h1>
+                        {% if app.user and app.user.id == user.id %}
+                            <a href="{{ path('profile_show') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>Modifier mon profil
+                            </a>
+                        {% endif %}
+                    </div>
+                    <p class="text-gray-500">Membre depuis {{ user.createdAt|date('d/m/Y') }}</p>
+                </div>
+            </div>
+            {% if user.profile.bio %}
+                <p class="mt-4 text-gray-700">{{ user.profile.bio }}</p>
+            {% endif %}
+            <div class="mt-4 flex items-center space-x-4 text-sm text-gray-500">
+                <span><strong>{{ outfits|length }}</strong> tenues publiées</span>
+            </div>
+        </div>
+
+        {# Section des tenues #}
+        <div class="space-y-6">
+            <h2 class="text-xl font-semibold text-gray-900">Tenues publiées</h2>
+            
+            {% if outfits|length > 0 %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for outfit in outfits %}
+                        {% include 'components/home_outfit_card.html.twig' with {'outfit': outfit} %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
+                    <p>{{ user.username }} n'a pas encore publié de tenues.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %} 

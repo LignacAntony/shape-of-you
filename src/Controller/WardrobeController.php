@@ -119,7 +119,7 @@ final class WardrobeController extends AbstractController
         $wardrobe_form = $this->createForm(WardrobeType::class);
 
         return $this->render('wardrobe/index.html.twig', [
-            'wardrobes' => $wardrobes,
+            'wardrobes' => $wardrobes,  
             'outfits' => $outfits,
             'allItems' => $allItems,
             'wardrobe_form' => $wardrobe_form
