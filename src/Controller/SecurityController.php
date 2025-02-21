@@ -14,8 +14,6 @@ use App\Form\ResetPasswordRequestFormType;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-    
 use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 
 class SecurityController extends AbstractController
@@ -49,7 +47,7 @@ class SecurityController extends AbstractController
 
 
     #[Route('/forgot', name: 'auth_forgot_get', methods: ['GET'])]
-    public function forgot_get(): Response
+    public function forgotGet(): Response
     {
         return $this->render('security/forgot.html.twig');
     }
