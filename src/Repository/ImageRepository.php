@@ -20,4 +20,4 @@ class ImageRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Image::class);
     }
-} 
+}

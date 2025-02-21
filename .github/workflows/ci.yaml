@@ -5,10 +5,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  php-code-sniffer:
-    name: "PHP-Code-Sniffer"
+  deps:
+    name: "Install Dependencies"
     runs-on: ubuntu-latest
-
     steps:
       - name: "Checkout Repository"
         uses: actions/checkout@v4
@@ -19,20 +18,44 @@ jobs:
           php-version: '8.3'
           tools: composer
 
-      - name: "Get Composer Cache Directory"
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: "Cache Composer Dependencies"
-        uses: actions/cache@v3
+      - name: "Cache vendor"
+        uses: actions/cache@v4
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+
+      - name: "Setup Environment"
+        run: |
+          echo "APP_ENV=test" >> .env.test.local
+          echo "POSTGRES_VERSION=${{ secrets.POSTGRES_VERSION }}" >> .env.test.local
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env.test.local
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env.test.local
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env.test.local
+          echo "ADMINER_PORT=${{ secrets.ADMINER_PORT }}" >> .env.test.local
+          cat .env.test.local
 
       - name: "Install Dependencies"
         run: composer install --prefer-dist --no-interaction --no-progress
+
+  php-code-sniffer:
+    name: "PHP-Code-Sniffer"
+    needs: deps
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP Environment"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: "Restore vendor cache"
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
 
       - name: "Run PHP Code Sniffer"
         run: vendor/bin/phpcs || true
