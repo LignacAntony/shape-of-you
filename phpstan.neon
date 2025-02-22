@@ -1,0 +1,20 @@
+parameters:
+    level: 5
+    paths:
+        - src
+        - tests
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    excludePaths:
+        - vendor/*
+        - src/Migrations/*
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        - '#Property [a-zA-Z0-9\\_]+::\$passwordHasher is never written, only read\.#'
+        - '#Property [a-zA-Z0-9\\_]+::\$manager \(Doctrine\\ORM\\EntityManagerInterface\) does not accept Doctrine\\Persistence\\ObjectManager\.#'
+        - '#Unreachable statement - code above always terminates\.#'
+    
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
