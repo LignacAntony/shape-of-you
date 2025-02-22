@@ -87,7 +87,7 @@ class AppFixtures extends Fixture
         'Sweat à capuche' => [
             'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800'
         ],
-        
+
         // Bas
         'Jean slim' => [
             'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800'
@@ -107,7 +107,7 @@ class AppFixtures extends Fixture
         'Jupe plissée' => [
             'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=800'
         ],
-        
+
         // Chaussures
         'Air Force 1' => [
             'https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=800'
@@ -127,7 +127,7 @@ class AppFixtures extends Fixture
         'Chelsea boots' => [
             'https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800'
         ],
-        
+
         // Accessoires
         'Chaîne fine' => [
             'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800'
@@ -268,11 +268,11 @@ class AppFixtures extends Fixture
             ['name' => 'T-shirt basique', 'description' => 'T-shirt blanc en coton', 'category' => 'T-shirts', 'brand' => 'Uniqlo', 'color' => 'Blanc', 'imageUrl' => $this->imageUrls['T-shirt basique'][0]],
             ['name' => 'T-shirt imprimé', 'description' => 'T-shirt avec motif', 'category' => 'T-shirts', 'brand' => 'H&M', 'color' => 'Noir', 'imageUrl' => $this->imageUrls['T-shirt imprimé'][0]],
             ['name' => 'Chemise oxford', 'description' => 'Chemise en coton oxford', 'category' => 'Chemises', 'brand' => 'Ralph Lauren', 'color' => 'Bleu', 'imageUrl' => $this->imageUrls['Chemise oxford'][0]],
-            
+
             // Bas
             ['name' => 'Jean slim', 'description' => 'Jean coupe slim', 'category' => 'Pantalons', 'brand' => 'Levi\'s', 'color' => 'Bleu', 'imageUrl' => $this->imageUrls['Jean slim'][0]],
             ['name' => 'Chino', 'description' => 'Pantalon chino', 'category' => 'Pantalons', 'brand' => 'Dockers', 'color' => 'Beige', 'imageUrl' => $this->imageUrls['Chino'][0]],
-            
+
             // Chaussures
             ['name' => 'Stan Smith', 'description' => 'Sneakers classiques', 'category' => 'Chaussures', 'brand' => 'Adidas', 'color' => 'Blanc', 'imageUrl' => $this->imageUrls['Stan Smith'][0]],
             ['name' => 'Chelsea boots', 'description' => 'Boots en cuir', 'category' => 'Bottes', 'brand' => 'Church\'s', 'color' => 'Noir', 'imageUrl' => $this->imageUrls['Chelsea boots'][0]]
@@ -286,7 +286,7 @@ class AppFixtures extends Fixture
             $clothingItem->setBrand($data['brand']);
             $clothingItem->setColor($data['color']);
             $clothingItem->setCreatedAt(new \DateTimeImmutable());
-            
+
             // Trouver la catégorie correspondante
             $categoryFound = false;
             foreach ($categories as $category) {
@@ -384,7 +384,7 @@ class AppFixtures extends Fixture
             $wardrobe = new Wardrobe();
             $wardrobe->setName($data['name']);
             $wardrobe->setDescription($data['description']);
-            
+
             // Télécharger l'image
             if (isset($data['imageUrl'])) {
                 $imagePath = $this->downloadAndSaveImage($data['imageUrl'], 'wardrobe-' . strtolower(str_replace([' ', '\''], '-', $data['name'])));
@@ -392,11 +392,11 @@ class AppFixtures extends Fixture
                     $wardrobe->setImage($imagePath);
                 }
             }
-            
-        $wardrobe->setAuthor($user);
+
+            $wardrobe->setAuthor($user);
             $wardrobe->setCreatedAt(new \DateTimeImmutable());
-            
-        $manager->persist($wardrobe);
+
+            $manager->persist($wardrobe);
             $wardrobes[] = $wardrobe;
         }
 
@@ -469,7 +469,7 @@ class AppFixtures extends Fixture
                     $outfit->setCreatedAt(new \DateTimeImmutable());
                     $outfit->setLikesCount(0);
                     $outfit->setIsPublished(true);
-                    
+
                     // Télécharger l'image de la tenue
                     if (isset($data['imageUrl'])) {
                         $imagePath = $this->downloadAndSaveImage($data['imageUrl'], 'outfit-' . strtolower(str_replace([' ', '\''], '-', $data['name'])));
@@ -483,11 +483,11 @@ class AppFixtures extends Fixture
                     // Ajouter les vêtements à la tenue
                     foreach ($data['items'] as $index) {
                         if (isset($this->clothingItems[$index])) {
-        $outfitItem = new OutfitItem();
+                            $outfitItem = new OutfitItem();
                             $outfitItem->setClothingItem($this->clothingItems[$index]);
-        $outfitItem->setWardrobe($wardrobe);
-        $outfitItem->setSize('M');
-        $manager->persist($outfitItem);
+                            $outfitItem->setWardrobe($wardrobe);
+                            $outfitItem->setSize('M');
+                            $manager->persist($outfitItem);
 
                             // Ajouter le vêtement à la collection de l'outfit
                             $outfit->addOutfitItem($outfitItem);
@@ -496,20 +496,20 @@ class AppFixtures extends Fixture
                     }
 
                     // Distribution aléatoire des likes parmi les utilisateurs
-                    $potentialLikers = array_filter($users, function($potentialUser) use ($user) {
+                    $potentialLikers = array_filter($users, function ($potentialUser) use ($user) {
                         return $potentialUser !== $user && !in_array('ROLE_ADMIN', $potentialUser->getRoles());
                     });
-                    
+
                     // On prend un nombre aléatoire d'utilisateurs qui vont liker
                     $numberOfLikes = random_int(0, count($potentialLikers));
                     $likesCount = 0;
-                    
+
                     if ($numberOfLikes > 0) {
                         $potentialLikersArray = array_values($potentialLikers);
-                        $likerIndices = $numberOfLikes === count($potentialLikers) 
+                        $likerIndices = $numberOfLikes === count($potentialLikers)
                             ? range(0, count($potentialLikers) - 1)
                             : (array) array_rand($potentialLikersArray, $numberOfLikes);
-                        
+
                         foreach ((array) $likerIndices as $likerIndex) {
                             $liker = $potentialLikersArray[$likerIndex];
                             $like = new Like();
@@ -520,7 +520,7 @@ class AppFixtures extends Fixture
                             $likesCount++;
                         }
                     }
-                    
+
                     // Mettre à jour le nombre total de likes
                     $outfit->setLikesCount($likesCount);
                     $manager->persist($outfit);

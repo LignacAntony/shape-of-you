@@ -106,7 +106,7 @@ final class OutfitController extends AbstractController
     public function details(int $id): Response
     {
         $outfit = $this->outfitRepository->findOutfitWithPublicAccess($id, $this->getUser());
-        
+
         if (!$outfit) {
             throw $this->createNotFoundException('Tenue non trouvée');
         }
@@ -136,7 +136,7 @@ final class OutfitController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function removeItem(Request $request, int $outfitId, int $outfitItemId): JsonResponse
     {
-        if (!$this->isCsrfTokenValid('remove_item'.$outfitItemId, $request->toArray()['_token'] ?? '')) {
+        if (!$this->isCsrfTokenValid('remove_item' . $outfitItemId, $request->toArray()['_token'] ?? '')) {
             return $this->json(['status' => 'error', 'message' => 'Token CSRF invalide'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -164,7 +164,7 @@ final class OutfitController extends AbstractController
     public function addExistingItem(Request $request, int $id): JsonResponse
     {
         $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
-        
+
         if (!$outfit) {
             return $this->json([
                 'status' => 'error',
@@ -211,7 +211,7 @@ final class OutfitController extends AbstractController
     public function create(Request $request, int $wardrobeId): JsonResponse
     {
         $wardrobe = $this->entityManager->getRepository(Wardrobe::class)->find($wardrobeId);
-        
+
         if (!$wardrobe || $wardrobe->getAuthor() !== $this->getUser()) {
             return $this->json([
                 'status' => 'error',
@@ -255,7 +255,8 @@ final class OutfitController extends AbstractController
             // Debug de la valeur de isPublished
             $formData = $request->request->all();
             $isPublished = $formData['outfit']['isPublished'] ?? null;
-            $this->addFlash('debug', sprintf('Form isPublished: %s, Entity isPublished: %s', 
+            $this->addFlash('debug', sprintf(
+                'Form isPublished: %s, Entity isPublished: %s',
                 var_export($isPublished, true),
                 var_export($outfit->getIsPublished(), true)
             ));
@@ -266,14 +267,14 @@ final class OutfitController extends AbstractController
             // Gestion des images
             /** @var UploadedFile[] $imageFiles */
             $imageFiles = $form->get('images')->getData();
-            
+
             if ($imageFiles) {
                 $uploadDir = $this->getParameter('upload_directory');
-                
+
                 foreach ($imageFiles as $imageFile) {
                     $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $newFilename = uniqid() . '.' . $imageFile->guessExtension();
-                    
+
                     try {
                         $imageFile->move($uploadDir, $newFilename);
                         $outfit->addImage('uploads/images/' . $newFilename);
@@ -285,7 +286,7 @@ final class OutfitController extends AbstractController
                     }
                 }
             }
-            
+
             $this->entityManager->persist($outfit);
             $this->entityManager->flush();
 
@@ -294,7 +295,6 @@ final class OutfitController extends AbstractController
                 'message' => 'La tenue a été créée avec succès.',
                 'redirect' => $this->generateUrl('outfit_details', ['id' => $outfit->getId()])
             ]);
-
         } catch (\Exception $e) {
             return $this->json([
                 'status' => 'error',
@@ -309,7 +309,7 @@ final class OutfitController extends AbstractController
     public function editOutfitUser(Request $request, int $id): Response
     {
         $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
-        
+
         if (!$outfit) {
             throw $this->createNotFoundException('Tenue non trouvée');
         }
@@ -349,7 +349,7 @@ final class OutfitController extends AbstractController
     public function deleteOutfitUser(Request $request, int $id): JsonResponse
     {
         $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
-        
+
         if (!$outfit) {
             return new JsonResponse([
                 'status' => 'error',
@@ -387,7 +387,7 @@ final class OutfitController extends AbstractController
     public function toggleLike(int $id): JsonResponse
     {
         $outfit = $this->outfitRepository->findOutfitWithPublicAccess($id, $this->getUser());
-        
+
         if (!$outfit) {
             return $this->json([
                 'status' => 'error',
@@ -428,7 +428,7 @@ final class OutfitController extends AbstractController
     public function isLiked(int $id): JsonResponse
     {
         $outfit = $this->outfitRepository->findOutfitWithPublicAccess($id, $this->getUser());
-        
+
         if (!$outfit) {
             return $this->json([
                 'status' => 'error',
@@ -436,7 +436,7 @@ final class OutfitController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         }
 
-        $isLiked = $outfit->getLikes()->exists(function($key, $like) {
+        $isLiked = $outfit->getLikes()->exists(function ($key, $like) {
             return $like->getAuthor() === $this->getUser();
         });
 
