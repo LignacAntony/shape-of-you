@@ -82,7 +82,7 @@ jobs:
           key: composer-${{ hashFiles('**/composer.lock') }}
 
       - name: "Run PHP Stan"
-        run: composer analyse
+        run: composer analyse --memory-limit=1G
   # docker-install:
   #   name: "Docker Install"
   #   runs-on: ubuntu-latest
