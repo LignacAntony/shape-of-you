@@ -471,6 +471,7 @@ final class OutfitController extends AbstractController
         return $this->json([
             'status' => 'success',
             'review' => [
+                'avatar' => '/uploads/avatars/' . $review->getAuthor()->getProfile()->getAvatar(),
                 'content' => $review->getContent(),
                 'author' => $review->getAuthor()->getUsername(),
                 'createdAt' => $review->getCreatedAt()->format('d/m/Y H:i')
