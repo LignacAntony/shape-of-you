@@ -60,24 +60,29 @@ jobs:
 
       - name: "Run PHP Code Sniffer"
         run: vendor/bin/phpcs || true
-  # php-stan:
-  #   name: "PHP-Stan"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: "Checkout Repository"
-  #       uses: actions/checkout@master
-  #     - name: "Setup Php Enviroment"
-  #       uses: shivammathur/setup-php@v2
-  #       with:
-  #           php-version: '8.1'
-  #           tools: composer
-  #     - name: "Composer install"
-  #       run: |
-  #         composer install --prefer-dist --no-interaction --no-progress
-  #         composer global require "phpstan/phpstan"
-  #     - name: "Run PHP Stan"
-  #       run: ~/.composer/vendor/bin/phpstan analyse --level 5 src/ 
-  #       continue-on-error: true
+
+  php-stan:
+    name: "PHP-Stan"
+    needs: deps
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP Environment"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: "Restore vendor cache"
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+
+      - name: "Run PHP Stan"
+        run: composer analyse
   # docker-install:
   #   name: "Docker Install"
   #   runs-on: ubuntu-latest

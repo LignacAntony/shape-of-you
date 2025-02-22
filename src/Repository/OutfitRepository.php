@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Entity\Wardrobe;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends ServiceEntityRepository<Outfit>
@@ -18,7 +19,7 @@ class OutfitRepository extends ServiceEntityRepository
         parent::__construct($registry, Outfit::class);
     }
 
-    public function findOutfitWithAccessCheck(int $id, User $user): ?Outfit
+    public function findOutfitWithAccessCheck(int $id, ?UserInterface $user): ?Outfit
     {
         return $this->createQueryBuilder('o')
             ->andWhere('o.id = :id')
@@ -29,7 +30,7 @@ class OutfitRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function findOutfitsForWardrobe(Wardrobe $wardrobe, User $user): array
+    public function findOutfitsForWardrobe(Wardrobe $wardrobe, ?UserInterface $user): array
     {
         return $this->createQueryBuilder('o')
             ->andWhere('o.wardrobe = :wardrobe')
@@ -40,7 +41,7 @@ class OutfitRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findOutfitWithPublicAccess(int $id, User $user): ?Outfit
+    public function findOutfitWithPublicAccess(int $id, ?UserInterface $user): ?Outfit
     {
         return $this->createQueryBuilder('o')
             ->andWhere('o.id = :id')
@@ -51,7 +52,7 @@ class OutfitRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function findPublishedOutfitsByUser(User $user): array
+    public function findPublishedOutfitsByUser(?UserInterface $user): array
     {
         return $this->createQueryBuilder('o')
             ->andWhere('o.author = :user')

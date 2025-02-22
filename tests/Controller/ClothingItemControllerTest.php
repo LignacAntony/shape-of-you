@@ -6,13 +6,14 @@ use App\Entity\CategoryItem;
 use App\Entity\ClothingItem;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class ClothingItemControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private EntityManagerInterface $manager;
+    private ObjectManager $manager;
     private EntityRepository $repository;
     private CategoryItem $categoryItem;
     private string $path = '/clothing/item/';
@@ -25,7 +26,7 @@ final class ClothingItemControllerTest extends WebTestCase
 
         $this->categoryItem = new CategoryItem();
         $this->categoryItem->setName('Vêtements');
-        $this->categoryItem->setDesription('Catégorie des vêtements');
+        $this->categoryItem->setDescription('Catégorie des vêtements');
         $this->manager->persist($this->categoryItem);
 
         foreach ($this->repository->findAll() as $object) {
@@ -53,6 +54,10 @@ final class ClothingItemControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
+
+        $category = new CategoryItem();
+        $category->setName('Test Category');
+        $category->setDescription('Test Description');
 
         $this->client->submitForm('Save', [
             'clothing_item[name]' => 'Testing',

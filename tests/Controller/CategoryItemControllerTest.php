@@ -5,13 +5,14 @@ namespace App\Tests\Controller;
 use App\Entity\CategoryItem;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class CategoryItemControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private EntityManagerInterface $manager;
+    private ObjectManager $manager;
     private EntityRepository $repository;
     private string $path = '/category/item/';
 
@@ -63,7 +64,7 @@ final class CategoryItemControllerTest extends WebTestCase
         $this->markTestIncomplete();
         $fixture = new CategoryItem();
         $fixture->setName('Vêtements');
-        $fixture->setDesription('Catégorie des vêtements');
+        $fixture->setDescription('Catégorie des vêtements');
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -82,7 +83,7 @@ final class CategoryItemControllerTest extends WebTestCase
 
         $fixture = new CategoryItem();
         $fixture->setName('Vêtements');
-        $fixture->setDesription('Catégorie des vêtements');
+        $fixture->setDescription('Catégorie des vêtements');
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -100,7 +101,7 @@ final class CategoryItemControllerTest extends WebTestCase
         $fixture = $this->repository->findAll();
 
         self::assertSame('Something New', $fixture[0]->getName());
-        self::assertSame('Something New', $fixture[0]->getDesription());
+        self::assertSame('Something New', $fixture[0]->getDescription());
         self::assertSame('Something New', $fixture[0]->getCategoryParent());
     }
 
@@ -110,7 +111,7 @@ final class CategoryItemControllerTest extends WebTestCase
 
         $fixture = new CategoryItem();
         $fixture->setName('Vêtements');
-        $fixture->setDesription('Catégorie des vêtements');
+        $fixture->setDescription('Catégorie des vêtements');
 
         $this->manager->persist($fixture);
         $this->manager->flush();
