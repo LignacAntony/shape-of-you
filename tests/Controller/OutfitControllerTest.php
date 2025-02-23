@@ -4,6 +4,8 @@ namespace App\Tests\Controller;
 
 use App\Entity\Outfit;
 use App\Entity\User;
+use App\Entity\Profile;
+use App\Entity\Wardrobe;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -13,144 +15,192 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class OutfitControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private EntityManagerInterface $manager;
+    private EntityManagerInterface $entityManager;
     private EntityRepository $repository;
-    private User $user;
+    private string $path = '/admin/outfit';
     private UserPasswordHasherInterface $passwordHasher;
-    private string $path = '/admin/outfit/';
+    private User $user;
+    private Wardrobe $wardrobe;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
-        $this->manager = static::getContainer()->get('doctrine')->getManager();
-        $this->repository = $this->manager->getRepository(Outfit::class);
+        $this->entityManager = $this->client->getContainer()->get('doctrine')->getManager();
+        $this->repository = $this->entityManager->getRepository(Outfit::class);
 
+        // Nettoyer la base de données
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Outfit')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\OutfitItem')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Wardrobe')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Profile')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\User')->execute();
+
+        // Créer un utilisateur admin
         $this->user = new User();
-        $this->user->setEmail('user@test.fr');
-        $this->user->setFirstname('John');
-        $this->user->setLastname('Doe');
-        $this->user->setUsername('johndoe');
-        $this->user->setVerified(true);
-        $hashedUserPassword = $this->passwordHasher->hashPassword($this->user, 'password');
-        $this->user->setPassword($hashedUserPassword);
-        $this->user->setCreatedAt(new \DateTimeImmutable());
-        $this->user->setUpdatedAt(new \DateTime());
-        $this->manager->persist($this->user);
+        $this->user->setEmail('test@example.com')
+            ->setUsername('testuser')
+            ->setPassword('testpass')
+            ->setRoles(['ROLE_ADMIN']);
 
-        foreach ($this->repository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
+        // Créer un profil avec un avatar par défaut
+        $profile = new Profile();
+        $profile->setAppUser($this->user);
+        $this->user->setProfile($profile);
 
-        $this->manager->flush();
+        // Créer une garde-robe pour l'utilisateur
+        $this->wardrobe = new Wardrobe();
+        $this->wardrobe->setAuthor($this->user)
+            ->setName('Ma garde-robe')
+            ->setDescription('Description de ma garde-robe')
+            ->setCreatedAt(new \DateTimeImmutable());
+
+        // Persister les entités
+        $this->entityManager->persist($this->user);
+        $this->entityManager->persist($profile);
+        $this->entityManager->persist($this->wardrobe);
+        $this->entityManager->flush();
+
+        // Connecter l'utilisateur
+        $this->client->loginUser($this->user);
     }
 
     public function testIndex(): void
     {
-        $this->client->followRedirects();
-        $crawler = $this->client->request('GET', $this->path);
-
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Outfit index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+        $this->client->request('GET', $this->path);
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertSelectorExists('h1');
     }
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
-        $this->client->request('GET', sprintf('%snew', $this->path));
+        $this->client->request('GET', sprintf('%s/new', $this->path));
+        $this->assertResponseStatusCodeSame(200);
 
-        self::assertResponseStatusCodeSame(200);
-
-        $this->client->submitForm('Save', [
-            'outfit[name]' => 'Testing',
-            'outfit[description]' => 'Testing',
-            'outfit[CreatedAt]' => 'Testing',
-            'outfit[UpdateDateAt]' => 'Testing',
-            'outfit[isPublished]' => 'Testing',
-            'outfit[likesCount]' => 'Testing',
-            'outfit[author]' => 'Testing',
+        $this->client->submitForm('Create', [
+            'outfit[name]' => 'Test Outfit',
+            'outfit[description]' => 'Test Description',
+            'outfit[isPublished]' => true
         ]);
 
-        self::assertResponseRedirects($this->path);
+        $this->assertResponseRedirects('/admin/outfit');
 
-        self::assertSame(1, $this->repository->count([]));
+        $outfit = $this->repository->findOneBy(['name' => 'Test Outfit']);
+        $this->assertNotNull($outfit);
+        $this->assertEquals('Test Outfit', $outfit->getName());
+        $this->assertEquals('Test Description', $outfit->getDescription());
+        $this->assertTrue($outfit->getIsPublished());
+    }
+
+    public function testNewWithInvalidData(): void
+    {
+        $this->client->request('GET', sprintf('%s/new', $this->path));
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->client->submitForm('Create', [
+            'outfit[name]' => '', // Nom vide pour déclencher une erreur de validation
+            'outfit[description]' => 'Test Description',
+            'outfit[isPublished]' => true
+        ]);
+
+        $this->assertResponseStatusCodeSame(422); // Unprocessable Entity
+        $this->assertSelectorExists('.text-red-600');
+        $this->assertSelectorTextContains('.text-red-600', 'Le nom est obligatoire');
     }
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new Outfit();
-        $fixture->setName('My Title');
-        $fixture->setDescription('My description');
-        $fixture->setIsPublished(true);
-        $fixture->setAuthor($this->user);
+        // S'assurer que l'utilisateur est connecté avant de créer l'outfit
+        $this->client->loginUser($this->user);
 
-        $this->manager->persist($fixture);
-        $this->manager->flush();
+        $outfit = $this->createOutfit();
+        $this->entityManager->persist($outfit);
+        $this->entityManager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $this->client->request('GET', sprintf('/admin/outfit/%s', $outfit->getId()));
 
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Outfit');
-
-        // Use assertions to check that the properties are properly displayed.
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertSelectorExists('h1');
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new Outfit();
-        $fixture->setName('My Title');
-        $fixture->setDescription('My description');
-        $fixture->setIsPublished(true);
-        $fixture->setAuthor($this->user);
+        $outfit = $this->createOutfit();
+        $this->entityManager->persist($outfit);
+        $this->entityManager->flush();
 
-        $this->manager->persist($fixture);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        $this->client->request('GET', sprintf('%s/%s/edit', $this->path, $outfit->getId()));
+        $this->assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Update', [
-            'outfit[name]' => 'Something New',
-            'outfit[description]' => 'Something New',
-            'outfit[CreatedAt]' => 'Something New',
-            'outfit[UpdateDateAt]' => 'Something New',
-            'outfit[isPublished]' => 'Something New',
-            'outfit[likesCount]' => 'Something New',
-            'outfit[author]' => 'Something New',
+            'outfit[name]' => 'Updated Outfit',
+            'outfit[description]' => 'Updated Description',
+            'outfit[isPublished]' => false
         ]);
 
-        self::assertResponseRedirects('/admin/outfit/');
+        $this->assertResponseRedirects('/admin/outfit');
 
-        $fixture = $this->repository->findAll();
+        $updatedOutfit = $this->repository->find($outfit->getId());
+        $this->assertNotNull($updatedOutfit);
+        $this->assertEquals('Updated Outfit', $updatedOutfit->getName());
+        $this->assertEquals('Updated Description', $updatedOutfit->getDescription());
+        $this->assertFalse($updatedOutfit->getIsPublished());
+    }
 
-        self::assertSame('Something New', $fixture[0]->getName());
-        self::assertSame('Something New', $fixture[0]->getDescription());
-        self::assertSame('Something New', $fixture[0]->getCreatedAt());
-        self::assertSame('Something New', $fixture[0]->getUpdateDateAt());
-        self::assertSame('Something New', $fixture[0]->getIsPublished());
-        self::assertSame('Something New', $fixture[0]->getLikesCount());
-        self::assertSame('Something New', $fixture[0]->getAuthor());
+    public function testEditWithInvalidData(): void
+    {
+        $outfit = $this->createOutfit();
+        $this->entityManager->persist($outfit);
+        $this->entityManager->flush();
+
+        $this->client->request('GET', sprintf('%s/%s/edit', $this->path, $outfit->getId()));
+        $this->assertResponseStatusCodeSame(200);
+
+        $crawler = $this->client->submitForm('Update', [
+            'outfit[name]' => '',
+            'outfit[description]' => 'Updated Description',
+            'outfit[isPublished]' => false
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+        
+        // Debug: afficher le contenu de la réponse
+        var_dump($this->client->getResponse()->getContent());
+        
+        $this->assertSelectorExists('.text-red-600');
+        $this->assertSelectorTextContains('.text-red-600', 'Le nom est obligatoire');
+
+        // Vérifier que l'outfit n'a pas été modifié
+        $unchangedOutfit = $this->repository->find($outfit->getId());
+        $this->assertNotNull($unchangedOutfit);
+        $this->assertNotSame('', $unchangedOutfit->getName());
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new Outfit();
-        $fixture->setName('My Title');
-        $fixture->setDescription('My description');
-        $fixture->setIsPublished(true);
-        $fixture->setAuthor($this->user);
+        $outfit = $this->createOutfit();
+        $this->entityManager->persist($outfit);
+        $this->entityManager->flush();
 
-        $this->manager->persist($fixture);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $crawler = $this->client->request('GET', sprintf('%s/%s', $this->path, $outfit->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/admin/outfit/');
-        self::assertSame(0, $this->repository->count([]));
+        $this->assertResponseRedirects('/admin/outfit');
+        $this->assertEquals(0, $this->repository->count([]));
+    }
+
+    private function createOutfit(): Outfit
+    {
+        $outfit = new Outfit();
+        $outfit->setName('Test Outfit');
+        $outfit->setDescription('Test Description');
+        $outfit->setIsPublished(true);
+        $outfit->setAuthor($this->user);
+        $outfit->setWardrobe($this->wardrobe);
+        $outfit->setCreatedAt(new \DateTimeImmutable());
+        $outfit->setLikesCount(0);
+        $outfit->setUpdateDateAt(new \DateTime());
+
+        return $outfit;
     }
 }

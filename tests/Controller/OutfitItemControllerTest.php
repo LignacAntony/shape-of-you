@@ -2,12 +2,12 @@
 
 namespace App\Tests\Controller;
 
-use App\Entity\CategoryItem;
-use App\Entity\ClothingItem;
-use App\Entity\Outfit;
 use App\Entity\OutfitItem;
 use App\Entity\User;
+use App\Entity\Profile;
 use App\Entity\Wardrobe;
+use App\Entity\ClothingItem;
+use App\Entity\CategoryItem;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -19,171 +19,163 @@ final class OutfitItemControllerTest extends WebTestCase
     private KernelBrowser $client;
     private EntityManagerInterface $manager;
     private EntityRepository $repository;
+    private string $path = '/admin/outfit-item/';
     private User $user;
-    private Outfit $outfit;
     private Wardrobe $wardrobe;
-    private CategoryItem $categoryItem;
     private ClothingItem $clothingItem;
-    private UserPasswordHasherInterface $passwordHasher;
-    private string $path = '/outfit/item/';
+    private CategoryItem $category;
 
     protected function setUp(): void
     {
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(OutfitItem::class);
+        $passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
 
-        $this->user = new User();
-        $this->user->setEmail('user@test.fr');
-        $this->user->setFirstname('John');
-        $this->user->setLastname('Doe');
-        $this->user->setUsername('johndoe');
-        $this->user->setVerified(true);
-        $hashedUserPassword = $this->passwordHasher->hashPassword($this->user, 'password');
-        $this->user->setPassword($hashedUserPassword);
-        $this->user->setCreatedAt(new \DateTimeImmutable());
-        $this->user->setUpdatedAt(new \DateTime());
-        $this->manager->persist($this->user);
-
-        $this->outfit = new Outfit();
-        $this->outfit->setName('My Title');
-        $this->outfit->setDescription('My description');
-        $this->outfit->setIsPublished(true);
-        $this->outfit->setAuthor($this->user);
-        $this->manager->persist($this->outfit);
-
-        $this->wardrobe = new Wardrobe();
-        $this->wardrobe->setAuthor($this->user);
-        $this->wardrobe->setName('Armoire de John Doe');
-        $this->wardrobe->setDescription('Armoire de John Doe');
-        $this->manager->persist($this->wardrobe);
-
-        $this->categoryItem = new CategoryItem();
-        $this->categoryItem->setName('Vêtements');
-        $this->categoryItem->setDesription('Catégorie des vêtements');
-        $this->manager->persist($this->categoryItem);
-
-        $this->clothingItem = new ClothingItem();
-        $this->clothingItem->setCategory($this->categoryItem);
-        $this->clothingItem->setName('Nike Air Max 90');
-        $this->clothingItem->setDescription('Les meilleures baskets du monde !');
-        $this->clothingItem->setPrice('120');
-        $this->clothingItem->setColor('Blanc');
-        $this->clothingItem->setBrand('Nike');
-        $this->manager->persist($this->clothingItem);
-
-        foreach ($this->repository->findAll() as $object) {
+        // Clean up database
+        foreach ($this->manager->getRepository(OutfitItem::class)->findAll() as $object) {
             $this->manager->remove($object);
         }
+        foreach ($this->manager->getRepository(ClothingItem::class)->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        foreach ($this->manager->getRepository(Wardrobe::class)->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        foreach ($this->manager->getRepository(CategoryItem::class)->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        foreach ($this->manager->getRepository(Profile::class)->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        foreach ($this->manager->getRepository(User::class)->findAll() as $object) {
+            $this->manager->remove($object);
+        }
+        $this->manager->flush();
+
+        // Create user
+        $this->user = new User();
+        $this->user->setEmail('test@example.com');
+        $this->user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
+        $this->user->setPassword($passwordHasher->hashPassword($this->user, 'test123'));
+
+        // Create profile
+        $profile = new Profile();
+        $profile->setAppUser($this->user);
+        $this->user->setProfile($profile);
+
+        $this->manager->persist($this->user);
+        $this->manager->persist($profile);
+
+        // Create category
+        $this->category = new CategoryItem();
+        $this->category->setName('Test Category');
+        $this->category->setDescription('Test Description');
+        $this->manager->persist($this->category);
+
+        // Create wardrobe
+        $this->wardrobe = new Wardrobe();
+        $this->wardrobe->setName('Test Wardrobe');
+        $this->wardrobe->setDescription('Test Description');
+        $this->wardrobe->setAuthor($this->user);
+        $this->manager->persist($this->wardrobe);
+
+        // Create clothing item
+        $this->clothingItem = new ClothingItem();
+        $this->clothingItem->setName('Test Clothing');
+        $this->clothingItem->setCategory($this->category);
+        $this->clothingItem->setColor('Black');
+        $this->clothingItem->setCreatedAt(new \DateTimeImmutable('2025-02-23 09:39:03'));
+        $this->manager->persist($this->clothingItem);
 
         $this->manager->flush();
+
+        $this->client->loginUser($this->user);
     }
 
     public function testIndex(): void
     {
-        $this->client->followRedirects();
         $crawler = $this->client->request('GET', $this->path);
-
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('OutfitItem index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+        self::assertPageTitleContains('Liste des éléments de tenue');
     }
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
-        $this->client->request('GET', sprintf('%snew', $this->path));
-
+        $crawler = $this->client->request('GET', sprintf('%snew', $this->path));
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
-            'outfit_item[size]' => 'Testing',
-            'outfit_item[purchaseAt]' => 'Testing',
-            'outfit_item[outfit]' => 'Testing',
-            'outfit_item[clothingItem]' => 'Testing',
-            'outfit_item[wardrobe]' => 'Testing',
+        $this->client->submitForm('Créer', [
+            'outfit_item[size]' => 'M',
+            'outfit_item[purchaseAt]' => '2024-01-01',
+            'outfit_item[clothingItem]' => $this->clothingItem->getId(),
+            'outfit_item[wardrobe]' => $this->wardrobe->getId(),
         ]);
 
-        self::assertResponseRedirects($this->path);
-
+        self::assertResponseRedirects('/admin/outfit-item/');
         self::assertSame(1, $this->repository->count([]));
     }
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
-
         $fixture = new OutfitItem();
-        $fixture->setOutfit($this->outfit);
-        $fixture->setClothingItem($this->clothingItem);
         $fixture->setWardrobe($this->wardrobe);
+        $fixture->setClothingItem($this->clothingItem);
         $fixture->setSize('M');
         $fixture->setPurchaseAt(new \DateTimeImmutable());
 
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-
+        $crawler = $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('OutfitItem');
-
-        // Use assertions to check that the properties are properly displayed.
+        self::assertPageTitleContains('Détails de l\'élément de tenue');
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
         $fixture = new OutfitItem();
-        $fixture->setOutfit($this->outfit);
-        $fixture->setClothingItem($this->clothingItem);
         $fixture->setWardrobe($this->wardrobe);
+        $fixture->setClothingItem($this->clothingItem);
         $fixture->setSize('M');
         $fixture->setPurchaseAt(new \DateTimeImmutable());
 
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        $crawler = $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Update', [
-            'outfit_item[size]' => 'Something New',
-            'outfit_item[purchaseAt]' => 'Something New',
-            'outfit_item[outfit]' => 'Something New',
-            'outfit_item[clothingItem]' => 'Something New',
-            'outfit_item[wardrobe]' => 'Something New',
+        $this->client->submitForm('Mettre à jour', [
+            'outfit_item[size]' => 'L',
+            'outfit_item[purchaseAt]' => '2024-02-01',
+            'outfit_item[clothingItem]' => $this->clothingItem->getId(),
+            'outfit_item[wardrobe]' => $this->wardrobe->getId(),
         ]);
 
-        self::assertResponseRedirects('/outfit/item/');
+        self::assertResponseRedirects('/admin/outfit-item/');
 
         $fixture = $this->repository->findAll();
-
-        self::assertSame('Something New', $fixture[0]->getSize());
-        self::assertSame('Something New', $fixture[0]->getPurchaseAt());
-        self::assertSame('Something New', $fixture[0]->getOutfit());
-        self::assertSame('Something New', $fixture[0]->getClothingItem());
-        self::assertSame('Something New', $fixture[0]->getWardrobe());
+        self::assertSame('L', $fixture[0]->getSize());
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
         $fixture = new OutfitItem();
-        $fixture->setOutfit($this->outfit);
-        $fixture->setClothingItem($this->clothingItem);
         $fixture->setWardrobe($this->wardrobe);
+        $fixture->setClothingItem($this->clothingItem);
         $fixture->setSize('M');
         $fixture->setPurchaseAt(new \DateTimeImmutable());
 
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
+        $crawler = $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Supprimer')->form();
+        $this->client->submit($form);
 
-        self::assertResponseRedirects('/outfit/item/');
+        self::assertResponseRedirects('/admin/outfit-item/');
         self::assertSame(0, $this->repository->count([]));
     }
 }

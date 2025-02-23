@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Entity\Profile;
 
 final class WardrobeControllerTest extends WebTestCase
 {
@@ -17,7 +18,7 @@ final class WardrobeControllerTest extends WebTestCase
     private EntityManagerInterface $manager;
     private EntityRepository $repository;
     private User $user;
-    private string $path = '/wardrobe/';
+    private string $path = '/admin/wardrobe/';
     private UserPasswordHasherInterface $passwordHasher;
 
     protected function setUp(): void
@@ -25,24 +26,38 @@ final class WardrobeControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(Wardrobe::class);
+        $this->passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
 
+        // Clean up the database
+        $this->manager->createQuery('DELETE FROM App\Entity\OutfitItem')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\Outfit')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\Wardrobe')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\Profile')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\User')->execute();
+
+        // Create user
         $this->user = new User();
-        $this->user->setEmail('user@test.fr');
+        $this->user->setEmail('wardrobe-test@test.fr');
         $this->user->setFirstname('John');
         $this->user->setLastname('Doe');
         $this->user->setUsername('johndoe');
         $this->user->setVerified(true);
-        $hashedUserPassword = $this->passwordHasher->hashPassword($this->user, 'password');
-        $this->user->setPassword($hashedUserPassword);
+        $this->user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
+        $hashedPassword = $this->passwordHasher->hashPassword($this->user, 'password');
+        $this->user->setPassword($hashedPassword);
         $this->user->setCreatedAt(new \DateTimeImmutable());
         $this->user->setUpdatedAt(new \DateTime());
+
+        // Create profile for user
+        $profile = new Profile();
+        $profile->setAppUser($this->user);
+        $this->user->setProfile($profile);
+
         $this->manager->persist($this->user);
-
-        foreach ($this->repository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
+        $this->manager->persist($profile);
         $this->manager->flush();
+
+        $this->client->loginUser($this->user);
     }
 
     public function testIndex(): void
@@ -52,87 +67,75 @@ final class WardrobeControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Wardrobe index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
     }
 
     public function testNew(): void
     {
-        $this->markTestIncomplete();
         $this->client->request('GET', sprintf('%snew', $this->path));
-
         self::assertResponseStatusCodeSame(200);
 
-        $this->client->submitForm('Save', [
-            'wardrobe[name]' => 'Testing',
-            'wardrobe[description]' => 'Testing',
-            'wardrobe[createdAt]' => 'Testing',
-            'wardrobe[author]' => 'Testing',
+        $this->client->submitForm('Create', [
+            'wardrobe[name]' => 'Test Wardrobe',
+            'wardrobe[description]' => 'Test Description',
         ]);
 
-        self::assertResponseRedirects($this->path);
-
+        self::assertResponseRedirects('/admin/wardrobe');
         self::assertSame(1, $this->repository->count([]));
+
+        $wardrobe = $this->repository->findOneBy(['name' => 'Test Wardrobe']);
+        self::assertNotNull($wardrobe);
+        self::assertSame('Test Description', $wardrobe->getDescription());
     }
 
     public function testShow(): void
     {
-        $this->markTestIncomplete();
-
         $fixture = new Wardrobe();
+        $fixture->setName('Test Wardrobe');
+        $fixture->setDescription('Test Description');
         $fixture->setAuthor($this->user);
-        $fixture->setName('Armoire de John Doe');
-        $fixture->setDescription('Armoire de John Doe');
+        $fixture->setCreatedAt(new \DateTimeImmutable());
 
         $this->manager->persist($fixture);
         $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Wardrobe');
-
-        // Use assertions to check that the properties are properly displayed.
     }
 
     public function testEdit(): void
     {
-        $this->markTestIncomplete();
         $fixture = new Wardrobe();
+        $fixture->setName('Test Wardrobe');
+        $fixture->setDescription('Test Description');
         $fixture->setAuthor($this->user);
-        $fixture->setName('Armoire de John Doe');
-        $fixture->setDescription('Armoire de John Doe');
+        $fixture->setCreatedAt(new \DateTimeImmutable());
 
         $this->manager->persist($fixture);
         $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Update', [
-            'wardrobe[name]' => 'Something New',
-            'wardrobe[description]' => 'Something New',
-            'wardrobe[createdAt]' => 'Something New',
-            'wardrobe[author]' => 'Something New',
+            'wardrobe[name]' => 'Updated Wardrobe',
+            'wardrobe[description]' => 'Updated Description',
         ]);
 
-        self::assertResponseRedirects('/wardrobe/');
+        self::assertResponseRedirects('/admin/wardrobe');
 
-        $fixture = $this->repository->findAll();
-
-        self::assertSame('Something New', $fixture[0]->getName());
-        self::assertSame('Something New', $fixture[0]->getDescription());
-        self::assertSame('Something New', $fixture[0]->getCreatedAt());
-        self::assertSame('Something New', $fixture[0]->getAuthor());
+        $updatedWardrobe = $this->repository->findOneBy(['id' => $fixture->getId()]);
+        self::assertSame('Updated Wardrobe', $updatedWardrobe->getName());
+        self::assertSame('Updated Description', $updatedWardrobe->getDescription());
     }
 
     public function testRemove(): void
     {
-        $this->markTestIncomplete();
         $fixture = new Wardrobe();
+        $fixture->setName('Test Wardrobe');
+        $fixture->setDescription('Test Description');
         $fixture->setAuthor($this->user);
-        $fixture->setName('Armoire de John Doe');
-        $fixture->setDescription('Armoire de John Doe');
+        $fixture->setCreatedAt(new \DateTimeImmutable());
 
         $this->manager->persist($fixture);
         $this->manager->flush();
@@ -140,7 +143,7 @@ final class WardrobeControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/wardrobe/');
+        self::assertResponseRedirects('/admin/wardrobe');
         self::assertSame(0, $this->repository->count([]));
     }
 }

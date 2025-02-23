@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Entity\User;
 use App\Entity\Outfit;
 use App\Entity\OutfitItem;
 use App\Entity\ClothingItem;
@@ -47,6 +46,8 @@ final class WardrobeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $wardrobe->setAuthor($this->getUser());
+            $wardrobe->setCreatedAt(new \DateTimeImmutable());
             $entityManager->persist($wardrobe);
             $entityManager->flush();
 
