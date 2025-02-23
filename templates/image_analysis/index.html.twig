@@ -20,8 +20,9 @@
         {% if analysis %}
             <div class="alert alert-success mt-4">
                 <h4>Résultat de l'analyse :</h4>
-                <p>{{ analysis }}</p>
+                <pre>{{ analysis|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
             </div>
         {% endif %}
+
     </div>
 {% endblock %}

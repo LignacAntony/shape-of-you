@@ -30,41 +30,67 @@ class ImageAnalysisController extends AbstractController
 
             if ($file) {
                 try {
-                    // Convertir l'image en base64
                     $imageData = file_get_contents($file->getPathname());
                     $base64Image = base64_encode($imageData);
                     $imageMimeType = $file->getMimeType(); // Type MIME
 
-                    // Initialisation du client OpenAI
                     $client = OpenAI::client($apiKey);
 
-                    // Envoi de la requête à GPT-4o en structurant correctement le message
                     $response = $client->chat()->create([
-                        'model' => 'gpt-4o', // Modèle le plus récent compatible avec les images
+                        'model' => 'gpt-4o',
                         'messages' => [
                             [
                                 "role" => "system",
-                                "content" => "Tu es un assistant spécialisé en analyse de mode et de vêtements.",
+                                "content" => "Tu es un expert en mode et vêtements. Fournis une analyse détaillée des vêtements visibles dans l'image.",
                             ],
                             [
                                 "role" => "user",
                                 "content" => [
-                                    ["type" => "text", "text" => "Décris précisément les vêtements visibles sur cette image : type (t-shirt, pantalon, veste...), couleur et style. Et trouve la marque"],
+                                    ["type" => "text", "text" => "Analyse l'image et retourne un **JSON strictement valide**, sous la forme d'un **tableau** (array) si plusieurs vêtements sont détectés.
+                Chaque vêtement doit être un objet JSON contenant :
+                [
+                    {
+                        'nom': 'Nom du vêtement identifiable (ex: T-shirt Adidas Classic)',
+                        'categorie': 'Une des catégories suivantes : [T-shirts, Chemises, Débardeurs, Pulls, Robes, Manteaux, Vestes, Pantalons, Shorts, Jupes, Chaussures, Bottes, Sandales, Accessoires, Ceintures, Écharpes, Maillots de bain, Lingerie, Pyjamas]',
+                        'description': 'Une brève description du vêtement, son style, sa coupe et ses matériaux',
+                        'marque': 'Si une marque est identifiable, sinon null',
+                        'couleur_hex': 'Code couleur en format HEXA (ex: #FF5733)',
+                        'prix': 'Prix estimé du vêtement en euros (ex: 49.99)',
+                        'site': 'URL du site où acheter le vêtement (tu peux t'aider de la marque), sinon null'
+                    }
+                ]
+                Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets aucun texte avant ou après."],
                                     ["type" => "image_url", "image_url" => [
                                         "url" => "data:$imageMimeType;base64,$base64Image",
                                     ]],
                                 ],
                             ],
                         ],
-                        'max_tokens' => 300,
+                        'max_tokens' => 700,
                         'temperature' => 0.5,
                     ]);
 
-                    // Récupération du texte généré par OpenAI
-                    $analysis = $response->choices[0]->message->content ?? 'Aucune description disponible.';
+
+                    $jsonResponse = $response->choices[0]->message->content ?? '[]';
+
+                    $jsonResponse = trim($jsonResponse); // Supprime les espaces blancs en début et fin
+                    $jsonResponse = preg_replace('/^```json\s*|\s*```$/', '', $jsonResponse); // Supprime les backticks et "json"
+
+                    preg_match('/\[.*\]/s', $jsonResponse, $matches);
+                    $jsonResponse = $matches[0] ?? '[]';
+
+                    $analysis = json_decode($jsonResponse, true);
+
+                    if (!$analysis || !is_array($analysis) || empty($analysis)) {
+                        file_put_contents('logs/openai_response.log', "Réponse brute : " . $jsonResponse . "\n", FILE_APPEND);
+                        $error = 'Erreur lors du traitement des données. Vérifie le log openai_response.log.';
+                    }
+
                 } catch (\Exception $e) {
                     $error = 'Erreur lors de l\'analyse de l\'image : ' . $e->getMessage();
                 }
+
+
             } else {
                 $error = "Veuillez télécharger une image valide.";
             }
