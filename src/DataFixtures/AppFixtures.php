@@ -461,14 +461,14 @@ class AppFixtures extends Fixture
         foreach ($wardrobes as $wardrobe) {
             if (isset($outfitData[$wardrobe->getName()])) {
                 foreach ($outfitData[$wardrobe->getName()] as $data) {
-                    $outfit = new Outfit();
+        $outfit = new Outfit();
                     $outfit->setName($data['name']);
                     $outfit->setDescription($data['description']);
-                    $outfit->setAuthor($user);
+        $outfit->setAuthor($user);
                     $outfit->setWardrobe($wardrobe);
                     $outfit->setCreatedAt(new \DateTimeImmutable());
                     $outfit->setLikesCount(0);
-                    $outfit->setIsPublished(true);
+        $outfit->setIsPublished(true);
 
                     // Télécharger l'image de la tenue
                     if (isset($data['imageUrl'])) {
@@ -478,16 +478,16 @@ class AppFixtures extends Fixture
                         }
                     }
 
-                    $manager->persist($outfit);
+        $manager->persist($outfit);
 
                     // Ajouter les vêtements à la tenue
                     foreach ($data['items'] as $index) {
                         if (isset($this->clothingItems[$index])) {
-                            $outfitItem = new OutfitItem();
+        $outfitItem = new OutfitItem();
                             $outfitItem->setClothingItem($this->clothingItems[$index]);
-                            $outfitItem->setWardrobe($wardrobe);
-                            $outfitItem->setSize('M');
-                            $manager->persist($outfitItem);
+        $outfitItem->setWardrobe($wardrobe);
+        $outfitItem->setSize('M');
+        $manager->persist($outfitItem);
 
                             // Ajouter le vêtement à la collection de l'outfit
                             $outfit->addOutfitItem($outfitItem);

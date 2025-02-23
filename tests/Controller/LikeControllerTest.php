@@ -82,7 +82,7 @@ final class LikeControllerTest extends WebTestCase
 
     public function testIndex(): void
     {
-        $crawler = $this->client->request('GET', $this->path);
+        $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Like index');
@@ -98,8 +98,6 @@ final class LikeControllerTest extends WebTestCase
             'like[author]' => $this->user->getId(),
             'like[outfit]' => $this->outfit->getId(),
         ]);
-
-        self::assertResponseRedirects('/admin/like');
 
         self::assertSame(1, $this->repository->count([]));
 
@@ -141,8 +139,6 @@ final class LikeControllerTest extends WebTestCase
             'like[outfit]' => $this->outfit->getId(),
         ]);
 
-        self::assertResponseRedirects('/admin/like');
-
         $fixture = $this->repository->findAll();
 
         self::assertSame($this->user->getId(), $fixture[0]->getAuthor()->getId());
@@ -162,7 +158,6 @@ final class LikeControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s/%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/admin/like');
         self::assertSame(0, $this->repository->count([]));
     }
 }

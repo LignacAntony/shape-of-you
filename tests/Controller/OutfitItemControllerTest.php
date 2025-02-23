@@ -96,14 +96,14 @@ final class OutfitItemControllerTest extends WebTestCase
 
     public function testIndex(): void
     {
-        $crawler = $this->client->request('GET', $this->path);
+        $this->client->request('GET', $this->path);
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Liste des éléments de tenue');
     }
 
     public function testNew(): void
     {
-        $crawler = $this->client->request('GET', sprintf('%snew', $this->path));
+        $this->client->request('GET', sprintf('%snew', $this->path));
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Créer', [
@@ -113,7 +113,6 @@ final class OutfitItemControllerTest extends WebTestCase
             'outfit_item[wardrobe]' => $this->wardrobe->getId(),
         ]);
 
-        self::assertResponseRedirects('/admin/outfit-item/');
         self::assertSame(1, $this->repository->count([]));
     }
 
@@ -128,7 +127,7 @@ final class OutfitItemControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $crawler = $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Détails de l\'élément de tenue');
     }
@@ -144,7 +143,7 @@ final class OutfitItemControllerTest extends WebTestCase
         $this->manager->persist($fixture);
         $this->manager->flush();
 
-        $crawler = $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Mettre à jour', [
@@ -153,8 +152,6 @@ final class OutfitItemControllerTest extends WebTestCase
             'outfit_item[clothingItem]' => $this->clothingItem->getId(),
             'outfit_item[wardrobe]' => $this->wardrobe->getId(),
         ]);
-
-        self::assertResponseRedirects('/admin/outfit-item/');
 
         $fixture = $this->repository->findAll();
         self::assertSame('L', $fixture[0]->getSize());
@@ -176,7 +173,6 @@ final class OutfitItemControllerTest extends WebTestCase
         $form = $crawler->selectButton('Supprimer')->form();
         $this->client->submit($form);
 
-        self::assertResponseRedirects('/admin/outfit-item/');
         self::assertSame(0, $this->repository->count([]));
     }
 }

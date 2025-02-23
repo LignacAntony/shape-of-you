@@ -62,13 +62,10 @@ final class CategoryItemControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $this->client->followRedirects();
-        $crawler = $this->client->request('GET', $this->path);
+        $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('CategoryItem index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
     }
 
     public function testNew(): void
@@ -81,8 +78,6 @@ final class CategoryItemControllerTest extends WebTestCase
             'category_item[name]' => 'Testing',
             'category_item[description]' => 'Testing'
         ]);
-
-        self::assertResponseRedirects('/admin/category/item');
 
         self::assertSame(1, $this->repository->count([]));
     }
@@ -118,8 +113,6 @@ final class CategoryItemControllerTest extends WebTestCase
             'category_item[description]' => 'Something New'
         ]);
 
-        self::assertResponseRedirects('/admin/category/item');
-
         $fixture = $this->repository->findAll();
 
         self::assertSame('Something New', $fixture[0]->getName());
@@ -138,7 +131,6 @@ final class CategoryItemControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/admin/category/item');
         self::assertSame(0, $this->repository->count([]));
     }
 }

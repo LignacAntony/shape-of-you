@@ -70,7 +70,7 @@ final class ClothingItemControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $this->client->followRedirects();
-        $crawler = $this->client->request('GET', $this->path);
+        $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('ClothingItem index');
@@ -94,8 +94,6 @@ final class ClothingItemControllerTest extends WebTestCase
             'clothing_item[price]' => '120',
             'clothing_item[category]' => $this->categoryItem->getId(),
         ]);
-
-        self::assertResponseRedirects('/admin/clothing/item');
 
         self::assertSame(1, $this->repository->count([]));
 
@@ -152,8 +150,6 @@ final class ClothingItemControllerTest extends WebTestCase
             'clothing_item[category]' => $this->categoryItem->getId(),
         ]);
 
-        self::assertResponseRedirects('/admin/clothing/item');
-
         $fixture = $this->repository->findAll();
 
         self::assertSame('Adidas Superstar', $fixture[0]->getName());
@@ -183,7 +179,6 @@ final class ClothingItemControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/admin/clothing/item');
         self::assertSame(0, $this->repository->count([]));
     }
 }

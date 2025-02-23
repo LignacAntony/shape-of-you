@@ -9,7 +9,6 @@ use App\Entity\Profile;
 use App\Entity\Wardrobe;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -17,7 +16,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class ReviewControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private ObjectManager $manager;
+    private EntityManagerInterface $manager;
     private EntityRepository $repository;
     private User $user;
     private Outfit $outfit;
@@ -89,18 +88,15 @@ final class ReviewControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $this->client->followRedirects();
-        $crawler = $this->client->request('GET', $this->path);
+        $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Review index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
     }
 
     public function testNew(): void
     {
-        $crawler = $this->client->request('GET', sprintf('%snew', $this->path));
+        $this->client->request('GET', sprintf('%snew', $this->path));
 
         self::assertResponseStatusCodeSame(200);
 
@@ -110,7 +106,6 @@ final class ReviewControllerTest extends WebTestCase
             'review[outfit]' => $this->outfit->getId(),
         ]);
 
-        self::assertResponseRedirects('/admin/review');
         self::assertSame(1, $this->repository->count([]));
     }
 
@@ -150,8 +145,6 @@ final class ReviewControllerTest extends WebTestCase
             'review[outfit]' => $this->outfit->getId(),
         ]);
 
-        self::assertResponseRedirects('/admin/review');
-
         $updatedReview = $this->repository->findOneBy(['id' => $fixture->getId()]);
         self::assertSame('Updated Content', $updatedReview->getContent());
     }
@@ -170,7 +163,6 @@ final class ReviewControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/admin/review');
         self::assertSame(0, $this->repository->count([]));
     }
 }

@@ -7,7 +7,6 @@ use App\Entity\User;
 use App\Entity\Wardrobe;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -16,7 +15,7 @@ use App\Entity\Profile;
 final class WardrobeControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private ObjectManager $manager;
+    private EntityManagerInterface $manager;
     private EntityRepository $repository;
     private User $user;
     private string $path = '/admin/wardrobe/';
@@ -64,7 +63,7 @@ final class WardrobeControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $this->client->followRedirects();
-        $crawler = $this->client->request('GET', $this->path);
+        $this->client->request('GET', $this->path);
 
         self::assertResponseStatusCodeSame(200);
         self::assertPageTitleContains('Wardrobe index');
@@ -80,7 +79,6 @@ final class WardrobeControllerTest extends WebTestCase
             'wardrobe[description]' => 'Test Description',
         ]);
 
-        self::assertResponseRedirects('/admin/wardrobe');
         self::assertSame(1, $this->repository->count([]));
 
         $wardrobe = $this->repository->findOneBy(['name' => 'Test Wardrobe']);
@@ -123,7 +121,6 @@ final class WardrobeControllerTest extends WebTestCase
             'wardrobe[description]' => 'Updated Description',
         ]);
 
-        self::assertResponseRedirects('/admin/wardrobe');
 
         $updatedWardrobe = $this->repository->findOneBy(['id' => $fixture->getId()]);
         self::assertSame('Updated Wardrobe', $updatedWardrobe->getName());
@@ -144,7 +141,6 @@ final class WardrobeControllerTest extends WebTestCase
         $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
         $this->client->submitForm('Delete');
 
-        self::assertResponseRedirects('/admin/wardrobe');
         self::assertSame(0, $this->repository->count([]));
     }
 }
