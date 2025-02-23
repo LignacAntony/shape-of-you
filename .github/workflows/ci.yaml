@@ -17,7 +17,6 @@ jobs:
         with:
           php-version: '8.3'
           tools: composer
-          extensions: pdo_pgsql
 
       - name: "Cache vendor"
         uses: actions/cache@v4
@@ -28,19 +27,22 @@ jobs:
       - name: "Setup Environment"
         run: |
           echo "APP_ENV=test" >> .env
-          echo "POSTGRES_VERSION=16" >> .env
-          echo "POSTGRES_DB=shape_of_you_test" >> .env
-          echo "POSTGRES_USER=postgres" >> .env
-          echo "POSTGRES_PASSWORD=postgres" >> .env
-          echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/shape_of_you_test?serverVersion=16&charset=utf8" >> .env
+          echo "POSTGRES_VERSION=${{ secrets.POSTGRES_VERSION }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "ADMINER_PORT=${{ secrets.ADMINER_PORT }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
           echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env
           echo "SYMFONY_DEPRECATIONS_HELPER=disabled=1" >> .env
           echo "PANTHER_ERROR_SCREENSHOT_DIR=./var/error-screenshots" >> .env
+          echo "SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT=1" >> .env
           echo "SYMFONY_PHPUNIT_VERSION=9.5" >> .env
           echo "SYMFONY_PHPUNIT_DIR=./var/cache/phpunit" >> .env
+          echo "SYMFONY_DEPRECATIONS_HELPER=999999" >> .env
           echo "PANTHER_APP_ENV=test" >> .env
           echo "SYMFONY_PROFILER=0" >> .env
-          echo "APP_DEBUG=0" >> .env
+          cat .env
 
       - name: "Install Dependencies"
         run: composer install --prefer-dist --no-interaction --no-progress
@@ -93,16 +95,16 @@ jobs:
         run: composer analyse --memory-limit=1G
 
   phpunit:
-    name: "PHPUnit tests"
+    name: "PHPUnit Tests"
     needs: deps
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: shape_of_you_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -119,37 +121,32 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: pdo_pgsql
           tools: composer
+          extensions: pdo_pgsql
 
-      - name: "Cache vendor"
+      - name: "Restore vendor cache"
         uses: actions/cache@v4
         with:
           path: vendor
           key: composer-${{ hashFiles('**/composer.lock') }}
 
-      - name: "Install Dependencies"
-        run: composer install --prefer-dist --no-interaction --no-progress
-
-      - name: "Setup Test Environment"
+      - name: "Create .env.test.local"
         run: |
-          echo "APP_ENV=test" >> .env
-          echo "POSTGRES_VERSION=16" >> .env
-          echo "POSTGRES_DB=shape_of_you_test" >> .env
-          echo "POSTGRES_USER=postgres" >> .env
-          echo "POSTGRES_PASSWORD=postgres" >> .env
-          echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/shape_of_you_test?serverVersion=16&charset=utf8" >> .env
-          echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env
-          echo "APP_DEBUG=0" >> .env
-          echo "SYMFONY_PROFILER=0" >> .env
-
-      - name: "Create Database & Schema"
+            echo "DATABASE_URL=\"postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16&charset=utf8\"" > .env.test.local
+  
+      - name: "Create Database"
         run: |
           php bin/console doctrine:database:create --env=test --if-not-exists
           php bin/console doctrine:schema:create --env=test
 
+      - name: Load fixtures
+        run: |
+          php bin/console --env=test doctrine:fixtures:load --no-interaction
+
       - name: "Run PHPUnit Tests"
-        run: vendor/bin/phpunit
+        env:
+            DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16&charset=utf8
+        run: vendor/bin/phpunit --display-warnings=false --display-deprecations=false --no-coverage
 
   # docker-install:
   #   name: "Docker Install"
