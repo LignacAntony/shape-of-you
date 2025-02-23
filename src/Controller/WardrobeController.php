@@ -21,6 +21,8 @@ use App\Repository\CategoryItemRepository;
 use App\Form\OutfitItemType;
 use App\Form\OutfitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Core\User\UserInterface;
+
 
 final class WardrobeController extends AbstractController
 {
@@ -398,7 +400,9 @@ final class WardrobeController extends AbstractController
         }
 
         try {
-            $wardrobe->setAuthor($this->getUser());
+            /** @var User $user */
+            $user = $this->getUser();
+            $wardrobe->setAuthor($user);
             $wardrobe->setCreatedAt(new \DateTimeImmutable());
 
             // Gestion de l'image
