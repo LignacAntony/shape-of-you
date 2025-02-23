@@ -43,12 +43,12 @@ final class LikeControllerTest extends WebTestCase
         $this->user->setEmail('admin@test.com');
         $this->user->setRoles(['ROLE_ADMIN']);
         $this->user->setPassword($this->passwordHasher->hashPassword($this->user, 'test123'));
-        
+
         // Create profile for admin user
         $profile = new Profile();
         $profile->setAppUser($this->user);
         $this->user->setProfile($profile);
-        
+
         $this->manager->persist($this->user);
         $this->manager->persist($profile);
 
