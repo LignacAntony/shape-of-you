@@ -3,39 +3,41 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Outfit;
-use App\Entity\User;
 use App\Entity\Profile;
+use App\Entity\User;
 use App\Entity\Wardrobe;
+use App\Repository\OutfitRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\Persistence\ObjectManager;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser as Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class OutfitControllerTest extends WebTestCase
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $entityManager;
-    private EntityRepository $repository;
     private string $path = '/admin/outfit';
-    private UserPasswordHasherInterface $passwordHasher;
+
+    private EntityManagerInterface $manager;
+
+    private OutfitRepository $repository;
+
+    private Client $client;
+
     private User $user;
+
     private Wardrobe $wardrobe;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->client = static::createClient();
-        $this->entityManager = $this->client->getContainer()->get('doctrine')->getManager();
-        $this->repository = $this->entityManager->getRepository(Outfit::class);
+        $this->manager = $this->client->getContainer()->get('doctrine')->getManager();
+        $this->repository = $this->manager->getRepository(Outfit::class);
 
         // Nettoyer la base de données
-        $this->entityManager->createQuery('DELETE FROM App\Entity\Outfit')->execute();
-        $this->entityManager->createQuery('DELETE FROM App\Entity\OutfitItem')->execute();
-        $this->entityManager->createQuery('DELETE FROM App\Entity\Wardrobe')->execute();
-        $this->entityManager->createQuery('DELETE FROM App\Entity\Profile')->execute();
-        $this->entityManager->createQuery('DELETE FROM App\Entity\User')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\Outfit')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\OutfitItem')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\Wardrobe')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\Profile')->execute();
+        $this->manager->createQuery('DELETE FROM App\Entity\User')->execute();
 
         // Créer un utilisateur admin
         $this->user = new User();
@@ -57,10 +59,10 @@ final class OutfitControllerTest extends WebTestCase
             ->setCreatedAt(new \DateTimeImmutable());
 
         // Persister les entités
-        $this->entityManager->persist($this->user);
-        $this->entityManager->persist($profile);
-        $this->entityManager->persist($this->wardrobe);
-        $this->entityManager->flush();
+        $this->manager->persist($this->user);
+        $this->manager->persist($profile);
+        $this->manager->persist($this->wardrobe);
+        $this->manager->flush();
 
         // Connecter l'utilisateur
         $this->client->loginUser($this->user);
@@ -115,8 +117,8 @@ final class OutfitControllerTest extends WebTestCase
         $this->client->loginUser($this->user);
 
         $outfit = $this->createOutfit();
-        $this->entityManager->persist($outfit);
-        $this->entityManager->flush();
+        $this->manager->persist($outfit);
+        $this->manager->flush();
 
         $this->client->request('GET', sprintf('/admin/outfit/%s', $outfit->getId()));
 
@@ -127,8 +129,8 @@ final class OutfitControllerTest extends WebTestCase
     public function testEdit(): void
     {
         $outfit = $this->createOutfit();
-        $this->entityManager->persist($outfit);
-        $this->entityManager->flush();
+        $this->manager->persist($outfit);
+        $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s/%s/edit', $this->path, $outfit->getId()));
         $this->assertResponseStatusCodeSame(200);
@@ -151,8 +153,8 @@ final class OutfitControllerTest extends WebTestCase
     public function testEditWithInvalidData(): void
     {
         $outfit = $this->createOutfit();
-        $this->entityManager->persist($outfit);
-        $this->entityManager->flush();
+        $this->manager->persist($outfit);
+        $this->manager->flush();
 
         $this->client->request('GET', sprintf('%s/%s/edit', $this->path, $outfit->getId()));
         $this->assertResponseStatusCodeSame(200);
@@ -164,10 +166,10 @@ final class OutfitControllerTest extends WebTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(422);
-        
+
         // Debug: afficher le contenu de la réponse
         var_dump($this->client->getResponse()->getContent());
-        
+
         $this->assertSelectorExists('.text-red-600');
         $this->assertSelectorTextContains('.text-red-600', 'Le nom est obligatoire');
 
@@ -180,8 +182,8 @@ final class OutfitControllerTest extends WebTestCase
     public function testRemove(): void
     {
         $outfit = $this->createOutfit();
-        $this->entityManager->persist($outfit);
-        $this->entityManager->flush();
+        $this->manager->persist($outfit);
+        $this->manager->flush();
 
         $crawler = $this->client->request('GET', sprintf('%s/%s', $this->path, $outfit->getId()));
         $this->client->submitForm('Delete');

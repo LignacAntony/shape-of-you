@@ -72,7 +72,7 @@ class OutfitItemType extends AbstractType
                     'attr' => [
                         'class' => 'space-y-2'
                     ],
-                    'choice_attr' => function() {
+                    'choice_attr' => function () {
                         return ['class' => 'mr-2'];
                     },
                     'label_attr' => [

@@ -39,12 +39,12 @@ final class CategoryItemControllerTest extends WebTestCase
         $user->setEmail('admin@test.com');
         $user->setRoles(['ROLE_ADMIN']);
         $user->setPassword($this->passwordHasher->hashPassword($user, 'test123'));
-        
+
         // Create profile for admin user
         $profile = new Profile();
         $profile->setAppUser($user);
         $user->setProfile($profile);
-        
+
         $this->manager->persist($user);
         $this->manager->persist($profile);
         $this->manager->flush();

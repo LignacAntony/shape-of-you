@@ -47,7 +47,9 @@ final class OutfitController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $outfit = new Outfit();
-        $outfit->setAuthor($this->getUser());
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $outfit->setAuthor($user);
         $outfit->setCreatedAt(new \DateTimeImmutable());
         $outfit->setLikesCount(0);
 

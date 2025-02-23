@@ -22,7 +22,6 @@ use App\Form\OutfitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-
 final class WardrobeController extends AbstractController
 {
     public function __construct(
@@ -44,12 +43,14 @@ final class WardrobeController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $wardrobe = new Wardrobe();
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $wardrobe->setAuthor($user);
+        $wardrobe->setCreatedAt(new \DateTimeImmutable());
         $form = $this->createForm(WardrobeType::class, $wardrobe);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $wardrobe->setAuthor($this->getUser());
-            $wardrobe->setCreatedAt(new \DateTimeImmutable());
             $entityManager->persist($wardrobe);
             $entityManager->flush();
 
@@ -373,36 +374,37 @@ final class WardrobeController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function createWardrobe(Request $request): JsonResponse
     {
-        $wardrobe = new Wardrobe();
-        $form = $this->createForm(WardrobeType::class, $wardrobe);
-        $form->handleRequest($request);
+        try {
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $data = json_decode($request->getContent(), true);
+            $wardrobe = new Wardrobe();
+            $form = $this->createForm(WardrobeType::class, $wardrobe);
+            $form->submit($data);
 
-        if (!$form->isSubmitted()) {
-            return $this->json([
-                'status' => 'error',
-                'message' => 'Le formulaire n\'a pas été soumis correctement.'
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        if (!$form->isValid()) {
-            $errors = [];
-            foreach ($form->getErrors(true) as $error) {
-                $errors[] = [
-                    'field' => $error->getOrigin()->getName(),
-                    'message' => $error->getMessage()
-                ];
+            if (!$form->isSubmitted()) {
+                return $this->json([
+                    'status' => 'error',
+                    'message' => 'Le formulaire n\'a pas été soumis correctement.'
+                ], Response::HTTP_BAD_REQUEST);
             }
 
-            return $this->json([
-                'status' => 'error',
-                'message' => 'Le formulaire contient des erreurs.',
-                'field_errors' => $errors
-            ], Response::HTTP_BAD_REQUEST);
-        }
+            if (!$form->isValid()) {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $errors[] = [
+                        'field' => $error->getOrigin()->getName(),
+                        'message' => $error->getMessage()
+                    ];
+                }
 
-        try {
-            /** @var User $user */
-            $user = $this->getUser();
+                return $this->json([
+                    'status' => 'error',
+                    'message' => 'Le formulaire contient des erreurs.',
+                    'field_errors' => $errors
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
             $wardrobe->setAuthor($user);
             $wardrobe->setCreatedAt(new \DateTimeImmutable());
 

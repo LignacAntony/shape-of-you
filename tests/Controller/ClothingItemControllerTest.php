@@ -41,12 +41,12 @@ final class ClothingItemControllerTest extends WebTestCase
         $user->setEmail('admin@test.com');
         $user->setRoles(['ROLE_ADMIN']);
         $user->setPassword($this->passwordHasher->hashPassword($user, 'test123'));
-        
+
         // Create profile for admin user
         $profile = new Profile();
         $profile->setAppUser($user);
         $user->setProfile($profile);
-        
+
         $this->manager->persist($user);
         $this->manager->persist($profile);
         $this->manager->flush();
@@ -106,7 +106,7 @@ final class ClothingItemControllerTest extends WebTestCase
     public function testShow(): void
     {
         $createdAt = new \DateTimeImmutable();
-        
+
         $fixture = new ClothingItem();
         $fixture->setCategory($this->categoryItem);
         $fixture->setName('Nike Air Max 90');
@@ -128,7 +128,7 @@ final class ClothingItemControllerTest extends WebTestCase
     public function testEdit(): void
     {
         $createdAt = new \DateTimeImmutable();
-        
+
         $fixture = new ClothingItem();
         $fixture->setCategory($this->categoryItem);
         $fixture->setName('Nike Air Max 90');
@@ -167,7 +167,7 @@ final class ClothingItemControllerTest extends WebTestCase
     public function testRemove(): void
     {
         $createdAt = new \DateTimeImmutable();
-        
+
         $fixture = new ClothingItem();
         $fixture->setCategory($this->categoryItem);
         $fixture->setName('Nike Air Max 90');
