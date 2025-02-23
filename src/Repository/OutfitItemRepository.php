@@ -7,6 +7,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\User;
 use App\Entity\Outfit;
+use Symfony\Component\Security\Core\User\UserInterface;
+
 
 /**
  * @extends ServiceEntityRepository<OutfitItem>
@@ -18,7 +20,7 @@ class OutfitItemRepository extends ServiceEntityRepository
         parent::__construct($registry, OutfitItem::class);
     }
 
-    public function findOutfitItemWithAccessCheck(int $outfitItemId, int $outfitId, User $user): ?OutfitItem
+    public function findOutfitItemWithAccessCheck(int $outfitItemId, int $outfitId, ?UserInterface $user): ?OutfitItem
     {
         return $this->createQueryBuilder('oi')
             ->andWhere('oi.id = :outfitItemId')
@@ -42,7 +44,7 @@ class OutfitItemRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findOutfitItemsByUser(User $user): array
+    public function findOutfitItemsByUser(?UserInterface $user): array
     {
         return $this->createQueryBuilder('oi')
             ->join('oi.wardrobe', 'w')

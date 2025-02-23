@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Entity\Profile;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -15,7 +16,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class ClothingItemControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private EntityManagerInterface $manager;
+    private ObjectManager $manager;
     private EntityRepository $repository;
     private CategoryItem $categoryItem;
     private string $path = '/admin/clothing/item/';
@@ -81,7 +82,9 @@ final class ClothingItemControllerTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(200);
 
-        $createdAt = new \DateTimeImmutable();
+        $category = new CategoryItem();
+        $category->setName('Test Category');
+        $category->setDescription('Test Description');
 
         $this->client->submitForm('Create', [
             'clothing_item[name]' => 'Nike Air Max 90',
