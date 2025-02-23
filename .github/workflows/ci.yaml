@@ -33,6 +33,7 @@ jobs:
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
           echo "ADMINER_PORT=${{ secrets.ADMINER_PORT }}" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env
           cat .env
 
       - name: "Install Dependencies"
@@ -124,7 +125,8 @@ jobs:
       - name: "Setup Environment"
         run: |
           echo "APP_ENV=test" >> .env
-          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=15&charset=utf8" >> .env
+          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16&charset=utf8" >> .env
+          echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env
 
       - name: "Create Database"
         run: |
