@@ -160,7 +160,7 @@ jobs:
       - name: "Run PHPUnit Tests"
         env:
             DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16&charset=utf8
-        run: vendor/bin/phpunit --display-warnings=false --display-deprecations=false --no-coverage
+        run: vendor/bin/phpunit --display-deprecations=false --no-coverage
 
   # docker-install:
   #   name: "Docker Install"
