@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Analyse d'Image{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h2>Analyse d'image avec OpenAI</h2>
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <button type="submit" class="btn btn-primary mt-2">Analyser l'image</button>
+            {{ form_end(form) }}
+        </form>
+
+        {% if analysis %}
+            <div class="alert alert-success mt-4">
+                <h4>Résultat de l'analyse :</h4>
+                <p>{{ analysis }}</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
