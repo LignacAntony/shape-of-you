@@ -2,6 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Outfit;
+use App\Form\OutfitIaType;
+use App\Repository\WardrobeRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use OpenAI;
 use App\Form\ImageUploadType;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,7 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ImageAnalysisController extends AbstractController
 {
     #[Route('/analyze-image', name: 'analyze_image', methods: ['GET', 'POST'])]
-    public function analyzeImage(Request $request): Response
+    public function analyzeImage(Request $request, EntityManagerInterface $em, WardrobeRepository $wardrobeRepo): Response
     {
         $apiKey = $_ENV['OPENAI_API_KEY'] ?? null;
         if (!$apiKey) {
@@ -32,7 +36,7 @@ class ImageAnalysisController extends AbstractController
                 try {
                     $imageData = file_get_contents($file->getPathname());
                     $base64Image = base64_encode($imageData);
-                    $imageMimeType = $file->getMimeType(); // Type MIME
+                    $imageMimeType = $file->getMimeType();
 
                     $client = OpenAI::client($apiKey);
 
@@ -73,8 +77,8 @@ class ImageAnalysisController extends AbstractController
 
                     $jsonResponse = $response->choices[0]->message->content ?? '[]';
 
-                    $jsonResponse = trim($jsonResponse); // Supprime les espaces blancs en début et fin
-                    $jsonResponse = preg_replace('/^```json\s*|\s*```$/', '', $jsonResponse); // Supprime les backticks et "json"
+                    $jsonResponse = trim($jsonResponse);
+                    $jsonResponse = preg_replace('/^```json\s*|\s*```$/', '', $jsonResponse);
 
                     preg_match('/\[.*\]/s', $jsonResponse, $matches);
                     $jsonResponse = $matches[0] ?? '[]';
@@ -96,8 +100,24 @@ class ImageAnalysisController extends AbstractController
             }
         }
 
+        $outfit = new Outfit();
+
+        $outfitForm = $this->createForm(OutfitIaType::class, $outfit);
+        $outfitForm->handleRequest($request);
+
+
+        if ($outfitForm->isSubmitted() && $outfitForm->isValid()) {
+            $outfit->setAuthor($this->getUser());
+
+            $em->persist($outfit);
+            $em->flush();
+
+            $this->addFlash('success', 'Nouvel outfit créé avec succès !');
+            return $this->redirectToRoute('analyze_image');
+        }
+
         return $this->render('image_analysis/index.html.twig', [
-            'form' => $form->createView(),
+            'form' => $outfitForm->createView(),
             'analysis' => $analysis,
             'error' => $error,
         ]);
