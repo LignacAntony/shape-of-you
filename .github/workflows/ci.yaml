@@ -32,7 +32,7 @@ jobs:
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
           echo "ADMINER_PORT=${{ secrets.ADMINER_PORT }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16\&charset=utf8" >> .env
           echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env
           echo "SYMFONY_DEPRECATIONS_HELPER=disabled=1" >> .env
           echo "PANTHER_ERROR_SCREENSHOT_DIR=./var/error-screenshots" >> .env
@@ -43,13 +43,6 @@ jobs:
           echo "PANTHER_APP_ENV=test" >> .env
           echo "SYMFONY_PROFILER=0" >> .env
           cat .env
-
-      - name: "Upload environment file"
-        uses: actions/upload-artifact@v4
-        with:
-          name: env-file
-          path: .env
-          retention-days: 1
 
       - name: "Install Dependencies"
         run: composer install --prefer-dist --no-interaction --no-progress
@@ -137,15 +130,24 @@ jobs:
           path: vendor
           key: composer-${{ hashFiles('**/composer.lock') }}
 
-      - name: "Download environment file"
-        uses: actions/download-artifact@v4
-        with:
-          name: env-file
-          path: .
-
-      - name: "Override DATABASE_URL for test environment"
+      - name: "Setup Environment"
         run: |
-          sed -i 's|^DATABASE_URL=.*$|DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16\&charset=utf8|' .env
+          echo "APP_ENV=test" >> .env
+          echo "POSTGRES_VERSION=${{ secrets.POSTGRES_VERSION }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "ADMINER_PORT=${{ secrets.ADMINER_PORT }}" >> .env
+          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16\&charset=utf8" >> .env
+          echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env
+          echo "SYMFONY_DEPRECATIONS_HELPER=disabled=1" >> .env
+          echo "PANTHER_ERROR_SCREENSHOT_DIR=./var/error-screenshots" >> .env
+          echo "SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT=1" >> .env
+          echo "SYMFONY_PHPUNIT_VERSION=9.5" >> .env
+          echo "SYMFONY_PHPUNIT_DIR=./var/cache/phpunit" >> .env
+          echo "SYMFONY_DEPRECATIONS_HELPER=999999" >> .env
+          echo "PANTHER_APP_ENV=test" >> .env
+          echo "SYMFONY_PROFILER=0" >> .env
           cat .env
 
       - name: "Create Database"

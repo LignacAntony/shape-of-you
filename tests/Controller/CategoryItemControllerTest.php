@@ -5,13 +5,11 @@ namespace App\Tests\Controller;
 use App\Entity\CategoryItem;
 use App\Entity\User;
 use App\Entity\Profile;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\Response;
 
 final class CategoryItemControllerTest extends WebTestCase
 {
