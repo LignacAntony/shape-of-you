@@ -155,6 +155,29 @@ jobs:
           php bin/console doctrine:database:create --env=test --if-not-exists
           php bin/console doctrine:schema:create --env=test
 
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: "Install JavaScript dependencies"
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found, skipping npm install"
+          fi
+          
+      - name: "Compile Webpack assets"
+        run: |
+          if [ -f webpack.config.js ]; then
+            npm run build
+          else
+            mkdir -p public/build
+            echo '{"entrypoints":{}}' > public/build/entrypoints.json
+            echo "Created mock entrypoints.json"
+          fi
+
       - name: "Run PHPUnit Tests"
         env:
           APP_DEBUG: 1
