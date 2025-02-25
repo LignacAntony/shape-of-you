@@ -10,6 +10,7 @@ use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 final class CategoryItemControllerTest extends WebTestCase
 {
@@ -111,17 +112,31 @@ final class CategoryItemControllerTest extends WebTestCase
         
         $itemId = $categoryItem->getId();
 
-        // 2. Test index page access (follow redirect)
+        // 2. Test index page access
         $this->client->followRedirects(true);
-        $this->client->request('GET', $this->path);
-        self::assertTrue($this->client->getResponse()->isSuccessful());
+        $crawler = $this->client->request('GET', $this->path);
+        
+        // Vérifier que la réponse est soit un succès (200) soit une redirection suivie (après followRedirects)
+        $statusCode = $this->client->getResponse()->getStatusCode();
+        self::assertTrue(
+            $statusCode >= 200 && $statusCode < 300,
+            sprintf('Page d\'index a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
+        );
         
         // 3. Test show page access
         $this->client->request('GET', $this->path . $itemId);
-        self::assertTrue($this->client->getResponse()->isSuccessful());
+        $statusCode = $this->client->getResponse()->getStatusCode();
+        self::assertTrue(
+            $statusCode >= 200 && $statusCode < 300,
+            sprintf('Page de détail a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
+        );
         
         // 4. Test edit page access
         $this->client->request('GET', $this->path . $itemId . '/edit');
-        self::assertTrue($this->client->getResponse()->isSuccessful());
+        $statusCode = $this->client->getResponse()->getStatusCode();
+        self::assertTrue(
+            $statusCode >= 200 && $statusCode < 300,
+            sprintf('Page d\'édition a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
+        );
     }
 }
