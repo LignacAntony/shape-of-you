@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Analyse d'image{% endblock %}
+
+{% block body %}
+    <h1>Analyse de l'image pour l'outfit : {{ outfit.name }}</h1>
+
+    {# Formulaire d'upload de l'image #}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Télécharger une image</h2>
+        </div>
+        <div class="card-body">
+            {{ form_start(imageForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
+            {{ form_widget(imageForm) }}
+            <button type="submit" class="btn btn-primary mt-2">Analyser</button>
+            {{ form_end(imageForm) }}
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    {% if analysis is not empty %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Résultats de l'analyse</h2>
+            </div>
+            <div class="card-body">
+                <ul>
+                    {% for clothing in analysis %}
+                        <li>
+                            <strong>{{ clothing.name }}</strong>
+                            {% if clothing.brand %} - {{ clothing.brand }}{% endif %}
+                            {% if clothing.color %} - Couleur : {{ clothing.color }}{% endif %}
+                            {% if clothing.price %} - {{ clothing.price }} €{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Modifier les informations des vêtements détectés</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% for form in clothingForms %}
+                        <div class="mb-4 p-3 border rounded">
+                            <h3>Vêtement {{ loop.index }}</h3>
+                            <div class="form-group">
+                                {{ form_row(form.clothingItem.name) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_row(form.clothingItem.brand) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_row(form.clothingItem.color) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_row(form.clothingItem.price) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_row(form.clothingItem.description) }}
+                            </div>
+
+                            <h4>Détails de l'Outfit</h4>
+                            <div class="form-group">
+                                {{ form_row(form.outfitItem.size) }}
+                            </div>
+                        </div>
+                        <hr>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-success">Enregistrer les modifications</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
