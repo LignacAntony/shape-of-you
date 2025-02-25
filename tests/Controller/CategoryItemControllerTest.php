@@ -5,12 +5,12 @@ namespace App\Tests\Controller;
 use App\Entity\CategoryItem;
 use App\Entity\User;
 use App\Entity\Profile;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\HttpFoundation\Response;
 
 final class CategoryItemControllerTest extends WebTestCase
 {
@@ -59,84 +59,78 @@ final class CategoryItemControllerTest extends WebTestCase
         $this->manager->flush();
     }
 
-    /**
-     * Test direct manipulation of CategoryItem entity
-     */
-    public function testCategoryItemCRUD(): void
+    public function testIndex(): void
     {
-        // 1. Create a CategoryItem directly in the database
-        $categoryItem = new CategoryItem();
-        $categoryItem->setName('Test Category');
-        $categoryItem->setDescription('Test Description');
-        
-        $this->manager->persist($categoryItem);
-        $this->manager->flush();
-        
-        $itemId = $categoryItem->getId();
-        
-        // 2. Verify it was created
-        self::assertNotNull($itemId);
-        self::assertEquals(1, $this->repository->count([]));
-        
-        // 3. Update the item directly in database
-        $categoryItem->setName('Updated Category');
-        $categoryItem->setDescription('Updated Description');
-        $this->manager->flush();
-        
-        // 4. Verify update worked
-        $this->manager->clear();
-        $updatedItem = $this->repository->find($itemId);
-        self::assertEquals('Updated Category', $updatedItem->getName());
-        self::assertEquals('Updated Description', $updatedItem->getDescription());
-        
-        // 5. Delete the item
-        $this->manager->remove($updatedItem);
-        $this->manager->flush();
-        
-        // 6. Verify it was deleted
-        self::assertEquals(0, $this->repository->count([]));
+        $this->client->followRedirects();
+        $this->client->request('GET', $this->path);
+
+        self::assertResponseStatusCodeSame(200);
+        self::assertPageTitleContains('CategoryItem index');
     }
 
-    /**
-     * Test accessing admin pages
-     */
-    public function testAdminPages(): void 
+    public function testNew(): void
     {
-        // 1. Create a CategoryItem directly in the database
-        $categoryItem = new CategoryItem();
-        $categoryItem->setName('Test Category');
-        $categoryItem->setDescription('Test Description');
-        
-        $this->manager->persist($categoryItem);
-        $this->manager->flush();
-        
-        $itemId = $categoryItem->getId();
+        $this->client->request('GET', sprintf('%snew', $this->path));
 
-        // 2. Test index page access
-        $this->client->followRedirects(true);
-        $crawler = $this->client->request('GET', $this->path);
-        
-        // Vérifier que la réponse est un succès
-        $statusCode = $this->client->getResponse()->getStatusCode();
-        self::assertTrue(
-            $statusCode >= 200 && $statusCode < 300,
-            sprintf('Page d\'index a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
-        );
-        
-        // 3. Test show page access
-        $this->client->request('GET', $this->path . $itemId);
-        $statusCode = $this->client->getResponse()->getStatusCode();
-        self::assertTrue(
-            $statusCode >= 200 && $statusCode < 300,
-            sprintf('Page de détail a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
-        );
-        
-        // 4. Test edit page access
-        $this->client->request('GET', $this->path . $itemId . '/edit');
-        $statusCode = $this->client->getResponse()->getStatusCode();
-        self::assertTrue(
-            $statusCode >= 200 && $statusCode < 300,
-            sprintf('Page d\'édition a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
-        );
+        self::assertResponseStatusCodeSame(200);
+
+        $this->client->submitForm('Create', [
+            'category_item[name]' => 'Testing',
+            'category_item[description]' => 'Testing'
+        ]);
+
+        self::assertSame(1, $this->repository->count([]));
+    }
+
+    public function testShow(): void
+    {
+        $fixture = new CategoryItem();
+        $fixture->setName('Vêtements');
+        $fixture->setDescription('Catégorie des vêtements');
+
+        $this->manager->persist($fixture);
+        $this->manager->flush();
+
+        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+
+        self::assertResponseStatusCodeSame(200);
+        self::assertPageTitleContains('CategoryItem');
+    }
+
+    public function testEdit(): void
+    {
+        $fixture = new CategoryItem();
+        $fixture->setName('Vêtements');
+        $fixture->setDescription('Catégorie des vêtements');
+
+        $this->manager->persist($fixture);
+        $this->manager->flush();
+
+        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
+
+        $this->client->submitForm('Update', [
+            'category_item[name]' => 'Something New',
+            'category_item[description]' => 'Something New'
+        ]);
+
+        $fixture = $this->repository->findAll();
+
+        self::assertSame('Something New', $fixture[0]->getName());
+        self::assertSame('Something New', $fixture[0]->getDescription());
+    }
+
+    public function testRemove(): void
+    {
+        $fixture = new CategoryItem();
+        $fixture->setName('Vêtements');
+        $fixture->setDescription('Catégorie des vêtements');
+
+        $this->manager->persist($fixture);
+        $this->manager->flush();
+
+        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $this->client->submitForm('Delete');
+
+        self::assertSame(0, $this->repository->count([]));
     }
 }
