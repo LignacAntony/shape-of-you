@@ -178,6 +178,15 @@ jobs:
             echo "Created mock entrypoints.json"
           fi
 
+      - name: "Setup Importmap (Stimulus.js)"
+        run: |
+          if grep -q "importmap" composer.json; then
+            php bin/console importmap:install --env=test
+            echo "Importmap installed"
+          else
+            echo "Project does not use importmap, skipping"
+          fi
+
       - name: "Run PHPUnit Tests"
         env:
           APP_DEBUG: 1
