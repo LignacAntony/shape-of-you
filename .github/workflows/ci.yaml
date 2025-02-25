@@ -188,14 +188,7 @@ jobs:
           fi
 
       - name: "Run PHPUnit Tests"
-        env:
-          APP_DEBUG: 1
-          CI: true
-        run: |
-          # Activer les logs de debug Symfony
-          sed -i 's/APP_ENV=test/APP_ENV=test\nAPP_DEBUG=1/' .env
-          # Exécuter les tests avec plus de verbosité
-          vendor/bin/phpunit tests/Controller/CategoryItemControllerTest.php -v
+        run: vendor/bin/phpunit tests/Controller/CategoryItemControllerTest.php
 
   # docker-install:
   #   name: "Docker Install"

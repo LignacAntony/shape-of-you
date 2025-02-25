@@ -113,78 +113,30 @@ final class CategoryItemControllerTest extends WebTestCase
         $itemId = $categoryItem->getId();
 
         // 2. Test index page access
-        $this->client->catchExceptions(false); // Pour voir l'exception si elle se produit
-        try {
-            $this->client->followRedirects(true);
-            $crawler = $this->client->request('GET', $this->path);
-            
-            // Vérifier la réponse
-            $statusCode = $this->client->getResponse()->getStatusCode();
-            // Ignorer ce test dans l'environnement CI si nous rencontrons un 500
-            if (getenv('CI') && $statusCode === 500) {
-                $this->markTestSkipped('Ignorer ce test dans CI - erreur 500 détectée');
-            }
-            
-            // Sinon, vérifier le succès
-            self::assertTrue(
-                $statusCode >= 200 && $statusCode < 300,
-                sprintf('Page d\'index a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
-            );
-        } catch (\Throwable $e) {
-            // Enregistrer l'exception pour débogage
-            echo "Exception lors de l'accès à la page index: " . $e->getMessage() . "\n";
-            echo "Trace: " . $e->getTraceAsString() . "\n";
-            
-            if (getenv('CI')) {
-                $this->markTestSkipped('Ignorer le test index dans CI à cause de: ' . $e->getMessage());
-            } else {
-                throw $e; // Relancer en local pour déboguer
-            }
-        }
+        $this->client->followRedirects(true);
+        $crawler = $this->client->request('GET', $this->path);
         
-        // Restaurer le comportement normal pour les exceptions
-        $this->client->catchExceptions(true);
+        // Vérifier que la réponse est un succès
+        $statusCode = $this->client->getResponse()->getStatusCode();
+        self::assertTrue(
+            $statusCode >= 200 && $statusCode < 300,
+            sprintf('Page d\'index a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
+        );
         
-        // 3. Test show page access (ignorer en CI si nécessaire)
-        try {
-            $this->client->request('GET', $this->path . $itemId);
-            $statusCode = $this->client->getResponse()->getStatusCode();
-            
-            if (getenv('CI') && $statusCode === 500) {
-                $this->markTestSkipped('Ignorer ce test dans CI - erreur 500 détectée');
-            } else {
-                self::assertTrue(
-                    $statusCode >= 200 && $statusCode < 300,
-                    sprintf('Page de détail a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
-                );
-            }
-        } catch (\Throwable $e) {
-            if (getenv('CI')) {
-                $this->markTestSkipped('Ignorer le test show dans CI');
-            } else {
-                throw $e;
-            }
-        }
+        // 3. Test show page access
+        $this->client->request('GET', $this->path . $itemId);
+        $statusCode = $this->client->getResponse()->getStatusCode();
+        self::assertTrue(
+            $statusCode >= 200 && $statusCode < 300,
+            sprintf('Page de détail a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
+        );
         
-        // 4. Test edit page access (ignorer en CI si nécessaire)
-        try {
-            $this->client->request('GET', $this->path . $itemId . '/edit');
-            $statusCode = $this->client->getResponse()->getStatusCode();
-            
-            if (getenv('CI') && $statusCode === 500) {
-                $this->markTestSkipped('Ignorer ce test dans CI - erreur 500 détectée');
-            } else {
-                self::assertTrue(
-                    $statusCode >= 200 && $statusCode < 300,
-                    sprintf('Page d\'édition a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
-                );
-            }
-        } catch (\Throwable $e) {
-            if (getenv('CI')) {
-                $this->markTestSkipped('Ignorer le test edit dans CI');
-            } else {
-                throw $e;
-            }
-        }
+        // 4. Test edit page access
+        $this->client->request('GET', $this->path . $itemId . '/edit');
+        $statusCode = $this->client->getResponse()->getStatusCode();
+        self::assertTrue(
+            $statusCode >= 200 && $statusCode < 300,
+            sprintf('Page d\'édition a retourné un code HTTP %d au lieu d\'un succès', $statusCode)
+        );
     }
 }
