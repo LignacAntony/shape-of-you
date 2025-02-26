@@ -38,8 +38,39 @@ class ImageAnalysisController extends AbstractController
 
             if ($file) {
                 try {
-                    $imageData     = file_get_contents($file->getPathname());
-                    $base64Image   = base64_encode($imageData);
+                    $imageData = file_get_contents($file->getPathname());
+                    $sourceImage = imagecreatefromstring($imageData);
+                    if (!$sourceImage) {
+                        throw new \Exception("Impossible de créer l'image depuis les données.");
+                    }
+
+// Déterminer la taille d'origine
+                    $width  = imagesx($sourceImage);
+                    $height = imagesy($sourceImage);
+
+// Définir la nouvelle largeur (par exemple 800 pixels) et calculer la hauteur pour garder les proportions
+                    $newWidth  = 800;
+                    $newHeight = intval($height * ($newWidth / $width));
+
+// Créer une nouvelle image redimensionnée
+                    $newImage = imagecreatetruecolor($newWidth, $newHeight);
+                    imagecopyresampled($newImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+// Capturer la sortie dans une variable selon le type MIME
+                    ob_start();
+                    if ($file->getMimeType() === 'image/png') {
+                        imagepng($newImage);
+                    } else {
+                        imagejpeg($newImage, null, 90); // 90 correspond à la qualité JPEG
+                    }
+                    $resizedImageData = ob_get_clean();
+
+// Libérer la mémoire
+                    imagedestroy($sourceImage);
+                    imagedestroy($newImage);
+
+// Encoder l'image redimensionnée en base64
+                    $base64Image = base64_encode($resizedImageData);
                     $imageMimeType = $file->getMimeType();
 
                     $client = OpenAI::client($_ENV['OPENAI_API_KEY'] ?? null);

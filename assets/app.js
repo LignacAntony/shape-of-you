@@ -131,3 +131,13 @@ document.addEventListener("DOMContentLoaded", function () {
         items[newIndex].classList.add('opacity-100');
     }
 });
+document.querySelectorAll('.remove-item').forEach(function(button) {
+    button.addEventListener('click', function(e) {
+        // On supprime le conteneur de l'élément
+        var itemRow = e.target.closest('.item-row');
+        if (itemRow) {
+            console.log('aled')
+            itemRow.remove();
+        }
+    });
+});
