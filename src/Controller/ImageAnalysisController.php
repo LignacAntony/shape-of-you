@@ -80,7 +80,7 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
                             ],
                         ],
                         'max_tokens'  => 700,
-                        'temperature' => 0.5,
+                        'temperature' => 0.6,
                     ]);
 
                     // Nettoyage et décodage de la réponse
@@ -111,6 +111,7 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
             $analysis = $session->get('analysis');
             $itemsData = [];
 
+
             foreach ($analysis as $clothingData) {
                 // Création et pré-remplissage de l'entité ClothingItem
                 $clothingItem = new ClothingItem();
@@ -119,6 +120,8 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
                 $clothingItem->setColor($clothingData['color'] ?? '');
                 $clothingItem->setPrice($clothingData['price'] ?? 0);
                 $clothingItem->setDescription($clothingData['description'] ?? '');
+
+
 
                 if (isset($clothingData['category'])) {
                     $category = $entityManager->getRepository(CategoryItem::class)
@@ -155,19 +158,41 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
             $globalForm->handleRequest($request);
 
             // Si le formulaire global est soumis et valide, persister les objets en BDD
+            // Après le handleRequest()
+            // Après l'appel à handleRequest()
             if ($globalForm->isSubmitted() && $globalForm->isValid()) {
                 $data = $globalForm->getData();
-                foreach ($data['items'] as $itemData) {
+                foreach ($globalForm->get('items') as $itemForm) {
+                    // Récupérer l'image depuis le sous-formulaire du ClothingItem
+                    $uploadedImage = $itemForm->get('clothingItem')->get('image')->getData();
+
+                    $itemData = $itemForm->getData();
                     $newClothing   = $itemData['clothingItem'];
                     $newOutfitItem = $itemData['outfitItem'];
+
+                    if ($uploadedImage) {
+                        $newFilename = uniqid() . '.' . $uploadedImage->guessExtension();
+                        try {
+                            $uploadedImage->move(
+                                $this->getParameter('upload_directory'),
+                                $newFilename
+                            );
+                            $newClothing->addImage($newFilename);
+                        } catch (FileException $e) {
+                            // Gérez l'exception
+                        }
+                    }
+
                     $entityManager->persist($newClothing);
                     $entityManager->persist($newOutfitItem);
                 }
                 $entityManager->flush();
-                // On efface les données d'analyse en session pour éviter de recréer le formulaire
+                // Supprimer les données de session pour éviter de recréer le formulaire
                 $session->remove('analysis');
                 return $this->redirectToRoute('analyze_image', ['id' => $outfit->getId()]);
             }
+
+
         }
 
         return $this->render('analysis/analyze.html.twig', [
