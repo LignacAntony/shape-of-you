@@ -4,21 +4,31 @@ namespace App\Form;
 
 use App\Entity\OutfitItem;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class OutfitItemIaType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            // 'size' étant un champ modifiable par l'utilisateur
-            ->add('size', TextType::class, [
-                'required' => false,
-                'label' => 'Taille'
+            ->add('size', ChoiceType::class, [
+                'required' => true,
+                'label' => 'Taille',
+                'choices' => [
+                    'XS' => 'xs',
+                    'S' => 's',
+                    'M' => 'm',
+                    'L' => 'l',
+                    'XL' => 'xl',
+                    'XXL' => 'xxl',
+                ],
+                'attr' => [
+                    'class' => 'form-area w-full py-2 mb-2',
+                ],
+                'data' => 'm',
             ]);
-        // Vous pouvez ajouter d’autres champs éventuels sur OutfitItem
     }
 
     public function configureOptions(OptionsResolver $resolver)

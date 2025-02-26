@@ -127,7 +127,7 @@
 
                         <div>
                             {{ form_label(form.color, 'Couleur', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.color, {'attr': {'class': 'form-area w-full'}}) }}
+                            {{ form_widget(form.color, {'attr': {'class': 'mt-2 h-8'}}) }}
                             <div x-show="fieldErrors.color" class="mt-1 text-sm text-red-600" x-text="fieldErrors.color"></div>
                             {{ form_errors(form.color) }}
                         </div>

@@ -21,10 +21,19 @@ class ImageAnalysisController extends AbstractController
     #[Route('/outfit/{id}/analyze', name: 'analyze_image', methods: ['GET', 'POST'])]
     public function analyzeImage(Outfit $outfit, Request $request, EntityManagerInterface $entityManager): Response
     {
-        // On récupère la session pour stocker temporairement l'analyse
+        $user = $this->getUser();
+
+        if ($user !== $outfit->getAuthor()) {
+            return $this->redirectToRoute('app_home');
+        }
+
+
         $session = $request->getSession();
 
-        // Création et gestion du formulaire d'upload d'image
+        if ($request->isMethod('GET')) {
+            $session->remove('analysis');
+        }
+
         $imageForm = $this->createForm(ImageUploadType::class);
         $imageForm->handleRequest($request);
 
@@ -32,7 +41,6 @@ class ImageAnalysisController extends AbstractController
         $error = null;
         $globalForm = null;
 
-        // Si le formulaire d'image est soumis et valide, effectuer l'analyse
         if ($imageForm->isSubmitted() && $imageForm->isValid()) {
             $file = $imageForm->get('image')->getData();
 
@@ -44,19 +52,15 @@ class ImageAnalysisController extends AbstractController
                         throw new \Exception("Impossible de créer l'image depuis les données.");
                     }
 
-// Déterminer la taille d'origine
-                    $width  = imagesx($sourceImage);
+                    $width = imagesx($sourceImage);
                     $height = imagesy($sourceImage);
 
-// Définir la nouvelle largeur (par exemple 800 pixels) et calculer la hauteur pour garder les proportions
-                    $newWidth  = 800;
+                    $newWidth = 800;
                     $newHeight = intval($height * ($newWidth / $width));
 
-// Créer une nouvelle image redimensionnée
                     $newImage = imagecreatetruecolor($newWidth, $newHeight);
                     imagecopyresampled($newImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
-// Capturer la sortie dans une variable selon le type MIME
                     ob_start();
                     if ($file->getMimeType() === 'image/png') {
                         imagepng($newImage);
@@ -65,11 +69,9 @@ class ImageAnalysisController extends AbstractController
                     }
                     $resizedImageData = ob_get_clean();
 
-// Libérer la mémoire
                     imagedestroy($sourceImage);
                     imagedestroy($newImage);
 
-// Encoder l'image redimensionnée en base64
                     $base64Image = base64_encode($resizedImageData);
                     $imageMimeType = $file->getMimeType();
 
@@ -87,19 +89,18 @@ class ImageAnalysisController extends AbstractController
                                     [
                                         "type" => "text",
                                         "text" => "Analyse l'image et retourne un **JSON strictement valide**, sous la forme d'un **tableau** (array) si plusieurs vêtements sont détectés.
-Chaque vêtement doit être un objet JSON contenant :
-[
-    {
-        'name': 'Nom du vêtement identifiable (ex: T-shirt Adidas Classic)',
-        'category': 'Une des catégories suivantes : [T-shirts, Chemises, Débardeurs, Pulls, Robes, Manteaux, Vestes, Pantalons, Shorts, Jupes, Chaussures, Bottes, Sandales, Accessoires, Ceintures, Écharpes, Maillots de bain, Lingerie, Pyjamas]',
-        'description': 'Une brève description du vêtement, son style, sa coupe et ses matériaux',
-        'brand': 'Si une marque est identifiable, sinon null',
-        'color': 'Code couleur en format HEXA (ex: #FF5733)',
-        'price': 'Prix estimé du vêtement en euros (ex: 49.99)',
-        'size': 'Taille suggérée (optionnel)'
-    }
-]
-Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets aucun texte avant ou après."
+                                            Chaque vêtement doit être un objet JSON contenant :
+                                            [
+                                                {
+                                                    'name': 'Nom du vêtement identifiable (ex: T-shirt Adidas Classic)',
+                                                    'category': 'Une des catégories suivantes : [T-shirts, Chemises, Débardeurs, Pulls, Robes, Manteaux, Vestes, Pantalons, Shorts, Jupes, Chaussures, Bottes, Sandales, Accessoires, Ceintures, Écharpes, Maillots de bain, Lingerie, Pyjamas]',
+                                                    'description': 'Une brève description du vêtement, son style, sa coupe et ses matériaux',
+                                                    'brand': 'Si une marque est identifiable, sinon null',
+                                                    'color': 'Code couleur en format HEXA (ex: #FF5733)',
+                                                    'price': 'Prix estimé du vêtement en euros (ex: 49.99, tu le multiplie par 100)',
+                                                }
+                                            ]
+                                            Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets aucun texte avant ou après."
                                     ],
                                     [
                                         "type" => "image_url",
@@ -110,11 +111,10 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
                                 ],
                             ],
                         ],
-                        'max_tokens'  => 700,
+                        'max_tokens' => 700,
                         'temperature' => 0.6,
                     ]);
 
-                    // Nettoyage et décodage de la réponse
                     $jsonResponse = $response->choices[0]->message->content ?? '[]';
                     $jsonResponse = trim($jsonResponse);
                     $jsonResponse = preg_replace('/^```json\s*|\s*```$/', '', $jsonResponse);
@@ -126,8 +126,9 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
                         file_put_contents('logs/openai_response.log', "Réponse brute : " . $jsonResponse . "\n", FILE_APPEND);
                         $error = 'Erreur lors du traitement des données. Vérifie le log openai_response.log.';
                     } else {
-                        // Stocker l'analyse en session pour la réutiliser lors de la soumission du formulaire global
                         $session->set('analysis', $analysis);
+                        $this->addFlash('info', 'Analysis data stored in session.');
+
                     }
                 } catch (\Exception $e) {
                     $error = 'Erreur lors de l\'analyse de l\'image : ' . $e->getMessage();
@@ -137,21 +138,18 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
             }
         }
 
-        // Si une analyse est présente en session, on reconstruit le formulaire global
         if ($session->has('analysis')) {
             $analysis = $session->get('analysis');
             $itemsData = [];
 
 
             foreach ($analysis as $clothingData) {
-                // Création et pré-remplissage de l'entité ClothingItem
                 $clothingItem = new ClothingItem();
                 $clothingItem->setName($clothingData['name'] ?? '');
                 $clothingItem->setBrand($clothingData['brand'] ?? '');
                 $clothingItem->setColor($clothingData['color'] ?? '');
                 $clothingItem->setPrice($clothingData['price'] ?? 0);
                 $clothingItem->setDescription($clothingData['description'] ?? '');
-
 
 
                 if (isset($clothingData['category'])) {
@@ -162,43 +160,37 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
                     }
                 }
 
-                // Création de l'entité OutfitItem associée à l'Outfit courant
                 $outfitItem = new OutfitItem();
                 $outfitItem->addOutfit($outfit);
                 $outfitItem->setSize($clothingData['size'] ?? 'sm');
                 $outfitItem->setWardrobe($outfit->getWardrobe());
                 $outfitItem->setClothingItem($clothingItem);
 
-                // Regrouper les deux entités dans un tableau
                 $itemsData[] = [
                     'clothingItem' => $clothingItem,
-                    'outfitItem'   => $outfitItem,
+                    'outfitItem' => $outfitItem,
                 ];
             }
 
-            // Construction du formulaire global avec CollectionType
             $globalForm = $this->createFormBuilder(['items' => $itemsData])
                 ->add('items', CollectionType::class, [
-                    'entry_type'    => ClothingOutfitItemType::class,
+                    'entry_type' => ClothingOutfitItemType::class,
                     'entry_options' => [],
-                    'allow_add'     => true,
-                    'by_reference'  => false,
+                    'allow_add' => true,
+                    'by_reference' => false,
                 ])
                 ->getForm();
 
             $globalForm->handleRequest($request);
 
-            // Si le formulaire global est soumis et valide, persister les objets en BDD
-            // Après le handleRequest()
-            // Après l'appel à handleRequest()
+
             if ($globalForm->isSubmitted() && $globalForm->isValid()) {
                 $data = $globalForm->getData();
                 foreach ($globalForm->get('items') as $itemForm) {
-                    // Récupérer l'image depuis le sous-formulaire du ClothingItem
                     $uploadedImage = $itemForm->get('clothingItem')->get('image')->getData();
 
                     $itemData = $itemForm->getData();
-                    $newClothing   = $itemData['clothingItem'];
+                    $newClothing = $itemData['clothingItem'];
                     $newOutfitItem = $itemData['outfitItem'];
 
                     if ($uploadedImage) {
@@ -208,9 +200,8 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
                                 $this->getParameter('upload_directory'),
                                 $newFilename
                             );
-                            $newClothing->addImage($newFilename);
+                            $newClothing->addImage('uploads/images/' . $newFilename);
                         } catch (FileException $e) {
-                            // Gérez l'exception
                         }
                     }
 
@@ -218,20 +209,20 @@ Réponds **UNIQUEMENT** avec un tableau JSON valide et rien d'autre. Ne mets auc
                     $entityManager->persist($newOutfitItem);
                 }
                 $entityManager->flush();
-                // Supprimer les données de session pour éviter de recréer le formulaire
                 $session->remove('analysis');
+                $this->addFlash('info', 'Analysis data removed from session.');
+
+                $session->remove('globalForm');
                 return $this->redirectToRoute('analyze_image', ['id' => $outfit->getId()]);
             }
-
-
         }
 
         return $this->render('analysis/analyze.html.twig', [
-            'outfit'      => $outfit,
-            'imageForm'   => $imageForm->createView(),
-            'globalForm'  => $globalForm ? $globalForm->createView() : null,
-            'error'       => $error,
-            'analysis'    => $analysis,
+            'outfit' => $outfit,
+            'imageForm' => $imageForm->createView(),
+            'globalForm' => $globalForm ? $globalForm->createView() : null,
+            'error' => $error,
+            'analysis' => $analysis,
         ]);
     }
 }
