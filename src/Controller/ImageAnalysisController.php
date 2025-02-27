@@ -122,7 +122,7 @@ class ImageAnalysisController extends AbstractController
                     $jsonResponse = $matches[0] ?? '[]';
 
                     $analysis = json_decode($jsonResponse, true);
-                    if (!$analysis || !is_array($analysis) || empty($analysis)) {
+                    if (!is_array($analysis) || empty($analysis)) {
                         file_put_contents('logs/openai_response.log', "Réponse brute : " . $jsonResponse . "\n", FILE_APPEND);
                         $error = 'Erreur lors du traitement des données. Vérifie le log openai_response.log.';
                     } else {
