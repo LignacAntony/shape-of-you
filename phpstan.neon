@@ -7,9 +7,6 @@ parameters:
         - vendor/*
         - src/Migrations/*
     treatPhpDocTypesAsCertain: false
-    ignoreErrors:
-        - '#Property [a-zA-Z0-9\\_]+::\$passwordHasher is never written, only read\.#'
-        - '#Unreachable statement - code above always terminates\.#'
 
 includes:
     - vendor/phpstan/phpstan-symfony/extension.neon

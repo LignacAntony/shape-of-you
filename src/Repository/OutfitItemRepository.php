@@ -9,7 +9,6 @@ use App\Entity\User;
 use App\Entity\Outfit;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-
 /**
  * @extends ServiceEntityRepository<OutfitItem>
  */
