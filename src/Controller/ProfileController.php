@@ -14,6 +14,7 @@ use App\Entity\Profile;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\User;
 use App\Repository\OutfitRepository;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class ProfileController extends AbstractController
 {
@@ -21,6 +22,7 @@ class ProfileController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function index(Request $request, EntityManagerInterface $entityManager, Security $security, ProfileRepository $profileRepository): Response
     {
+        /** @var User $user */
         $user = $security->getUser();
 
         $profile = $profileRepository->findOneBy(['appUser' => $user]);

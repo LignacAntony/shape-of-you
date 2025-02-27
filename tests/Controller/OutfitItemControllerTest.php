@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Entity\Wardrobe;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -17,7 +18,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class OutfitItemControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private EntityManagerInterface $manager;
+    private ObjectManager $manager;
     private EntityRepository $repository;
     private User $user;
     private Outfit $outfit;
@@ -32,6 +33,7 @@ final class OutfitItemControllerTest extends WebTestCase
         $this->client = static::createClient();
         $this->manager = static::getContainer()->get('doctrine')->getManager();
         $this->repository = $this->manager->getRepository(OutfitItem::class);
+        $this->passwordHasher = static::getContainer()->get('security.user_password_hasher');
 
         $this->user = new User();
         $this->user->setEmail('user@test.fr');
@@ -60,7 +62,7 @@ final class OutfitItemControllerTest extends WebTestCase
 
         $this->categoryItem = new CategoryItem();
         $this->categoryItem->setName('Vêtements');
-        $this->categoryItem->setDesription('Catégorie des vêtements');
+        $this->categoryItem->setDescription('Catégorie des vêtements');
         $this->manager->persist($this->categoryItem);
 
         $this->clothingItem = new ClothingItem();
