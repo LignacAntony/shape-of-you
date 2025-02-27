@@ -9,6 +9,7 @@ use App\Entity\CategoryItem;
 use App\Entity\Wardrobe;
 use App\Entity\Like;
 use App\Entity\Review;
+use App\Entity\User;
 use App\Form\OutfitType;
 use App\Form\ClothingItemType;
 use App\Repository\OutfitRepository;
@@ -21,6 +22,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 final class OutfitController extends AbstractController
 {
@@ -386,7 +388,9 @@ final class OutfitController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function toggleLike(int $id): JsonResponse
     {
-        $outfit = $this->outfitRepository->findOutfitWithPublicAccess($id, $this->getUser());
+        /** @var User $user */
+        $user = $this->getUser();
+        $outfit = $this->outfitRepository->findOutfitWithPublicAccess($id, $user);
 
         if (!$outfit) {
             return $this->json([
@@ -396,7 +400,7 @@ final class OutfitController extends AbstractController
         }
 
         $existingLike = $this->entityManager->getRepository(Like::class)->findOneBy([
-            'author' => $this->getUser(),
+            'author' => $user,
             'outfit' => $outfit
         ]);
 
@@ -407,7 +411,7 @@ final class OutfitController extends AbstractController
         } else {
             // Like
             $like = new Like();
-            $like->setAuthor($this->getUser());
+            $like->setAuthor($user);
             $like->setOutfit($outfit);
             $like->setCreatedAt(new \DateTimeImmutable());
             $this->entityManager->persist($like);
@@ -450,6 +454,8 @@ final class OutfitController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function addReview(Request $request, Outfit $outfit, EntityManagerInterface $entityManager): JsonResponse
     {
+        /** @var User $user */
+        $user = $this->getUser();
         $content = json_decode($request->getContent(), true)['content'] ?? null;
 
         if (!$content) {
@@ -461,7 +467,7 @@ final class OutfitController extends AbstractController
 
         $review = new Review();
         $review->setContent($content);
-        $review->setAuthor($this->getUser());
+        $review->setAuthor($user);
         $review->setOutfit($outfit);
         $review->setCreatedAt(new \DateTimeImmutable());
 

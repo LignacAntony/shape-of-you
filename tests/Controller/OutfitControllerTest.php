@@ -6,6 +6,7 @@ use App\Entity\Outfit;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -13,7 +14,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class OutfitControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
-    private EntityManagerInterface $manager;
+    private ObjectManager $manager;
     private EntityRepository $repository;
     private User $user;
     private UserPasswordHasherInterface $passwordHasher;
