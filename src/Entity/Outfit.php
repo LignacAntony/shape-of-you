@@ -62,7 +62,7 @@ class Outfit
     /**
      * @var Collection<int, OutfitItem>
      */
-    #[ORM\ManyToMany(targetEntity: OutfitItem::class, inversedBy: 'outfits')]
+    #[ORM\ManyToMany(targetEntity: OutfitItem::class, inversedBy: 'outfits', cascade: ['persist'])]
     private Collection $outfitItems;
 
     public function __construct()

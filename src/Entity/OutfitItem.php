@@ -18,7 +18,7 @@ class OutfitItem
     #[ORM\ManyToMany(targetEntity: Outfit::class, mappedBy: 'outfitItems')]
     private Collection $outfits;
 
-    #[ORM\ManyToOne(inversedBy: 'outfitItems')]
+    #[ORM\ManyToOne(inversedBy: 'outfitItems', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?ClothingItem $clothingItem = null;
 

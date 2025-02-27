@@ -157,12 +157,11 @@ final class WardrobeController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function clothingDetails(OutfitItem $outfitItem): Response
     {
-        if ($outfitItem->getWardrobe()->getAuthor() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce vêtement.');
-        }
+
 
         return $this->render('wardrobe/clothing_details.html.twig', [
             'outfitItem' => $outfitItem,
+            'canEdit' => $outfitItem->getWardrobe()->getAuthor() === $this->getUser()
         ]);
     }
 
