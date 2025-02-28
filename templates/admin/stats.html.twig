@@ -38,15 +38,9 @@
 
         </div>
     </div>
-    <br>
 
-    <br>
-    <br>
-    <br>
-
-
-        <br>
-        <br>
-        <br>
-{{ dump(clothing_items_per_category) }}
+    <div class="p-6 lg:w-1/2 mt-6">
+        <h3 class="text-lg font-semibold mb-2">Catégories</h3>
+        <canvas id="categoryPieChart" data-chart-data="{{ clothing_items_per_category|json_encode()|e('html_attr') }}"></canvas>
+    </div>
 </div>
