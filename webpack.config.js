@@ -22,6 +22,7 @@ Encore
      */
     .addEntry('app', './assets/app.js')
     .addEntry('chart-init', './assets/js/chart-init.js')
+    .addEntry('carousel-init', './assets/js/carousel.js')
 
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
