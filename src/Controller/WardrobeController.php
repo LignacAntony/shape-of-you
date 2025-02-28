@@ -302,10 +302,26 @@ final class WardrobeController extends AbstractController
             'user' => $this->getUser(),
             'wardrobe' => $outfitItem->getWardrobe()
         ]);
-
         $outfitForm = $this->createForm(OutfitItemType::class, $outfitItem, [
             'user' => $this->getUser()
         ]);
+
+        if ($request->isXmlHttpRequest() && $request->query->get('action') === 'delete_image') {
+            $data = json_decode($request->getContent(), true);
+            $imagePath = $data['imagePath'] ?? null;
+            if (!$imagePath) {
+                return new JsonResponse(['error' => 'Aucun chemin d\'image fourni'], 400);
+            }
+            $uploadDir = $this->getParameter('upload_directory');
+            $fullImagePath = $uploadDir . '/' . basename($imagePath);
+            if (file_exists($fullImagePath)) {
+                unlink($fullImagePath);
+            }
+            $clothingItem->removeImage($imagePath);
+            $entityManager->flush();
+
+            return new JsonResponse(['success' => true]);
+        }
 
         $outfitForm->handleRequest($request);
         $clothingForm->handleRequest($request);
@@ -366,6 +382,7 @@ final class WardrobeController extends AbstractController
             'outfit_form' => $outfitForm
         ]);
     }
+
 
     #[Route('/wardrobe/create', name: 'wardrobe_create', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]

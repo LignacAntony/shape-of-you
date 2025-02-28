@@ -311,9 +311,28 @@ final class OutfitController extends AbstractController
     public function editOutfitUser(Request $request, int $id): Response
     {
         $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
-
         if (!$outfit) {
             throw $this->createNotFoundException('Tenue non trouvée');
+        }
+
+        if ($request->isXmlHttpRequest() && $request->query->get('action') === 'delete_image') {
+            $data = json_decode($request->getContent(), true);
+            $imagePath = $data['imagePath'] ?? null;
+
+            if (!$imagePath) {
+                return new JsonResponse(['error' => 'Aucun chemin d\'image fourni'], 400);
+            }
+
+            $uploadDir = $this->getParameter('upload_directory');
+            $fullImagePath = $uploadDir . '/' . basename($imagePath);
+            if (file_exists($fullImagePath)) {
+                unlink($fullImagePath);
+            }
+
+            $outfit->removeImage($imagePath);
+            $this->entityManager->flush();
+
+            return new JsonResponse(['success' => true]);
         }
 
         $form = $this->createForm(OutfitType::class, $outfit);
@@ -322,7 +341,6 @@ final class OutfitController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $outfit->setUpdateDateAt(new \DateTime());
 
-            // Gérer les images
             /** @var UploadedFile[] $images */
             $images = $form->get('images')->getData();
             if ($images) {
@@ -342,9 +360,10 @@ final class OutfitController extends AbstractController
 
         return $this->render('outfit/edit.html.twig', [
             'outfit' => $outfit,
-            'form' => $form
+            'form'   => $form,
         ]);
     }
+
 
     #[Route('/outfit/{id}/delete-user', name: 'outfit_delete_user', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
