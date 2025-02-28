@@ -1,0 +1,24 @@
+<div class="bg-white shadow-md rounded-lg p-6 mt-5">
+    <h2 class="text-2xl font-bold mb-4">Vos statistiques</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        user
+    {{ user_count }}<br>
+    {{ user_register_today }}
+        <br>
+        <br>
+        <br>
+        outfit
+        <br>
+        {{ outfit_count }}<br>
+        {{ top_author.id }}/
+        {{ top_author.outfitCount }}
+        {{ outfit_most_likes.author.firstname }}
+        {{ outfit_most_likes.name }}
+        {{ outfit_most_likes.likesCount }}
+
+        <br>
+        <br>
+        <br>
+{{ dump(clothing_items_per_category) }}
+    </div>
+</div>
