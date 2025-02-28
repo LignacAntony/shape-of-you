@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Profile;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Security\EmailVerifier;
@@ -41,6 +42,10 @@ class RegistrationController extends AbstractController
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
             $entityManager->persist($user);
+            $entityManager->flush();
+            $profile = new Profile();
+            $profile->setAppUser($user);
+            $entityManager->persist($profile);
             $entityManager->flush();
 
             // generate a signed url and email it to the user
