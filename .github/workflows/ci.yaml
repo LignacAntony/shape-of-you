@@ -31,8 +31,7 @@ jobs:
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-          echo "ADMINER_PORT=${{ secrets.ADMINER_PORT }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16\&charset=utf8" >> .env
           cat .env
 
       - name: "Install Dependencies"
@@ -85,34 +84,89 @@ jobs:
       - name: "Run PHP Stan"
         run: composer analyse --memory-limit=1G
 
+  phpunit:
+    name: "PHPUnit Tests"
+    needs: deps
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
 
-  # docker-install:
-  #   name: "Docker Install"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: "Checkout repository"
-  #       uses: actions/checkout@v2
-  #     - name: Install Docker using Docker's official script
-  #       run: |
-  #         curl -fsSL https://get.docker.com -o get-docker.sh
-  #         sudo sh get-docker.sh
-  #       continue-on-error: false
-  #     - name: "Install Docker Compose"
-  #       run: |
-  #         sudo curl -L "https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  #         sudo chmod +x /usr/local/bin/docker-compose
-  #         docker-compose --version
-  #       continue-on-error: false
-  #     - name: "Docker up"
-  #       env:
-  #         POSTGRES_VERSION: ${{ secrets.POSTGRES_VERSION }}
-  #         POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-  #         POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-  #         POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-  #         ADMINER_PORT: ${{ secrets.ADMINER_PORT }}
-  #       run: docker-compose -f docker-compose.yaml -f docker-compose.override.yaml up -d
-  #       continue-on-error: false
-  #     - name: "Docker shows running containers"
-  #       run: docker ps -a
-  #       continue-on-error: false
+      - name: "Setup PHP Environment"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+          extensions: pdo_pgsql
+
+      - name: "Restore vendor cache"
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('**/composer.lock') }}
+
+      - name: "Setup Environment"
+        run: |
+          echo "APP_ENV=test" >> .env
+          echo "POSTGRES_VERSION=${{ secrets.POSTGRES_VERSION }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}?serverVersion=16\&charset=utf8" >> .env
+          echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env
+          cat .env
+
+      - name: "Create Database"
+        run: |
+          php bin/console doctrine:database:create --env=test --if-not-exists
+          php bin/console doctrine:schema:create --env=test
+
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: "Install JavaScript dependencies"
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found, skipping npm install"
+          fi
+          
+      - name: "Compile Webpack assets"
+        run: |
+          if [ -f webpack.config.js ]; then
+            npm run build
+          else
+            mkdir -p public/build
+            echo '{"entrypoints":{}}' > public/build/entrypoints.json
+            echo "Created mock entrypoints.json"
+          fi
+
+      - name: "Setup Importmap (Stimulus.js)"
+        run: |
+          if grep -q "importmap" composer.json; then
+            php bin/console importmap:install --env=test
+            echo "Importmap installed"
+          else
+            echo "Project does not use importmap, skipping"
+          fi
+
+      - name: "Run PHPUnit Tests"
+        run: vendor/bin/phpunit
