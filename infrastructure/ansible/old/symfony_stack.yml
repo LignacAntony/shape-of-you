@@ -1,0 +1,291 @@
+---
+- name: Configure full Symfony stack with Nginx and PostgreSQL
+  hosts: servers
+  remote_user: root
+  vars:
+    symfony_root_dir: "{{ playbook_dir }}/../../"
+    web_server_name: shape-of-you.local
+    postgres_version: 16
+    postgres_db: shape-of-you-db
+    postgres_user: user
+    postgres_password: password
+    postgres_port: 5432
+    php_version: 8.2
+
+  tasks:
+    # Installation de Nginx (déjà présent dans le playbook existant)
+    - name: Install Nginx
+      community.general.homebrew:
+        name: nginx
+        state: present
+
+    # Installation de PHP et extensions nécessaires
+    - name: Install PHP and required extensions
+      community.general.homebrew:
+        name:
+          - "php@{{ php_version }}"
+          - composer
+        state: present
+
+    # Installation de Node.js et npm
+    - name: Install Node.js and npm
+      community.general.homebrew:
+        name: node
+        state: present
+
+    # Installation de PostgreSQL
+    - name: Install PostgreSQL
+      community.general.homebrew:
+        name: postgresql@{{ postgres_version }}
+        state: present
+
+    # Démarrage de PostgreSQL
+    - name: Start PostgreSQL
+      ansible.builtin.command: brew services start postgresql@{{ postgres_version }}
+      register: pg_start_output
+      changed_when: pg_start_output.rc == 0
+
+    # Création de l'utilisateur PostgreSQL
+    - name: Create PostgreSQL user
+      ansible.builtin.command: >
+        /opt/homebrew/opt/postgresql@{{ postgres_version }}/bin/psql -U {{ ansible_user_id }} -d postgres -c 
+        "CREATE USER \"{{ postgres_user }}\" WITH PASSWORD '{{ postgres_password }}'"
+      register: create_user_output
+      failed_when: create_user_output.rc != 0 and "already exists" not in create_user_output.stderr
+      changed_when: create_user_output.rc == 0
+
+    # Création de la base de données PostgreSQL
+    - name: Create PostgreSQL database
+      ansible.builtin.command: >
+        /opt/homebrew/opt/postgresql@{{ postgres_version }}/bin/psql -U {{ ansible_user_id }} -d postgres -c 
+        "CREATE DATABASE \"{{ postgres_db }}\" WITH OWNER \"{{ postgres_user }}\""
+      register: create_db_output
+      failed_when: create_db_output.rc != 0 and "already exists" not in create_db_output.stderr
+      changed_when: create_db_output.rc == 0
+
+    # Création du répertoire templates si nécessaire
+    - name: Create templates directory
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/templates"
+        state: directory
+        mode: '0755'
+
+    # Création du template Nginx pour Symfony
+    - name: Create Nginx template for Symfony
+      ansible.builtin.copy:
+        content: |
+          server {
+              listen 8080;
+              server_name {{ web_server_name }};
+              root {{ symfony_root_dir | realpath }}/public;
+
+              # Ajout des logs d'erreur détaillés
+              error_log /opt/homebrew/var/log/nginx/{{ web_server_name }}_error.log debug;
+              access_log /opt/homebrew/var/log/nginx/{{ web_server_name }}_access.log combined;
+
+              location / {
+                  try_files $uri /index.php$is_args$args;
+              }
+
+              location ~ ^/index\.php(/|$) {
+                  fastcgi_pass 127.0.0.1:9000;
+                  fastcgi_split_path_info ^(.+\.php)(/.*)$;
+                  include fastcgi_params;
+                  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                  fastcgi_param DOCUMENT_ROOT $document_root;
+                  fastcgi_buffer_size 128k;
+                  fastcgi_buffers 4 256k;
+                  fastcgi_busy_buffers_size 256k;
+                  internal;
+              }
+
+
+              # Exception pour le fichier test.php avec définition de DOCUMENT_ROOT
+              location = /test.php {
+                  fastcgi_pass 127.0.0.1:9000;
+                  include fastcgi_params;
+                  fastcgi_param SCRIPT_FILENAME $document_root/test.php;
+                  fastcgi_param DOCUMENT_ROOT $document_root;
+              }
+
+              location ~ \.php$ {
+                  return 404;
+              }
+
+              # Augmentation de la taille du buffer
+              client_max_body_size 20M;
+              client_body_buffer_size 128k;
+          }
+        dest: "{{ playbook_dir }}/templates/nginx_symfony.conf.j2"
+        mode: '0644'
+
+    # Configuration de Nginx pour Symfony
+    - name: Create Nginx configuration for Symfony
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/nginx_symfony.conf.j2"
+        dest: "/opt/homebrew/etc/nginx/servers/{{ web_server_name }}.conf"
+      register: nginx_conf
+
+    # Configuration de PHP-FPM
+    - name: Start PHP-FPM
+      ansible.builtin.command: brew services start php@{{ php_version }}
+      register: php_fpm_output
+      changed_when: php_fpm_output.rc == 0
+
+    # Installation des dépendances Composer
+    - name: Install Composer dependencies
+      ansible.builtin.command: composer install
+      args:
+        chdir: "{{ symfony_root_dir }}"
+
+    - name: Grant privileges to PostgreSQL user
+      ansible.builtin.command: >
+        /opt/homebrew/opt/postgresql@{{ postgres_version }}/bin/psql -U {{ ansible_user_id }} -d postgres -c 
+        "GRANT ALL ON SCHEMA public TO \"{{ postgres_user }}\"; ALTER USER \"{{ postgres_user }}\" WITH SUPERUSER;"
+      register: grant_privileges_output
+      changed_when: grant_privileges_output.rc == 0
+
+    - name: Create or update .env.local file
+      ansible.builtin.copy:
+        content: |
+          ###> doctrine/doctrine-bundle ###
+          DATABASE_URL="postgresql://{{ postgres_user }}:{{ postgres_password }}@127.0.0.1:{{ postgres_port }}/{{ postgres_db }}?serverVersion={{ postgres_version }}&charset=utf8"
+          ###< doctrine/doctrine-bundle ###
+        dest: "{{ symfony_root_dir }}/.env.local"
+        mode: '0644'
+
+    - name: Restart PostgreSQL
+      ansible.builtin.command: brew services restart postgresql@{{ postgres_version }}
+      register: pg_restart_output
+      changed_when: pg_restart_output.rc == 0
+
+    # Mise à jour du schema de base de données Symfony
+    - name: Run Symfony database migrations
+      ansible.builtin.command: php bin/console doctrine:migrations:migrate --no-interaction
+      args:
+        chdir: "{{ symfony_root_dir }}"
+
+    # Installation des dépendances NPM et compilation des assets
+    - name: Install NPM dependencies
+      ansible.builtin.command: npm install
+      args:
+        chdir: "{{ symfony_root_dir }}"
+
+    - name: Build frontend assets
+      ansible.builtin.command: npm run build
+      args:
+        chdir: "{{ symfony_root_dir }}"
+
+    # Ajout de l'entrée hosts locale
+    - name: Add hosts entry for Symfony application
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1 {{ web_server_name }}"
+        state: present
+      become: true
+
+    # S'assurer que PHP-FPM est bien configuré et démarré
+    - name: Ensure PHP-FPM is configured correctly
+      ansible.builtin.lineinfile:
+        path: /opt/homebrew/etc/php/{{ php_version }}/php-fpm.d/www.conf
+        regexp: '^listen = '
+        line: 'listen = 127.0.0.1:9000'
+        state: present
+      register: php_fpm_config
+
+    - name: Restart PHP-FPM if config changed
+      ansible.builtin.command: brew services restart php@{{ php_version }}
+      when: php_fpm_config.changed
+
+    # S'assurer que Nginx est bien démarré
+    - name: Ensure Nginx is started
+      ansible.builtin.command: sudo /opt/homebrew/bin/nginx
+      register: nginx_start
+      changed_when: nginx_start.rc == 0
+      become: true
+      ignore_errors: yes
+
+    # Redémarrer Nginx pour prendre en compte la nouvelle configuration
+    - name: Restart Nginx if needed
+      ansible.builtin.shell: |
+        sudo /opt/homebrew/bin/nginx -s stop || true
+        sleep 2
+        sudo /opt/homebrew/bin/nginx
+      register: nginx_restart
+      changed_when: nginx_restart.rc == 0
+      become: true
+      when: nginx_conf.changed
+
+    # Ajouter un délai pour laisser le temps aux services de démarrer
+    - name: Wait for services to start
+      ansible.builtin.wait_for:
+        port: 8080
+        timeout: 30
+
+    - name: Display Nginx error log if verification failed
+      ansible.builtin.command: tail -n 50 /opt/homebrew/var/log/nginx/{{ web_server_name }}_error.log
+      when: webpage is defined and webpage.failed
+      ignore_errors: yes
+
+    - name: Check if Symfony public directory exists
+      ansible.builtin.stat:
+        path: "{{ symfony_root_dir }}/public"
+      register: symfony_public_dir
+
+    - name: Display Symfony root directory info
+      ansible.builtin.debug:
+        msg: "Symfony public directory exists: {{ symfony_public_dir.stat.exists }}"
+
+    - name: Check if index.php exists
+      ansible.builtin.stat:
+        path: "{{ symfony_root_dir }}/public/index.php"
+      register: index_php
+
+    - name: Display index.php info
+      ansible.builtin.debug:
+        msg: "index.php exists: {{ index_php.stat.exists }}"
+
+    - name: Check PHP-FPM running
+      ansible.builtin.shell: ps aux | grep php-fpm
+      register: php_fpm_status
+      changed_when: false
+
+    - name: Display PHP-FPM status
+      ansible.builtin.debug:
+        msg: "{{ php_fpm_status.stdout_lines }}"
+
+    - name: Check permissions on Symfony directory
+      ansible.builtin.command: ls -la {{ symfony_root_dir }}/public
+      register: permissions
+      changed_when: false
+
+    - name: Display permissions
+      ansible.builtin.debug:
+        msg: "{{ permissions.stdout_lines }}"
+
+    - name: Create a test PHP file
+      ansible.builtin.copy:
+        content: "<?php phpinfo(); ?>"
+        dest: "{{ symfony_root_dir }}/public/test.php"
+        mode: '0644'
+
+    - name: Test direct PHP access via test.php
+      ansible.builtin.uri:
+        url: "http://{{ web_server_name }}:8080/test.php"
+        return_content: yes
+      register: php_test
+      ignore_errors: yes
+
+    # Vérification finale
+    - name: Verify the Symfony application is working
+      ansible.builtin.uri:
+        url: "http://{{ web_server_name }}:8080"
+        return_content: yes
+        validate_certs: no
+        follow_redirects: yes
+      register: webpage
+      until: webpage.status == 200
+      retries: 6
+      delay: 5 
+      failed_when: webpage.status != 200
+      ignore_errors: yes

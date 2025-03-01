@@ -1,0 +1,42 @@
+---
+- name: Cleanup Symfony stack
+  hosts: servers
+  vars:
+    web_server_name: shape-of-you.local
+    postgres_version: 16
+    php_version: 8.2
+
+  tasks:
+    # Arrêt des services
+    - name: Stop Nginx
+      ansible.builtin.command: brew services stop nginx
+      register: nginx_stop
+      changed_when: nginx_stop.rc == 0
+      ignore_errors: true
+
+    - name: Stop PHP-FPM
+      ansible.builtin.command: brew services stop php@{{ php_version }}
+      register: php_stop
+      changed_when: php_stop.rc == 0
+      ignore_errors: true
+
+    - name: Stop PostgreSQL
+      ansible.builtin.command: brew services stop postgresql@{{ postgres_version }}
+      register: pg_stop
+      changed_when: pg_stop.rc == 0
+      ignore_errors: true
+
+    # Suppression de la configuration Nginx
+    - name: Remove Nginx configuration for Symfony
+      ansible.builtin.file:
+        path: "/usr/local/etc/nginx/servers/{{ web_server_name }}.conf"
+        state: absent
+      register: nginx_conf_rm
+
+    # Suppression de l'entrée hosts
+    - name: Remove hosts entry for Symfony application
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1 {{ web_server_name }}"
+        state: absent
+      become: true 

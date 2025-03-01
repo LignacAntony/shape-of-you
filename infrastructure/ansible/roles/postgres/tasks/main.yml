@@ -1,0 +1,31 @@
+---
+- name: Installer PostgreSQL via Homebrew
+  community.general.homebrew:
+    name: postgresql@{{ postgres_version }}
+    state: present
+
+- name: Démarrer PostgreSQL
+  ansible.builtin.command: brew services start postgresql@{{ postgres_version }}
+  register: pg_start_output
+  changed_when: pg_start_output.rc == 0
+
+- name: Créer l'utilisateur PostgreSQL
+  ansible.builtin.command: >
+    /opt/homebrew/opt/postgresql@{{ postgres_version }}/bin/psql -U {{ ansible_user_id }} -d postgres -c
+    "CREATE USER \"{{ postgres_user }}\" WITH PASSWORD '{{ postgres_password }}'"
+  register: create_user_output
+  failed_when: create_user_output.rc != 0 and "already exists" not in create_user_output.stderr
+  changed_when: create_user_output.rc == 0
+
+- name: Créer la base de données PostgreSQL
+  ansible.builtin.command: >
+    /opt/homebrew/opt/postgresql@{{ postgres_version }}/bin/psql -U {{ ansible_user_id }} -d postgres -c
+    "CREATE DATABASE \"{{ postgres_db }}\" WITH OWNER \"{{ postgres_user }}\""
+  register: create_db_output
+  failed_when: create_db_output.rc != 0 and "already exists" not in create_db_output.stderr
+  changed_when: create_db_output.rc == 0
+
+- name: Redémarrer PostgreSQL
+  ansible.builtin.command: brew services restart postgresql@{{ postgres_version }}
+  register: pg_restart_output
+  changed_when: pg_restart_output.rc == 0

@@ -1,0 +1,19 @@
+---
+- name: Déployer la stack complète Symfony
+  hosts: servers
+  remote_user: root
+  vars:
+    symfony_root_dir: "{{ playbook_dir }}/../../.."
+    web_server_name: shape-of-you.local
+    postgres_version: 16
+    postgres_db: shape-of-you-db
+    postgres_user: user
+    postgres_password: password
+    postgres_port: 5432
+    php_version: 8.2
+  roles:
+    - common
+    - nginx
+    - php
+    - postgres
+    - symfony

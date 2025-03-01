@@ -1,0 +1,21 @@
+---
+- name: Installer PHP et ses extensions via Homebrew
+  community.general.homebrew:
+    name:
+      - "php@{{ php_version }}"
+    state: present
+
+- name: S'assurer que PHP-FPM écoute sur 127.0.0.1:9000
+  ansible.builtin.lineinfile:
+    path: "/opt/homebrew/etc/php/{{ php_version }}/php-fpm.d/www.conf"
+    regexp: '^listen = '
+    line: 'listen = 127.0.0.1:9000'
+    state: present
+  register: php_fpm_config
+
+- name: Redémarrer PHP-FPM si la configuration a changé
+  ansible.builtin.command: brew services restart php@{{ php_version }}
+  when: php_fpm_config.changed
+
+- name: Démarrer PHP-FPM
+  ansible.builtin.command: brew services start php@{{ php_version }}

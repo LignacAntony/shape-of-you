@@ -1,0 +1,8 @@
+---
+- name: Installer Homebrew packages communs
+  community.general.homebrew:
+    name:
+      - node
+      - webpack
+      - composer
+    state: present
