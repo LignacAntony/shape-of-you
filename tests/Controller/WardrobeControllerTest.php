@@ -117,8 +117,8 @@ final class WardrobeControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Update', [
-            'wardrobe[name]' => 'Updated Wardrobe',
-            'wardrobe[description]' => 'Updated Description',
+            'wardrobe_admin[name]' => 'Updated Wardrobe',
+            'wardrobe_admin[description]' => 'Updated Description',
         ]);
 
 
