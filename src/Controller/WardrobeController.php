@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Wardrobe;
+use App\Form\WardrobeAdminType;
 use App\Form\WardrobeType;
 use App\Repository\WardrobeRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -45,7 +46,7 @@ final class WardrobeController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $wardrobe = new Wardrobe();
-        $form = $this->createForm(WardrobeType::class, $wardrobe);
+        $form = $this->createForm(WardrobeAdminType::class, $wardrobe);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -74,7 +75,7 @@ final class WardrobeController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Wardrobe $wardrobe, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(WardrobeType::class, $wardrobe);
+        $form = $this->createForm(WardrobeAdminType::class, $wardrobe);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

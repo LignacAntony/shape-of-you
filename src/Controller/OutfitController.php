@@ -10,6 +10,7 @@ use App\Entity\Wardrobe;
 use App\Entity\Like;
 use App\Entity\Review;
 use App\Entity\User;
+use App\Form\OutfitAdminType;
 use App\Form\OutfitType;
 use App\Form\ClothingItemType;
 use App\Repository\OutfitRepository;
@@ -47,7 +48,7 @@ final class OutfitController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $outfit = new Outfit();
-        $form = $this->createForm(OutfitType::class, $outfit);
+        $form = $this->createForm(OutfitAdminType::class, $outfit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -76,7 +77,7 @@ final class OutfitController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Outfit $outfit, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(OutfitType::class, $outfit);
+        $form = $this->createForm(OutfitAdminType::class, $outfit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
