@@ -398,7 +398,7 @@ final class WardrobeController extends AbstractController
             $data = json_decode($request->getContent(), true);
             $wardrobe = new Wardrobe();
             $form = $this->createForm(WardrobeType::class, $wardrobe);
-            $form->submit($data);
+            $form->handleRequest($request);
 
             if (!$form->isSubmitted()) {
                 return $this->json([
