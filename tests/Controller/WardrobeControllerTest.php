@@ -75,8 +75,8 @@ final class WardrobeControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Create', [
-            'wardrobe[name]' => 'Test Wardrobe',
-            'wardrobe[description]' => 'Test Description',
+            'wardrobe_admin[name]' => 'Test Wardrobe',
+            'wardrobe_admin[description]' => 'Test Description',
         ]);
 
         self::assertSame(1, $this->repository->count([]));

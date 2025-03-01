@@ -81,9 +81,9 @@ final class OutfitControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Create', [
-            'outfit[name]' => 'Test Outfit',
-            'outfit[description]' => 'Test Description',
-            'outfit[isPublished]' => true
+            'outfit_admin[name]' => 'Test Outfit',
+            'outfit_admin[description]' => 'Test Description',
+            'outfit_admin[isPublished]' => true
         ]);
 
         $outfit = $this->repository->findOneBy(['name' => 'Test Outfit']);
@@ -99,9 +99,9 @@ final class OutfitControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Create', [
-            'outfit[name]' => '', // Nom vide pour déclencher une erreur de validation
-            'outfit[description]' => 'Test Description',
-            'outfit[isPublished]' => true
+            'outfit_admin[name]' => '', // Nom vide pour déclencher une erreur de validation
+            'outfit_admin[description]' => 'Test Description',
+            'outfit_admin[isPublished]' => true
         ]);
 
         $this->assertResponseStatusCodeSame(422); // Unprocessable Entity
@@ -134,9 +134,9 @@ final class OutfitControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Update', [
-            'outfit[name]' => 'Updated Outfit',
-            'outfit[description]' => 'Updated Description',
-            'outfit[isPublished]' => false
+            'outfit_admin[name]' => 'Updated Outfit',
+            'outfit_admin[description]' => 'Updated Description',
+            'outfit_admin[isPublished]' => false
         ]);
 
         $updatedOutfit = $this->repository->find($outfit->getId());
@@ -156,9 +156,9 @@ final class OutfitControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(200);
 
         $this->client->submitForm('Update', [
-            'outfit[name]' => '',
-            'outfit[description]' => 'Updated Description',
-            'outfit[isPublished]' => false
+            'outfit_admin[name]' => '',
+            'outfit_admin[description]' => 'Updated Description',
+            'outfit_admin[isPublished]' => false
         ]);
 
         $this->assertResponseStatusCodeSame(422);
