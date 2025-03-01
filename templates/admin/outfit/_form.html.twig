@@ -24,16 +24,17 @@
                             'class': 'appearance-none rounded-md relative block w-full px-3 py-2
                                        border border-gray-300 placeholder-gray-400 text-gray-900
                                        focus:outline-none focus:ring-indigo-500 focus:border-indigo-500
-                                       sm:text-sm transition duration-150 ease-in-out',
+                                       sm:text-sm transition duration-150 ease-in-out' ~
+                                       (field.vars.errors|length > 0 ? ' border-red-500' : ''),
                             'placeholder': field.vars.label
                         }
                     }) }}
                 {% endif %}
 
-                {% if field.vars.errors is not empty %}
-                    <p class="mt-1 text-xs text-red-600">
+                {% if field.vars.errors|length > 0 %}
+                    <div class="text-red-600 text-xs mt-1">
                         {{ form_errors(field) }}
-                    </p>
+                    </div>
                 {% endif %}
             </div>
         {% else %}
@@ -47,6 +48,5 @@
 >
     {{ button_label|default('Save') }}
 </button>
-
 
 {{ form_end(form) }}

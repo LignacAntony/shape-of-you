@@ -1,0 +1,9 @@
+<form method="post" action="{{ path('app_outfit_item_delete', {'id': outfit_item.id}) }}"
+        onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');"
+        class="inline-block">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ outfit_item.id) }}">
+    <button type="submit"
+            class="px-4 py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition-colors">
+        Supprimer
+    </button>
+</form>
