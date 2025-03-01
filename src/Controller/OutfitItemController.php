@@ -12,14 +12,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/admin/outfit/item')]
+#[Route('/admin/outfit-item')]
 #[IsGranted('ROLE_ADMIN')]
 final class OutfitItemController extends AbstractController
 {
-    #[Route(name: 'app_outfit_item_index', methods: ['GET'])]
+    #[Route('/', name: 'app_outfit_item_index', methods: ['GET'])]
     public function index(OutfitItemRepository $outfitItemRepository): Response
     {
-        return $this->render('outfit_item/index.html.twig', [
+        return $this->render('admin/outfit_item/index.html.twig', [
             'outfit_items' => $outfitItemRepository->findAll(),
         ]);
     }
@@ -28,7 +28,9 @@ final class OutfitItemController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $outfitItem = new OutfitItem();
-        $form = $this->createForm(OutfitItemType::class, $outfitItem);
+        $form = $this->createForm(OutfitItemType::class, $outfitItem, [
+            'user' => $this->getUser()
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -38,24 +40,26 @@ final class OutfitItemController extends AbstractController
             return $this->redirectToRoute('app_outfit_item_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('outfit_item/new.html.twig', [
+        return $this->render('admin/outfit_item/new.html.twig', [
             'outfit_item' => $outfitItem,
             'form' => $form,
         ]);
     }
 
-    #[Route('/{id}', name: 'app_outfit_item_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_outfit_item_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(OutfitItem $outfitItem): Response
     {
-        return $this->render('outfit_item/show.html.twig', [
+        return $this->render('admin/outfit_item/show.html.twig', [
             'outfit_item' => $outfitItem,
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_outfit_item_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_outfit_item_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, OutfitItem $outfitItem, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(OutfitItemType::class, $outfitItem);
+        $form = $this->createForm(OutfitItemType::class, $outfitItem, [
+            'user' => $this->getUser()
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -64,13 +68,13 @@ final class OutfitItemController extends AbstractController
             return $this->redirectToRoute('app_outfit_item_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('outfit_item/edit.html.twig', [
+        return $this->render('admin/outfit_item/edit.html.twig', [
             'outfit_item' => $outfitItem,
             'form' => $form,
         ]);
     }
 
-    #[Route('/{id}', name: 'app_outfit_item_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_outfit_item_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, OutfitItem $outfitItem, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $outfitItem->getId(), $request->getPayload()->getString('_token'))) {

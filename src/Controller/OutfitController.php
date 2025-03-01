@@ -49,6 +49,20 @@ final class OutfitController extends AbstractController
     {
         $outfit = new Outfit();
         $form = $this->createForm(OutfitAdminType::class, $outfit);
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $outfit->setAuthor($user);
+        $outfit->setCreatedAt(new \DateTimeImmutable());
+        $outfit->setLikesCount(0);
+
+        // Récupérer la première garde-robe de l'utilisateur
+        $wardrobe = $entityManager->getRepository(Wardrobe::class)->findOneBy(['author' => $this->getUser()]);
+        if (!$wardrobe) {
+            throw $this->createNotFoundException('Vous devez avoir au moins une garde-robe pour créer une tenue.');
+        }
+        $outfit->setWardrobe($wardrobe);
+
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -75,21 +89,27 @@ final class OutfitController extends AbstractController
 
     #[Route('/admin/outfit/{id}/edit', name: 'app_outfit_edit', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function edit(Request $request, Outfit $outfit, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Outfit $outfit): Response
     {
         $form = $this->createForm(OutfitAdminType::class, $outfit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            $this->entityManager->flush();
 
-            return $this->redirectToRoute('app_outfit_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_outfit_index');
         }
 
-        return $this->render('admin/outfit/edit.html.twig', [
+        $response = $this->render('admin/outfit/edit.html.twig', [
             'outfit' => $outfit,
-            'form' => $form,
+            'form' => $form
         ]);
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $response->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return $response;
     }
 
     #[Route('/admin/outfit/{id}', name: 'app_outfit_delete', methods: ['POST'])]

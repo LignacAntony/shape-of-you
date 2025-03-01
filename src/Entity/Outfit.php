@@ -26,6 +26,7 @@ class Outfit
     private ?Wardrobe $wardrobe = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank(message: 'Le nom est obligatoire')]
     private ?string $name = null;
 
     #[ORM\Column(length: 4000, nullable: true)]
@@ -106,7 +107,7 @@ class Outfit
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(?string $name): static
     {
         $this->name = $name;
 

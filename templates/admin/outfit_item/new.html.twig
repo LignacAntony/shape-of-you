@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel élément de tenue{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-4">
+        {% include 'components/back_button.html.twig' %}
+
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+                    <h1 class="text-lg font-medium text-gray-900">
+                        Créer un nouvel élément de tenue
+                    </h1>
+                </div>
+
+                <div class="px-4 py-5 sm:p-6">
+                    {{ include('admin/outfit_item/_form.html.twig', {'button_label': 'Créer'}) }}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{{ path('app_outfit_item_index') }}"
+                   class="inline-block px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-md hover:bg-gray-300 transition-colors">
+                    Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
