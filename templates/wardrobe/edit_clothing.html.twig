@@ -181,12 +181,31 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script>
-        function removeImage(button, imagePath) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
-                // TODO: Ajouter la logique de suppression d'image
-                console.log('Suppression de l\'image:', imagePath);
+        <script>
+            function removeImage(button, imagePath) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
+                    fetch("{{ path('clothing_edit', {'id': outfitItem.id}) }}?action=delete_image", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        body: JSON.stringify({ imagePath: imagePath })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Retirer l'élément du DOM en cas de succès
+                                button.closest('.relative').remove();
+                            } else {
+                                alert("Erreur lors de la suppression de l'image : " + (data.error || ''));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert("Une erreur est survenue lors de la suppression.");
+                        });
+                }
             }
-        }
-    </script>
+        </script>
 {% endblock %} 

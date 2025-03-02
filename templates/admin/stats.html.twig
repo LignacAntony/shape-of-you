@@ -1,0 +1,46 @@
+<div class="bg-white shadow-md rounded-lg p-6 mt-5">
+    <h2 class="text-2xl font-bold mb-4">Vos statistiques</h2>
+    <h2 class="text-xl font-bold mb-4">Users</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="bg-blue-100 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Utilisateurs</h3>
+            <p class="text-3xl font-bold">{{ user_count }}</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Incription (24h)</h3>
+            <p class="text-3xl font-bold">{{ user_register_today }}</p>
+        </div>
+    </div>
+    <h2 class="text-xl font-bold mb-4 mt-12">Outfits</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="bg-blue-100 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Outfits</h3>
+            <p class="text-xl font-bold"><span class="text-3xl">{{ outfit_count }}</span> en lignes</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Auteur numéro 1</h3>
+            <p class="text-base font-bold">{{ top_author.outfitCount }} outfits</p>
+            <div class="flex flex-row items-center justify-between">
+                <p class="text-base">{{ top_author.email }}</p>
+                <a href="{{ path('profile_show_user', {'id': top_author.id}) }}" class="text-base font-bold underline">Voir le profile</a>
+            </div>
+        </div>
+        <div class="bg-red-100 p-4 rounded-lg sm:col-span-2">
+            <h3 class="text-lg font-semibold mb-2">Outfit tendance</h3>
+            <p class="text-base"><span class="font-bold">Auteur : </span> {{ outfit_most_likes.author.firstname }}</p>
+                <p class="text-base"><span class="font-bold">Outfit :</span> {{ outfit_most_likes.name }}</p>
+            <div class="flex flex-row items-baseline justify-between">
+                <p class="text-2xl font-bold mt-4">{{ outfit_most_likes.likesCount }} likes</p>
+                <a href="{{ path('outfit_details', {'id': outfit_most_likes.id}) }}" class="text-base font-bold underline">Voir outfit</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="p-6 lg:w-1/2 mt-6">
+        <h3 class="text-lg font-semibold mb-2">Catégories</h3>
+        <canvas id="categoryPieChart" data-chart-data="{{ clothing_items_per_category|json_encode()|e('html_attr') }}"></canvas>
+    </div>
+</div>

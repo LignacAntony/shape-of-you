@@ -62,4 +62,30 @@ class OutfitRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function countAllOutfits(): int
+    {
+        return $this->createQueryBuilder('u')
+            ->select('count(u.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+    public function findTopAuthor(): ?array
+    {
+        return $this->createQueryBuilder('o')
+            ->select('a.id as id, a.email as email, COUNT(o.id) as outfitCount')
+            ->innerJoin('o.author', 'a')
+            ->groupBy('a.id')
+            ->orderBy('outfitCount', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+    public function findOutfitWithMostLikes(): ?Outfit
+    {
+        return $this->createQueryBuilder('o')
+            ->orderBy('o.likesCount', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
