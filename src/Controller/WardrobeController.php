@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Wardrobe;
+use App\Form\WardrobeAdminType;
 use App\Form\WardrobeType;
 use App\Repository\WardrobeRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,11 +44,12 @@ final class WardrobeController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $wardrobe = new Wardrobe();
+        $form = $this->createForm(WardrobeAdminType::class, $wardrobe);
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $wardrobe->setAuthor($user);
         $wardrobe->setCreatedAt(new \DateTimeImmutable());
-        $form = $this->createForm(WardrobeType::class, $wardrobe);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -76,7 +78,7 @@ final class WardrobeController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Wardrobe $wardrobe, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(WardrobeType::class, $wardrobe);
+        $form = $this->createForm(WardrobeAdminType::class, $wardrobe);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -304,10 +306,26 @@ final class WardrobeController extends AbstractController
             'user' => $this->getUser(),
             'wardrobe' => $outfitItem->getWardrobe()
         ]);
-
         $outfitForm = $this->createForm(OutfitItemType::class, $outfitItem, [
             'user' => $this->getUser()
         ]);
+
+        if ($request->isXmlHttpRequest() && $request->query->get('action') === 'delete_image') {
+            $data = json_decode($request->getContent(), true);
+            $imagePath = $data['imagePath'] ?? null;
+            if (!$imagePath) {
+                return new JsonResponse(['error' => 'Aucun chemin d\'image fourni'], 400);
+            }
+            $uploadDir = $this->getParameter('upload_directory');
+            $fullImagePath = $uploadDir . '/' . basename($imagePath);
+            if (file_exists($fullImagePath)) {
+                unlink($fullImagePath);
+            }
+            $clothingItem->removeImage($imagePath);
+            $entityManager->flush();
+
+            return new JsonResponse(['success' => true]);
+        }
 
         $outfitForm->handleRequest($request);
         $clothingForm->handleRequest($request);
@@ -369,6 +387,7 @@ final class WardrobeController extends AbstractController
         ]);
     }
 
+
     #[Route('/wardrobe/create', name: 'wardrobe_create', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function createWardrobe(Request $request): JsonResponse
@@ -379,7 +398,7 @@ final class WardrobeController extends AbstractController
             $data = json_decode($request->getContent(), true);
             $wardrobe = new Wardrobe();
             $form = $this->createForm(WardrobeType::class, $wardrobe);
-            $form->submit($data);
+            $form->handleRequest($request);
 
             if (!$form->isSubmitted()) {
                 return $this->json([

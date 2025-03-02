@@ -16,6 +16,16 @@ class CategoryItemRepository extends ServiceEntityRepository
         parent::__construct($registry, CategoryItem::class);
     }
 
+    public function countClothingItemsPerCategory(): array
+    {
+        return $this->createQueryBuilder('cat')
+            ->select('cat.name as name, COUNT(ci.id) as count')
+            ->leftJoin('cat.clothingItems', 'ci')
+            ->groupBy('cat.id')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return CategoryItem[] Returns an array of CategoryItem objects
     //     */

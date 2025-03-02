@@ -346,6 +346,7 @@
 
     {% block javascripts %}
         {{ parent() }}
+        {{ encore_entry_script_tags('carousel-init') }}
         <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     {% endblock %}
 

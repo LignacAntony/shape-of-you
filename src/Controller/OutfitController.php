@@ -10,6 +10,7 @@ use App\Entity\Wardrobe;
 use App\Entity\Like;
 use App\Entity\Review;
 use App\Entity\User;
+use App\Form\OutfitAdminType;
 use App\Form\OutfitType;
 use App\Form\ClothingItemType;
 use App\Repository\OutfitRepository;
@@ -47,6 +48,7 @@ final class OutfitController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $outfit = new Outfit();
+        $form = $this->createForm(OutfitAdminType::class, $outfit);
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $outfit->setAuthor($user);
@@ -60,7 +62,7 @@ final class OutfitController extends AbstractController
         }
         $outfit->setWardrobe($wardrobe);
 
-        $form = $this->createForm(OutfitType::class, $outfit);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -89,7 +91,7 @@ final class OutfitController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Outfit $outfit): Response
     {
-        $form = $this->createForm(OutfitType::class, $outfit);
+        $form = $this->createForm(OutfitAdminType::class, $outfit);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -330,9 +332,28 @@ final class OutfitController extends AbstractController
     public function editOutfitUser(Request $request, int $id): Response
     {
         $outfit = $this->outfitRepository->findOutfitWithAccessCheck($id, $this->getUser());
-
         if (!$outfit) {
             throw $this->createNotFoundException('Tenue non trouvée');
+        }
+
+        if ($request->isXmlHttpRequest() && $request->query->get('action') === 'delete_image') {
+            $data = json_decode($request->getContent(), true);
+            $imagePath = $data['imagePath'] ?? null;
+
+            if (!$imagePath) {
+                return new JsonResponse(['error' => 'Aucun chemin d\'image fourni'], 400);
+            }
+
+            $uploadDir = $this->getParameter('upload_directory');
+            $fullImagePath = $uploadDir . '/' . basename($imagePath);
+            if (file_exists($fullImagePath)) {
+                unlink($fullImagePath);
+            }
+
+            $outfit->removeImage($imagePath);
+            $this->entityManager->flush();
+
+            return new JsonResponse(['success' => true]);
         }
 
         $form = $this->createForm(OutfitType::class, $outfit);
@@ -341,7 +362,6 @@ final class OutfitController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $outfit->setUpdateDateAt(new \DateTime());
 
-            // Gérer les images
             /** @var UploadedFile[] $images */
             $images = $form->get('images')->getData();
             if ($images) {
@@ -361,9 +381,10 @@ final class OutfitController extends AbstractController
 
         return $this->render('outfit/edit.html.twig', [
             'outfit' => $outfit,
-            'form' => $form
+            'form'   => $form,
         ]);
     }
+
 
     #[Route('/outfit/{id}/delete-user', name: 'outfit_delete_user', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
