@@ -1,11 +1,71 @@
 ---
+- name: Créer le répertoire de l'application Symfony
+  ansible.builtin.file:
+    path: "{{ symfony_root_dir }}"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+  become: true
+
+- name: Copier l'application buildée vers le serveur
+  ansible.builtin.synchronize:
+    src: "{{ playbook_dir }}/../../../dist/"
+    dest: "{{ symfony_root_dir }}"
+    delete: true
+    rsync_opts:
+      - "--exclude=.git"
+      - "--exclude=var/cache/*"
+      - "--exclude=var/log/*"
+      - "--rsh='ssh -i {{ playbook_dir }}/../ssh_keys/vps -o StrictHostKeyChecking=no'"
+  become: true
+  become_user: www-data
+
+- name: Créer le répertoire .ansible pour www-data
+  ansible.builtin.file:
+    path: "/var/www/.ansible"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+    recurse: true
+  become: true
+
+- name: Créer le répertoire de cache Composer
+  ansible.builtin.file:
+    path: "/var/www/.cache/composer"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+    recurse: true
+  become: true
+
+- name: Créer le répertoire .npm pour www-data
+  ansible.builtin.file:
+    path: "/var/www/.npm"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+    recurse: true
+  become: true
+
 - name: Installer les dépendances Composer
   ansible.builtin.composer:
     command: install
     working_dir: "{{ symfony_root_dir }}"
     no_dev: false
+    arguments: >-
+      --ignore-platform-req=ext-simplexml
+      --ignore-platform-req=ext-xml
+      --ignore-platform-req=ext-dom
+      --ignore-platform-req=ext-xmlwriter
+      --no-scripts
   register: composer_result
   changed_when: composer_result.changed
+  become: true
+  become_user: www-data
 
 - name: Créer ou mettre à jour le fichier .env.local
   ansible.builtin.copy:
@@ -16,13 +76,93 @@
       ###< doctrine/doctrine-bundle ###
     dest: "{{ symfony_root_dir }}/.env.local"
     mode: '0644'
+    owner: www-data
+    group: www-data
+  become: true
+
+- name: Installer les extensions PHP requises (Ubuntu/Debian)
+  ansible.builtin.apt:
+    name:
+      - "php{{ php_version }}-xml"
+      - "php{{ php_version }}-dom"
+      - "php{{ php_version }}-simplexml"
+      - "php{{ php_version }}-xmlwriter"
+    state: present
+    update_cache: true
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Trouver le chemin des extensions PHP
+  ansible.builtin.shell: set -o pipefail && php -i | grep "extension_dir"
+  args:
+    executable: /bin/bash
+  register: php_extension_dir
+  changed_when: false
+  become: true
+
+- name: Afficher le répertoire des extensions PHP
+  ansible.builtin.debug:
+    var: php_extension_dir.stdout
+  become: true
+
+- name: Lister les extensions PHP disponibles
+  ansible.builtin.command: ls -la {{ php_extension_dir.stdout | regex_replace('.*=> ', '') }}
+  register: php_extensions_list
+  changed_when: false
+  become: true
+
+- name: Afficher les extensions PHP disponibles
+  ansible.builtin.debug:
+    var: php_extensions_list.stdout_lines
+  become: true
+
+- name: Redémarrer PHP-FPM
+  ansible.builtin.service:
+    name: "php{{ php_version }}-fpm"
+    state: restarted
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Vérifier si l'extension DOM est chargée
+  ansible.builtin.shell: set -o pipefail && php -m | grep -E "^dom$"
+  args:
+    executable: /bin/bash
+  register: dom_extension
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Installer et activer l'extension DOM si elle n'est pas chargée
+  when: dom_extension.stdout == ""
+  block:
+    - name: Réinstaller l'extension DOM
+      ansible.builtin.apt:
+        name: "php{{ php_version }}-dom"
+        state: present
+        update_cache: true
+      become: true
+
+    - name: Activer l'extension DOM
+      ansible.builtin.command: phpenmod -v {{ php_version }} dom
+      args:
+        creates: /etc/php/{{ php_version }}/cli/conf.d/20-dom.ini
+      become: true
+
+    - name: Redémarrer PHP-FPM après activation de DOM
+      ansible.builtin.service:
+        name: "php{{ php_version }}-fpm"
+        state: restarted
+      become: true
 
 - name: Exécuter les migrations de base de données Symfony
-  ansible.builtin.command:
-    cmd: php bin/console doctrine:migrations:migrate --no-interaction
-    chdir: "{{ symfony_root_dir }}"
+  ansible.builtin.shell: |
+    cd {{ symfony_root_dir }} && \
+    php bin/console doctrine:migrations:migrate --no-interaction
   register: command_result
   changed_when: "'No migrations to execute' not in command_result.stdout"
+  become: true
+  become_user: www-data
+  ignore_errors: true
 
 - name: Installer les dépendances NPM
   ansible.builtin.command: npm install
@@ -30,6 +170,8 @@
     chdir: "{{ symfony_root_dir }}"
   register: npm_result
   changed_when: npm_result.stdout is defined and npm_result.stdout != ""
+  become: true
+  become_user: www-data
 
 - name: Compiler les assets frontend
   ansible.builtin.command: npm run build
@@ -37,10 +179,12 @@
     chdir: "{{ symfony_root_dir }}"
   register: build_result
   changed_when: build_result.stdout is defined and build_result.stdout != ""
+  become: true
+  become_user: www-data
 
 - name: Vérifier que l'application Symfony est accessible
   ansible.builtin.uri:
-    url: "http://{{ web_server_name }}:8080"
+    url: "http://{{ web_server_name }}"
     return_content: true
     validate_certs: false
     follow_redirects: true
@@ -49,3 +193,42 @@
   retries: 6
   delay: 5
   failed_when: webpage.status != 200
+
+- name: S'assurer que les extensions PHP sont activées
+  ansible.builtin.command: phpenmod -v {{ php_version }} {{ item }}
+  with_items:
+    - xml
+    - dom
+    - simplexml
+    - xmlwriter
+  changed_when: false
+  become: true
+  register: phpenmod_result
+  failed_when: false
+
+- name: Vérifier la configuration PHP
+  ansible.builtin.shell: set -o pipefail && php -i | grep -E "extension_dir|^extension="
+  args:
+    executable: /bin/bash
+  register: php_config
+  changed_when: false
+  become: true
+
+- name: Afficher la configuration PHP
+  ansible.builtin.debug:
+    var: php_config.stdout_lines
+  become: true
+
+- name: Vérifier que les extensions PHP sont correctement chargées
+  ansible.builtin.shell: set -o pipefail && php -m | grep -E "^(dom|xml|simplexml|xmlwriter)$"
+  args:
+    executable: /bin/bash
+  register: php_modules
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Afficher les modules PHP chargés
+  ansible.builtin.debug:
+    var: php_modules.stdout_lines
+  become: true

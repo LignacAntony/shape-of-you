@@ -1,8 +1,15 @@
 ---
-- name: Installer Homebrew packages communs
-  community.general.homebrew:
+- name: Installer les packages communs sur Linux
+  ansible.builtin.apt:
     name:
-      - node
-      - webpack
+      - nodejs
+      - npm
       - composer
+    state: present
+    update_cache: true
+
+- name: Installer webpack globalement via npm
+  npm:
+    name: webpack
+    global: true
     state: present

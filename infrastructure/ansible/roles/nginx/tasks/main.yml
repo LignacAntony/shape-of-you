@@ -1,58 +1,24 @@
 ---
-- name: Installer Nginx via Homebrew
-  community.general.homebrew:
+- name: Installer Nginx
+  ansible.builtin.apt:
     name: nginx
     state: present
+    update_cache: true
+  become: true
 
-- name: Créer le template de configuration Nginx pour Symfony
-  ansible.builtin.copy:
-    content: |
-      server {
-          listen 8080;
-          server_name {{ web_server_name }};
-          root {{ symfony_root_dir | realpath }}/public;
-
-          # Logs détaillés
-          error_log /opt/homebrew/var/log/nginx/{{ web_server_name }}_error.log debug;
-          access_log /opt/homebrew/var/log/nginx/{{ web_server_name }}_access.log combined;
-
-          location / {
-              try_files $uri /index.php$is_args$args;
-          }
-
-          location ~ ^/index\.php(/|$) {
-              fastcgi_pass 127.0.0.1:9000;
-              fastcgi_split_path_info ^(.+\.php)(/.*)$;
-              include fastcgi_params;
-              fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-              fastcgi_param DOCUMENT_ROOT $document_root;
-              fastcgi_buffer_size 128k;
-              fastcgi_buffers 4 256k;
-              fastcgi_busy_buffers_size 256k;
-              internal;
-          }
-
-          # Exception pour le fichier test.php
-          location = /test.php {
-              fastcgi_pass 127.0.0.1:9000;
-              include fastcgi_params;
-              fastcgi_param SCRIPT_FILENAME $document_root/test.php;
-              fastcgi_param DOCUMENT_ROOT $document_root;
-          }
-
-          location ~ \.php$ {
-              return 404;
-          }
-
-          client_max_body_size 20M;
-          client_body_buffer_size 128k;
-      }
-    dest: "/opt/homebrew/etc/nginx/servers/{{ web_server_name }}.conf"
+- name: Configurer Nginx pour Symfony
+  ansible.builtin.template:
+    src: ./templates/nginx_symfony.conf.j2
+    dest: /etc/nginx/sites-available/default
     mode: '0644'
+  register: nginx_config
+  notify: "Restart nginx"
+  become: true
 
-- name: Redémarrer Nginx
-  ansible.builtin.shell: |
-    sudo /opt/homebrew/bin/nginx -s stop || true
-    sleep 2
-    sudo /opt/homebrew/bin/nginx
+- name: Créer un lien symbolique vers sites-enabled
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: "Restart nginx"
   become: true

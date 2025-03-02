@@ -1,0 +1,14 @@
+---
+- name: Restart PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+
+- name: Reload PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
+    state: reloaded
+
+- name: Mettre à jour les paquets
+  ansible.builtin.apt:
+    update_cache: true

@@ -1,21 +1,101 @@
 ---
-- name: Installer PHP et ses extensions via Homebrew
-  community.general.homebrew:
+- name: Installer les dépendances pour ajouter des PPA
+  ansible.builtin.apt:
     name:
-      - "php@{{ php_version }}"
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+      - lsb-release
     state: present
+    update_cache: true
+  become: true
 
-- name: S'assurer que PHP-FPM écoute sur 127.0.0.1:9000
+- name: Ajouter le dépôt PPA pour PHP
+  ansible.builtin.apt_repository:
+    repo: ppa:ondrej/php
+    state: present
+    update_cache: true
+  become: true
+
+- name: Installer PHP et ses extensions via apt
+  ansible.builtin.apt:
+    name:
+      - "php{{ php_version }}"
+      - "php{{ php_version }}-fpm"
+      - "php{{ php_version }}-common"
+      - "php{{ php_version }}-cli"
+      - "php{{ php_version }}-xml"
+      - "php{{ php_version }}-curl"
+      - "php{{ php_version }}-mbstring"
+      - "php{{ php_version }}-zip"
+      - "php{{ php_version }}-gd"
+      - "php{{ php_version }}-intl"
+      - "php{{ php_version }}-pgsql"
+      - "php{{ php_version }}-dom"
+      - "php{{ php_version }}-curl"
+      - "php{{ php_version }}-simplexml"
+      - "php{{ php_version }}-xmlwriter"
+    state: present
+    update_cache: true
+  become: true
+
+- name: Vérifier l'installation des extensions PHP
+  ansible.builtin.shell: set -o pipefail && dpkg -l | grep -E "php{{ php_version }}-(xml|dom|simplexml|xmlwriter)"
+  args:
+    executable: /bin/bash
+  register: php_packages
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Afficher les packages PHP installés
+  ansible.builtin.debug:
+    var: php_packages.stdout_lines
+  become: true
+
+- name: S'assurer que PHP-FPM écoute sur un socket Unix
   ansible.builtin.lineinfile:
-    path: "/opt/homebrew/etc/php/{{ php_version }}/php-fpm.d/www.conf"
+    path: "/etc/php/{{ php_version }}/fpm/pool.d/www.conf"
     regexp: '^listen = '
-    line: 'listen = 127.0.0.1:9000'
+    line: 'listen = /var/run/php/php{{ php_version }}-fpm.sock'
     state: present
+  notify: Restart php-fpm
   register: php_fpm_config
+  become: true
 
-- name: Redémarrer PHP-FPM si la configuration a changé
-  ansible.builtin.command: brew services restart php@{{ php_version }}
-  when: php_fpm_config.changed
+- name: S'assurer que PHP-FPM est démarré et activé au démarrage
+  ansible.builtin.service:
+    name: "php{{ php_version }}-fpm"
+    state: started
+    enabled: true
+  become: true
 
-- name: Démarrer PHP-FPM
-  ansible.builtin.command: brew services start php@{{ php_version }}
+- name: S'assurer que les extensions PHP sont activées
+  ansible.builtin.command: phpenmod -v {{ php_version }} {{ item }}
+  with_items:
+    - xml
+    - dom
+    - simplexml
+    - xmlwriter
+  changed_when: false
+  become: true
+
+- name: Vérifier que les extensions PHP sont correctement chargées
+  ansible.builtin.shell: set -o pipefail && php -m | grep -E "^(dom|xml|simplexml|xmlwriter)$"
+  args:
+    executable: /bin/bash
+  register: php_modules
+  changed_when: false
+  failed_when: false
+  become: true
+
+- name: Afficher les modules PHP chargés
+  ansible.builtin.debug:
+    var: php_modules.stdout_lines
+  become: true
+
+- name: Redémarrer PHP-FPM après activation des extensions
+  ansible.builtin.service:
+    name: "php{{ php_version }}-fpm"
+    state: restarted
+  become: true
