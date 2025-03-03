@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Proposition et création d'Outfit{% endblock %}
+
+{% block body %}
+    <h1>Création d'un Outfit pour la wardrobe : {{ wardrobe.name }}</h1>
+
+    {# Formulaire de proposition via l'IA #}
+    {{ form_start(formProposal) }}
+    {{ form_row(formProposal.demande) }}
+    <button type="submit">Proposer l'Outfit</button>
+    {{ form_end(formProposal) }}
+
+    {% if error %}
+        <div style="color: red;">{{ error }}</div>
+    {% endif %}
+
+    {% if proposedOutfit is not null %}
+        <h2>Proposition d'Outfit</h2>
+        <ul>
+            {% for item in proposedOutfit %}
+                <li>
+                    <strong>{{ item.name }} ({{ item.category }})</strong> – {{ item.reason }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {# Formulaire de création de l'Outfit (affiché si une proposition est disponible) #}
+    {% if formOutfit is not null %}
+        <h2>Créer l'Outfit</h2>
+        {{ form_start(formOutfit) }}
+        {{ form_row(formOutfit.name) }}
+        {{ form_row(formOutfit.description) }}
+        <button type="submit">Créer l'Outfit</button>
+        {{ form_end(formOutfit) }}
+    {% endif %}
+{% endblock %}

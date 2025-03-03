@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Proposition d'Outfit{% endblock %}
+
+{% block body %}
+    <h1>Proposition d'Outfit pour la wardrobe : {{ wardrobe.name }}</h1>
+
+    {# Affichage du formulaire #}
+    {{ form_start(form) }}
+    {{ form_row(form.demande) }}
+    <button type="submit">Proposer l'Outfit</button>
+    {{ form_end(form) }}
+
+    {# Affichage d'une éventuelle erreur #}
+    {% if error %}
+        <div style="color: red;">{{ error }}</div>
+    {% endif %}
+
+    {# Affichage du résultat proposé par l'IA #}
+    {% if proposedOutfit is not null %}
+        <h2>Outfit Proposé</h2>
+        <ul>
+            {% for item in proposedOutfit %}
+                <li>
+                    <strong>{{ item.name }} ({{ item.category }})</strong> – {{ item.reason }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
