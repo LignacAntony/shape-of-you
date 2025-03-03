@@ -2,6 +2,23 @@
 
 {% block title %}Proposition et création d'Outfit{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('proposal-form');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            
+            form.addEventListener('submit', function() {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Recherche en cours...';
+                loadingSpinner.classList.remove('hidden');
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block body %}
     <div class="container mx-auto px-4 py-4">
         <div class="max-w-4xl mx-auto">
@@ -29,6 +46,16 @@
                         Proposer l'Outfit
                     </button>
                     {{ form_end(formProposal) }}
+
+                    {# Indicateur de chargement #}
+                    <div id="loading-spinner" class="hidden mt-4">
+                        <div class="flex items-center justify-center space-x-2 text-tertiary-600">
+                            <div class="w-4 h-4 rounded-full animate-pulse bg-tertiary-600"></div>
+                            <div class="w-4 h-4 rounded-full animate-pulse bg-tertiary-600"></div>
+                            <div class="w-4 h-4 rounded-full animate-pulse bg-tertiary-600"></div>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-2">Recherche des vêtements en cours...</p>
+                    </div>
                 </div>
             </div>
 

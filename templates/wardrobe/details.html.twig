@@ -132,11 +132,14 @@
                 </div>
             </div>
 
-
-
+            <div class="flex mt-8 mb-4">
+                <a href="{{ path('proposal_outfit', {'id': wardrobe.id}) }}" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-secondary-400 hover:bg-secondary-500 transition-all duration-200">
+                    <i class="fas fa-magic mr-2"></i>Proposer un outfit avec l'IA
+                </a>
+            </div>
 
             {# Section Tenues #}
-            <div class="mb-4 border rounded-lg overflow-hidden mt-8" data-accordion-section>
+            <div class="mb-4 border rounded-lg overflow-hidden mt-4" data-accordion-section>
                 <div
                         class="flex flex-col md:flex-row justify-between md:items-center px-4 py-3 bg-secondary-400 cursor-pointer"
                         data-accordion-header
