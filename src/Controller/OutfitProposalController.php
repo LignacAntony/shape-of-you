@@ -23,18 +23,36 @@ class OutfitProposalController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        // Partie 1 : Formulaire de proposition via l'IA (reste inchangée)
+        $proposedOutfit = null;
+        $error = null;
+        $formOutfit = null;
+
+        // Création du formulaire de proposition
         $formProposal = $this->createFormBuilder()
             ->add('demande', TextType::class, [
                 'label' => 'Décrivez l\'outfit souhaité',
                 'required' => true,
             ])
             ->getForm();
+
+        // Création du formulaire d'outfit si on a une proposition en session
+        $sessionProposal = $request->getSession()->get('proposed_outfit');
+        if ($sessionProposal) {
+            $outfit = new Outfit();
+            $outfit->setWardrobe($wardrobe);
+            $outfit->setAuthor($this->getUser());
+            $outfit->setName("Nouvelle tenue proposée");
+            $outfit->setDescription("");
+            $outfit->setCreatedAt(new \DateTimeImmutable());
+            $outfit->setLikesCount(0);
+            $outfit->setIsPublished(false);
+            
+            $formOutfit = $this->createForm(OutfitPropositionType::class, $outfit);
+            $proposedOutfit = $sessionProposal;
+        }
+
+        // Gestion de la soumission du formulaire de proposition
         $formProposal->handleRequest($request);
-
-        $proposedOutfit = null;
-        $error = null;
-
         if ($formProposal->isSubmitted() && $formProposal->isValid()) {
             $data = $formProposal->getData();
             $demande = $data['demande'];
@@ -54,18 +72,13 @@ class OutfitProposalController extends AbstractController
                 }
             }
 
-            $promptSystem = "Tu es un expert en mode.";
-            $promptUser = "Voici les vêtements disponibles (JSON) : " . json_encode($items) . ".\n";
-            $promptUser .= "La demande est : \"$demande\".\n";
-            $promptUser .= "Réponds UNIQUEMENT avec un tableau JSON strictement valide. Chaque objet doit contenir au minimum les clés 'name', 'category' et 'reason'.";
-
             try {
                 $client = OpenAI::client($_ENV['OPENAI_API_KEY'] ?? null);
                 $responseAI = $client->chat()->create([
                     'model' => 'gpt-4o',
                     'messages' => [
-                        ['role' => 'system', 'content' => $promptSystem],
-                        ['role' => 'user', 'content' => $promptUser],
+                        ['role' => 'system', 'content' => "Tu es un expert en mode."],
+                        ['role' => 'user', 'content' => "Voici les vêtements disponibles (JSON) : " . json_encode($items) . ".\nLa demande est : \"$demande\".\nRéponds UNIQUEMENT avec un tableau JSON strictement valide. Chaque objet doit contenir au minimum les clés 'name', 'category' et 'reason'."],
                     ],
                     'max_tokens' => 700,
                     'temperature' => 0.6,
@@ -81,62 +94,65 @@ class OutfitProposalController extends AbstractController
                 $proposedOutfit = json_decode($jsonResponse, true);
                 if (!is_array($proposedOutfit)) {
                     $error = "Erreur lors de la proposition de l'outfit.";
+                } else {
+                    // Stocker la proposition en session
+                    $request->getSession()->set('proposed_outfit', $proposedOutfit);
+                    return $this->redirectToRoute('proposal_outfit', ['id' => $wardrobe->getId()]);
                 }
             } catch (\Exception $e) {
                 $error = "Erreur lors de l'appel à l'IA : " . $e->getMessage();
             }
         }
 
-        // Partie 2 : Création de l'outfit
-        $formOutfit = null;
-        if ($proposedOutfit && is_array($proposedOutfit)) {
-            // Créer une nouvelle instance d'Outfit
-            $outfit = new Outfit();
-            $outfit->setWardrobe($wardrobe);
-            $outfit->setAuthor($this->getUser());
-            $outfit->setName("Nouvelle tenue proposée");
-            $outfit->setDescription(""); // Valeur par défaut
-
-            // Pour chaque élément proposé, rechercher dans la wardrobe le ClothingItem correspondant (par nom)
-            $selectedClothingItems = [];
-            foreach ($proposedOutfit as $itemProposal) {
-                foreach ($wardrobe->getOutfitItems() as $wardrobeItem) {
-                    $clothing = $wardrobeItem->getClothingItem();
-                    if ($clothing && strcasecmp($clothing->getName(), $itemProposal['name']) === 0) {
-                        $selectedClothingItems[] = $clothing;
-                        break;
+        // Gestion de la soumission du formulaire de création
+        if ($formOutfit) {
+            $formOutfit->handleRequest($request);
+            if ($formOutfit->isSubmitted() && $formOutfit->isValid()) {
+                // Récupérer les vêtements sélectionnés
+                $selectedClothingItems = [];
+                foreach ($sessionProposal as $itemProposal) {
+                    foreach ($wardrobe->getOutfitItems() as $wardrobeItem) {
+                        $clothing = $wardrobeItem->getClothingItem();
+                        if ($clothing && strcasecmp($clothing->getName(), $itemProposal['name']) === 0) {
+                            $selectedClothingItems[] = $clothing;
+                            break;
+                        }
                     }
                 }
-            }
 
-            // Utilisation du formulaire lié à l'entité Outfit
-            $formOutfit = $this->createForm(OutfitPropositionType::class, $outfit);
-            $formOutfit->handleRequest($request);
-
-            if ($formOutfit->isSubmitted() && $formOutfit->isValid()) {
-                // L'entité $outfit est automatiquement mise à jour avec les valeurs du formulaire
-                // Pour chaque ClothingItem sélectionné, on crée et associe un OutfitItem
+                // Créer les OutfitItems
                 foreach ($selectedClothingItems as $clothing) {
                     $outfitItem = new OutfitItem();
                     $outfitItem->setClothingItem($clothing);
                     $outfitItem->setWardrobe($wardrobe);
-                    $outfitItem->setSize('M'); // Taille par défaut, à modifier si besoin
+                    $outfitItem->setSize('M');
+                    $entityManager->persist($outfitItem);
+                    
                     $outfit->addOutfitItem($outfitItem);
+                    $outfitItem->addOutfit($outfit);
                 }
 
-                $entityManager->persist($outfit);
-                $entityManager->flush();
-                $this->addFlash('success', 'Votre outfit a été créé avec succès.');
-                return $this->redirectToRoute('outfit_show', ['id' => $outfit->getId()]);
+                try {
+                    $entityManager->persist($outfit);
+                    $entityManager->flush();
+                    
+                    // Nettoyer la session
+                    $request->getSession()->remove('proposed_outfit');
+                    
+                    $this->addFlash('success', 'Votre outfit a été créé avec succès.');
+                    return $this->redirectToRoute('outfit_show', ['id' => $outfit->getId()]);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Une erreur est survenue lors de la création de l\'outfit.');
+                }
             }
         }
 
         return $this->render('outfit/proposal_and_create.html.twig', [
-            'formProposal'   => $formProposal->createView(),
+            'formProposal' => $formProposal->createView(),
             'proposedOutfit' => $proposedOutfit,
-            'error'          => $error,
-            'formOutfit'     => $formOutfit ? $formOutfit->createView() : null,
-            'wardrobe'       => $wardrobe,
+            'error' => $error,
+            'formOutfit' => $formOutfit ? $formOutfit->createView() : null,
+            'wardrobe' => $wardrobe,
         ]);
     }
 }
