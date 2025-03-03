@@ -23,11 +23,14 @@ class OutfitProposalController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
+        if ($request->isMethod('GET') && ($request->query->get('reset') || !$request->headers->get('referer'))) {
+            $request->getSession()->remove('proposed_outfit');
+        }
+
         $proposedOutfit = null;
         $error = null;
         $formOutfit = null;
 
-        // Création du formulaire de proposition
         $formProposal = $this->createFormBuilder()
             ->add('demande', TextType::class, [
                 'label' => 'Décrivez l\'outfit souhaité',
@@ -35,7 +38,6 @@ class OutfitProposalController extends AbstractController
             ])
             ->getForm();
 
-        // Création du formulaire d'outfit si on a une proposition en session
         $sessionProposal = $request->getSession()->get('proposed_outfit');
         if ($sessionProposal) {
             $outfit = new Outfit();
@@ -51,7 +53,6 @@ class OutfitProposalController extends AbstractController
             $proposedOutfit = $sessionProposal;
         }
 
-        // Gestion de la soumission du formulaire de proposition
         $formProposal->handleRequest($request);
         if ($formProposal->isSubmitted() && $formProposal->isValid()) {
             $data = $formProposal->getData();
@@ -95,7 +96,6 @@ class OutfitProposalController extends AbstractController
                 if (!is_array($proposedOutfit)) {
                     $error = "Erreur lors de la proposition de l'outfit.";
                 } else {
-                    // Stocker la proposition en session
                     $request->getSession()->set('proposed_outfit', $proposedOutfit);
                     return $this->redirectToRoute('proposal_outfit', ['id' => $wardrobe->getId()]);
                 }
@@ -104,11 +104,9 @@ class OutfitProposalController extends AbstractController
             }
         }
 
-        // Gestion de la soumission du formulaire de création
         if ($formOutfit) {
             $formOutfit->handleRequest($request);
             if ($formOutfit->isSubmitted() && $formOutfit->isValid()) {
-                // Récupérer les vêtements sélectionnés
                 $selectedClothingItems = [];
                 foreach ($sessionProposal as $itemProposal) {
                     foreach ($wardrobe->getOutfitItems() as $wardrobeItem) {
@@ -120,7 +118,6 @@ class OutfitProposalController extends AbstractController
                     }
                 }
 
-                // Créer les OutfitItems
                 foreach ($selectedClothingItems as $clothing) {
                     $outfitItem = new OutfitItem();
                     $outfitItem->setClothingItem($clothing);
@@ -136,11 +133,11 @@ class OutfitProposalController extends AbstractController
                     $entityManager->persist($outfit);
                     $entityManager->flush();
                     
-                    // Nettoyer la session
-                    $request->getSession()->remove('proposed_outfit');
-                    
                     $this->addFlash('success', 'Votre outfit a été créé avec succès.');
-                    return $this->redirectToRoute('outfit_show', ['id' => $outfit->getId()]);
+                    return $this->redirectToRoute('proposal_outfit', [
+                        'id' => $wardrobe->getId(),
+                        'reset' => true
+                    ]);
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Une erreur est survenue lors de la création de l\'outfit.');
                 }
