@@ -112,21 +112,15 @@ class OutfitProposalController extends AbstractController
                     foreach ($wardrobe->getOutfitItems() as $wardrobeItem) {
                         $clothing = $wardrobeItem->getClothingItem();
                         if ($clothing && strcasecmp($clothing->getName(), $itemProposal['name']) === 0) {
-                            $selectedClothingItems[] = $clothing;
+                            $selectedClothingItems[] = $wardrobeItem;
                             break;
                         }
                     }
                 }
 
-                foreach ($selectedClothingItems as $clothing) {
-                    $outfitItem = new OutfitItem();
-                    $outfitItem->setClothingItem($clothing);
-                    $outfitItem->setWardrobe($wardrobe);
-                    $outfitItem->setSize('M');
-                    $entityManager->persist($outfitItem);
-                    
-                    $outfit->addOutfitItem($outfitItem);
-                    $outfitItem->addOutfit($outfit);
+                foreach ($selectedClothingItems as $wardrobeItem) {
+                    $outfit->addOutfitItem($wardrobeItem);
+                    $wardrobeItem->addOutfit($outfit);
                 }
 
                 try {
