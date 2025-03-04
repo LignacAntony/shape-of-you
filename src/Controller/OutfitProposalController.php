@@ -30,6 +30,7 @@ class OutfitProposalController extends AbstractController
         $proposedOutfit = null;
         $error = null;
         $formOutfit = null;
+        $outfit = null;
 
         $formProposal = $this->createFormBuilder()
             ->add('demande', TextType::class, [
@@ -148,7 +149,6 @@ class OutfitProposalController extends AbstractController
                     $entityManager->persist($outfit);
                     $entityManager->flush();
                     
-                    // Réinitialiser toutes les données de session liées aux outfits
                     $request->getSession()->remove('proposed_outfit');
                     
                     $this->addFlash('success', 'Votre outfit a été créé avec succès.');
