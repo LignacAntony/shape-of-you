@@ -73,6 +73,17 @@ class OutfitProposalController extends AbstractController
                 }
             }
 
+            if (empty($items)) {
+                $error = "Votre garde-robe est vide ! Ajoutez d'abord des vêtements avant de demander une proposition d'outfit.";
+                return $this->render('outfit/proposal_and_create.html.twig', [
+                    'formProposal' => $formProposal->createView(),
+                    'proposedOutfit' => null,
+                    'error' => $error,
+                    'formOutfit' => null,
+                    'wardrobe' => $wardrobe,
+                ]);
+            }
+
             try {
                 $client = OpenAI::client($_ENV['OPENAI_API_KEY'] ?? null);
                 $responseAI = $client->chat()->create([
@@ -93,8 +104,8 @@ class OutfitProposalController extends AbstractController
                     $jsonResponse = $matches[0];
                 }
                 $proposedOutfit = json_decode($jsonResponse, true);
-                if (!is_array($proposedOutfit)) {
-                    $error = "Erreur lors de la proposition de l'outfit.";
+                if (!is_array($proposedOutfit) || empty($proposedOutfit)) {
+                    $error = "Désolé, je n'ai pas trouvé de tenue correspondant à votre demande. Essayez de reformuler votre requête en étant plus précis sur le style, l'occasion ou la saison souhaitée.";
                 } else {
                     $request->getSession()->set('proposed_outfit', $proposedOutfit);
                     return $this->redirectToRoute('proposal_outfit', ['id' => $wardrobe->getId()]);

@@ -59,8 +59,41 @@
             </div>
 
             {% if error %}
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                    {{ error }}
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-400 text-lg"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Une erreur est survenue</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <p>{{ error }}</p>
+                                
+                                {% if "vide" in error %}
+                                    <div class="mt-3">
+                                        <p class="font-medium">Pour commencer :</p>
+                                        <ul class="list-disc pl-5 mt-1 space-y-1">
+                                            <li>Ajoutez des vêtements à votre garde-robe</li>
+                                            <li>Assurez-vous d'avoir différentes catégories (haut, bas, chaussures...)</li>
+                                            <li>Incluez des descriptions détaillées pour de meilleures suggestions</li>
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                {% if "reformuler" in error %}
+                                    <div class="mt-3">
+                                        <p class="font-medium">Conseils pour améliorer votre demande :</p>
+                                        <ul class="list-disc pl-5 mt-1 space-y-1">
+                                            <li>Précisez l'occasion (travail, soirée, casual...)</li>
+                                            <li>Mentionnez la saison ou la météo</li>
+                                            <li>Indiquez un style particulier souhaité</li>
+                                            <li>Donnez des exemples de combinaisons que vous aimez</li>
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
 
