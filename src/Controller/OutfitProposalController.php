@@ -23,7 +23,7 @@ class OutfitProposalController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        if ($request->isMethod('GET') && ($request->query->get('reset') || !$request->headers->get('referer'))) {
+        if ($request->query->get('reset') === 'true' || !$request->headers->get('referer')) {
             $request->getSession()->remove('proposed_outfit');
         }
 
@@ -89,7 +89,17 @@ class OutfitProposalController extends AbstractController
                 $responseAI = $client->chat()->create([
                     'model' => 'gpt-4o',
                     'messages' => [
-                        ['role' => 'system', 'content' => "Tu es un expert en mode."],
+                        ['role' => 'system', 'content' => "Tu es un expert en mode et stylisme personnel. Ta mission est de créer des tenues harmonieuses et adaptées en :
+                            - Respectant strictement le genre des vêtements (homme/femme/unisexe) pour une cohérence totale
+                            - Respectant les codes vestimentaires selon l'occasion si possible
+                            - Créant des associations de couleurs cohérentes si possible
+                            - Tenant compte de la saisonnalité des vêtements si possible
+                            - Proposant des combinaisons originales mais portables si possible
+                            - Expliquant chaque choix de façon claire et constructive si possible
+                            - Utilisant uniquement les vêtements disponibles dans la garde-robe
+                            - Vérifiant la compatibilité des styles entre les pièces si possible
+                            IMPORTANT : Ne jamais mélanger des vêtements de genres/sexes différents dans une même tenue, sauf si explicitement marqués comme unisexes.
+                            N'hésite pas à être créatif tout en restant pratique et élégant."],
                         ['role' => 'user', 'content' => "Voici les vêtements disponibles (JSON) : " . json_encode($items) . ".\nLa demande est : \"$demande\".\nRéponds UNIQUEMENT avec un tableau JSON strictement valide. Chaque objet doit contenir au minimum les clés 'name', 'category' et 'reason'."],
                     ],
                     'max_tokens' => 700,
@@ -138,10 +148,13 @@ class OutfitProposalController extends AbstractController
                     $entityManager->persist($outfit);
                     $entityManager->flush();
                     
+                    // Réinitialiser toutes les données de session liées aux outfits
+                    $request->getSession()->remove('proposed_outfit');
+                    
                     $this->addFlash('success', 'Votre outfit a été créé avec succès.');
                     return $this->redirectToRoute('proposal_outfit', [
                         'id' => $wardrobe->getId(),
-                        'reset' => true
+                        'reset' => 'true'
                     ]);
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Une erreur est survenue lors de la création de l\'outfit.');
