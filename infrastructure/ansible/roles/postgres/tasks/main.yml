@@ -46,23 +46,3 @@
     name: "{{ postgres_db }}"
     owner: "{{ postgres_user }}"
     state: present
-
-# - name: Configurer l'accès à PostgreSQL (pg_hba.conf)
-#   become: true
-#   become_user: postgres
-#   ansible.builtin.lineinfile:
-#     path: "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
-#     regexp: "^host\\s+{{ postgres_db }}\\s+{{ postgres_user }}\\s+"
-#     line: "host    {{ postgres_db }}    {{ postgres_user }}    127.0.0.1/32    md5"
-#     state: present
-#   notify: Restart PostgreSQL
-#   register: pg_hba_changed
-
-# - name: Configurer PostgreSQL pour écouter sur toutes les interfaces
-#   ansible.builtin.lineinfile:
-#     path: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
-#     regexp: "^#?listen_addresses\\s*="
-#     line: "listen_addresses = '*'"
-#     state: present
-#   notify: Restart PostgreSQL
-#   register: postgresql_conf_changed

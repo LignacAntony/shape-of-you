@@ -38,20 +38,7 @@
     state: present
     update_cache: true
   become: true
-
-- name: Vérifier l'installation des extensions PHP
-  ansible.builtin.shell: set -o pipefail && dpkg -l | grep -E "php{{ php_version }}-(xml|dom|simplexml|xmlwriter)"
-  args:
-    executable: /bin/bash
-  register: php_packages
-  changed_when: false
-  failed_when: false
-  become: true
-
-- name: Afficher les packages PHP installés
-  ansible.builtin.debug:
-    var: php_packages.stdout_lines
-  become: true
+  notify: Restart php-fpm
 
 - name: S'assurer que PHP-FPM écoute sur un socket Unix
   ansible.builtin.lineinfile:
@@ -77,25 +64,6 @@
     - dom
     - simplexml
     - xmlwriter
-  changed_when: false
+  changed_when: true
   become: true
-
-- name: Vérifier que les extensions PHP sont correctement chargées
-  ansible.builtin.shell: set -o pipefail && php -m | grep -E "^(dom|xml|simplexml|xmlwriter)$"
-  args:
-    executable: /bin/bash
-  register: php_modules
-  changed_when: false
-  failed_when: false
-  become: true
-
-- name: Afficher les modules PHP chargés
-  ansible.builtin.debug:
-    var: php_modules.stdout_lines
-  become: true
-
-- name: Redémarrer PHP-FPM après activation des extensions
-  ansible.builtin.service:
-    name: "php{{ php_version }}-fpm"
-    state: restarted
-  become: true
+  notify: Restart php-fpm

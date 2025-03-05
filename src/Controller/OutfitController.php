@@ -124,7 +124,7 @@ final class OutfitController extends AbstractController
         return $this->redirectToRoute('app_outfit_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/outfit/{id}/details', name: 'outfit_details')]
+    #[Route('/outfit/{id}/details', name: 'outfit_details', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
     public function details(int $id): Response
     {
@@ -134,7 +134,6 @@ final class OutfitController extends AbstractController
             throw $this->createNotFoundException('Tenue non trouvée');
         }
 
-        // Seul l'auteur peut voir le formulaire d'ajout de vêtements
         $form = null;
         if ($outfit->getAuthor() === $this->getUser()) {
             $clothingItem = new ClothingItem();

@@ -22,7 +22,7 @@ fi
 case "$1" in
     --setup)
         echo "Configuration de l'environnement Symfony..."
-        cd "$DIR/ansible" && ansible-playbook -i inventory.ini ./playbooks/symfony_stack.yml -K
+        cd "$DIR/ansible" && ansible-playbook playbooks/symfony_stack.yml -i inventory.ini
         ;;
     --cleanup)
         echo "Nettoyage de l'environnement..."
