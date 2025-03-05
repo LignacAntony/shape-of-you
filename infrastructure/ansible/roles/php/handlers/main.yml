@@ -1,0 +1,16 @@
+---
+- name: Restart php-fpm
+  ansible.builtin.service:
+    name: "php{{ php_version }}-fpm"
+    state: restarted
+
+- name: Reload php-fpm
+  ansible.builtin.service:
+    name: "php{{ php_version }}-fpm"
+    state: reloaded
+
+- name: Restart web server
+  ansible.builtin.service:
+    name: "{{ web_server_service | default('nginx') }}"
+    state: restarted
+  when: web_server_service is defined or web_server_service | default('nginx') != ''

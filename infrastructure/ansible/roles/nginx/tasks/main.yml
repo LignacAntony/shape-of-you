@@ -1,0 +1,24 @@
+---
+- name: Installer Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+  become: true
+
+- name: Configurer Nginx pour Symfony
+  ansible.builtin.template:
+    src: ./templates/nginx_symfony.conf.j2
+    dest: /etc/nginx/sites-available/default
+    mode: '0644'
+  register: nginx_config
+  notify: "Restart nginx"
+  become: true
+
+- name: Créer un lien symbolique vers sites-enabled
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: "Restart nginx"
+  become: true

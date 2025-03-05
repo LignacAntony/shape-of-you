@@ -1,0 +1,237 @@
+---
+- name: Créer le répertoire de l'application Symfony
+  ansible.builtin.file:
+    path: "{{ symfony_root_dir }}"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+  become: true
+
+- name: Créer les répertoires de logs
+  ansible.builtin.file:
+    path: "{{ symfony_root_dir }}/var/log"
+    state: directory
+    mode: '0775'
+    owner: www-data
+    group: www-data
+  become: true
+
+- name: Créer les répertoires nécessaires pour les assets
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0775'
+    owner: www-data
+    group: www-data
+  with_items:
+    - "{{ symfony_root_dir }}/assets/js"
+    - "{{ symfony_root_dir }}/public/build"
+  become: true
+
+- name: Créer les fichiers de logs nécessaires
+  ansible.builtin.file:
+    path: "{{ symfony_root_dir }}/var/log/{{ item }}"
+    state: touch
+    mode: '0664'
+    owner: www-data
+    group: www-data
+  with_items:
+    - prod.log
+    - security.log
+    - doctrine.log
+    - request.log
+    - app.log
+    - deprecation.log
+  become: true
+
+- name: Copier l'application buildée vers le serveur
+  ansible.builtin.synchronize:
+    src: "{{ playbook_dir }}/../../../"
+    dest: "{{ symfony_root_dir }}"
+    delete: true
+    rsync_opts:
+      - "--exclude=.git"
+      - "--exclude=.github"
+      - "--exclude=.gitignore"
+      - "--exclude=.env.test"
+      - "--exclude=.env.local"
+      - "--exclude=node_modules"
+      - "--exclude=var/cache/*"
+      - "--exclude=var/log/*"
+      - "--exclude=tests"
+      - "--exclude=infrastructure"
+      - "--exclude=public/build/*"
+      - "--exclude=public/uploads/avatars/*"
+      - "--exclude=public/uploads/images/*"
+      - "--exclude=docker-compose.yml"
+      - "--exclude=docker-compose.override.yml"
+      - "--exclude=phpunit.xml.dist"
+      - "--exclude=package-lock.json"
+      - "--exclude=README.md"
+      - "--exclude=.eslintrc.js"
+      - "--exclude=.stylelintrc.json"
+      - "--exclude=.babelrc"
+      - "--exclude=.env"
+      - "--exclude=.env.local"
+      - "--exclude=.env.local.php"
+      - "--exclude=.env.test"
+      - "--include=bin/**"
+      - "--include=config/**"
+      - "--include=migrations/**"
+      - "--include=public/**"
+      - "--include=public/uploads/avatars/default.webp"
+      - "--include=src/**"
+      - "--include=templates/**"
+      - "--include=translations/**"
+      - "--include=vendor/**"
+      - "--include=assets/**"
+      - "--include=composer.json"
+      - "--include=composer.lock"
+      - "--include=symfony.lock"
+      - "--include=.env"
+      - "--include=package.json"
+      - "--include=webpack.config.js"
+      - "--rsh='ssh -i {{ playbook_dir }}/../ssh_keys/vps -o StrictHostKeyChecking=no'"
+  become: true
+  become_user: www-data
+
+- name: Créer les répertoires nécessaires pour www-data
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+    recurse: true
+  with_items:
+    - "/var/www/.ansible"
+    - "/var/www/.cache/composer"
+    - "/var/www/.npm"
+  become: true
+
+- name: Installer les dépendances Composer
+  ansible.builtin.composer:
+    command: install
+    working_dir: "{{ symfony_root_dir }}"
+    no_dev: true  # Changé à true pour la production
+    arguments: >-
+      --ignore-platform-req=ext-simplexml
+      --ignore-platform-req=ext-xml
+      --ignore-platform-req=ext-dom
+      --ignore-platform-req=ext-xmlwriter
+      --no-scripts
+  register: composer_result
+  changed_when: composer_result.changed
+  become: true
+  become_user: www-data
+
+- name: Créer ou mettre à jour le fichier .env.local
+  ansible.builtin.copy:
+    content: |
+      ###> doctrine/doctrine-bundle ###
+      DATABASE_URL="postgresql://{{ postgres_user }}:{{ postgres_password }}@127.0.0.1:{{ postgres_port }}/{{ postgres_db }}?\
+      serverVersion={{ postgres_version }}&charset=utf8"
+      ###< doctrine/doctrine-bundle ###
+      # Activer temporairement l'affichage des erreurs en production pour le débogage
+      APP_DEBUG=true
+    dest: "{{ symfony_root_dir }}/.env.local"
+    mode: '0644'
+    owner: www-data
+    group: www-data
+  become: true
+
+- name: Installer les extensions PHP requises (Ubuntu/Debian)
+  ansible.builtin.apt:
+    name:
+      - "php{{ php_version }}-xml"
+      - "php{{ php_version }}-dom"
+      - "php{{ php_version }}-simplexml"
+      - "php{{ php_version }}-xmlwriter"
+    state: present
+    update_cache: true
+  become: true
+  when: ansible_os_family == "Debian"
+  notify: Restart php-fpm
+
+- name: S'assurer que les extensions PHP sont activées
+  ansible.builtin.command: phpenmod -v {{ php_version }} {{ item }}
+  with_items:
+    - xml
+    - dom
+    - simplexml
+    - xmlwriter
+  changed_when: true
+  become: true
+  notify: Restart php-fpm
+
+- name: Exécuter les migrations de base de données Symfony
+  ansible.builtin.shell: |
+    cd {{ symfony_root_dir }} && \
+    php bin/console doctrine:migrations:migrate --no-interaction
+  register: command_result
+  changed_when: "'No migrations to execute' not in command_result.stdout"
+  become: true
+  become_user: www-data
+  ignore_errors: true
+
+- name: Vider le cache Symfony (sans warmup)
+  ansible.builtin.shell: |
+    cd {{ symfony_root_dir }} && \
+    php bin/console cache:clear --env=prod --no-warmup
+  register: cache_clear_result
+  changed_when: cache_clear_result.stdout is defined and cache_clear_result.stdout != ""
+  become: true
+  become_user: www-data
+  ignore_errors: true
+
+- name: S'assurer que les permissions des logs sont correctes
+  ansible.builtin.file:
+    path: "{{ symfony_root_dir }}/var/log"
+    state: directory
+    mode: '0775'
+    owner: www-data
+    group: www-data
+    recurse: true
+  become: true
+
+- name: Installer les dépendances NPM
+  ansible.builtin.command: npm install
+  args:
+    chdir: "{{ symfony_root_dir }}"
+  register: npm_result
+  changed_when: npm_result.stdout is defined and npm_result.stdout != ""
+  become: true
+  become_user: www-data
+  notify: Build frontend assets
+
+- name: Build les assets avec Webpack Encore
+  ansible.builtin.command: npm run build
+  args:
+    chdir: "{{ symfony_root_dir }}"
+  register: webpack_result
+  changed_when: webpack_result.stdout is defined and webpack_result.stdout != ""
+  become: true
+  become_user: www-data
+
+- name: S'assurer que les permissions des assets sont correctes
+  ansible.builtin.file:
+    path: "{{ symfony_root_dir }}/public/build"
+    state: directory
+    mode: '0775'
+    owner: www-data
+    group: www-data
+    recurse: true
+  become: true
+
+- name: Vérifier que l'application Symfony est accessible
+  ansible.builtin.uri:
+    url: "http://{{ web_server_name }}"
+    return_content: true
+    validate_certs: false
+    follow_redirects: true
+  register: webpage
+  until: webpage.status == 200
+  retries: 6
+  delay: 5
+  failed_when: webpage.status != 200

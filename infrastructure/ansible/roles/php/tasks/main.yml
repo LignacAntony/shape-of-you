@@ -1,0 +1,69 @@
+---
+- name: Installer les dépendances pour ajouter des PPA
+  ansible.builtin.apt:
+    name:
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+      - lsb-release
+    state: present
+    update_cache: true
+  become: true
+
+- name: Ajouter le dépôt PPA pour PHP
+  ansible.builtin.apt_repository:
+    repo: ppa:ondrej/php
+    state: present
+    update_cache: true
+  become: true
+
+- name: Installer PHP et ses extensions via apt
+  ansible.builtin.apt:
+    name:
+      - "php{{ php_version }}"
+      - "php{{ php_version }}-fpm"
+      - "php{{ php_version }}-common"
+      - "php{{ php_version }}-cli"
+      - "php{{ php_version }}-xml"
+      - "php{{ php_version }}-curl"
+      - "php{{ php_version }}-mbstring"
+      - "php{{ php_version }}-zip"
+      - "php{{ php_version }}-gd"
+      - "php{{ php_version }}-intl"
+      - "php{{ php_version }}-pgsql"
+      - "php{{ php_version }}-dom"
+      - "php{{ php_version }}-curl"
+      - "php{{ php_version }}-simplexml"
+      - "php{{ php_version }}-xmlwriter"
+    state: present
+    update_cache: true
+  become: true
+  notify: Restart php-fpm
+
+- name: S'assurer que PHP-FPM écoute sur un socket Unix
+  ansible.builtin.lineinfile:
+    path: "/etc/php/{{ php_version }}/fpm/pool.d/www.conf"
+    regexp: '^listen = '
+    line: 'listen = /var/run/php/php{{ php_version }}-fpm.sock'
+    state: present
+  notify: Restart php-fpm
+  register: php_fpm_config
+  become: true
+
+- name: S'assurer que PHP-FPM est démarré et activé au démarrage
+  ansible.builtin.service:
+    name: "php{{ php_version }}-fpm"
+    state: started
+    enabled: true
+  become: true
+
+- name: S'assurer que les extensions PHP sont activées
+  ansible.builtin.command: phpenmod -v {{ php_version }} {{ item }}
+  with_items:
+    - xml
+    - dom
+    - simplexml
+    - xmlwriter
+  changed_when: true
+  become: true
+  notify: Restart php-fpm

@@ -1,0 +1,48 @@
+---
+- name: Ajouter la clé PostgreSQL
+  ansible.builtin.get_url:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    dest: /usr/share/keyrings/postgresql-archive-keyring.asc
+    mode: '0644'
+  become: true
+
+- name: Ajouter le dépôt PostgreSQL
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.asc]
+      http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
+    state: present
+  register: apt_repository_added
+  become: true
+  notify: Mettre à jour les paquets
+
+- name: Installer PostgreSQL
+  ansible.builtin.apt:
+    name:
+      - "postgresql-{{ postgres_version }}"
+      - "postgresql-contrib-{{ postgres_version }}"
+      - "python3-psycopg2"
+    state: present
+  become: true
+
+- name: S'assurer que PostgreSQL est démarré et activé au démarrage
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Créer l'utilisateur PostgreSQL
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ postgres_user }}"
+    password: "{{ postgres_password }}"
+    state: present
+
+- name: Créer la base de données PostgreSQL
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: "{{ postgres_db }}"
+    owner: "{{ postgres_user }}"
+    state: present

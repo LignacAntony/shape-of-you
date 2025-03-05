@@ -1,0 +1,15 @@
+---
+- name: Installer les packages communs sur Linux
+  ansible.builtin.apt:
+    name:
+      - nodejs
+      - npm
+      - composer
+    state: present
+    update_cache: true
+
+- name: Installer webpack globalement via npm
+  community.general.npm:
+    name: webpack
+    global: true
+    state: present

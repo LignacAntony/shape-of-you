@@ -1,0 +1,16 @@
+---
+- name: Restart php-fpm
+  ansible.builtin.service:
+    name: "php{{ php_version }}-fpm"
+    state: restarted
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Build frontend assets
+  ansible.builtin.command: npm run build
+  args:
+    chdir: "{{ symfony_root_dir }}"
+  register: build_result
+  changed_when: build_result.stdout is defined and build_result.stdout != ""
+  become: true
+  become_user: www-data
