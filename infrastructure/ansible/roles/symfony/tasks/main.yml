@@ -62,6 +62,8 @@
       - "--exclude=tests"
       - "--exclude=infrastructure"
       - "--exclude=public/build/*"
+      - "--exclude=public/uploads/avatars/*"
+      - "--exclude=public/uploads/images/*"
       - "--exclude=docker-compose.yml"
       - "--exclude=docker-compose.override.yml"
       - "--exclude=phpunit.xml.dist"
@@ -70,10 +72,15 @@
       - "--exclude=.eslintrc.js"
       - "--exclude=.stylelintrc.json"
       - "--exclude=.babelrc"
+      - "--exclude=.env"
+      - "--exclude=.env.local"
+      - "--exclude=.env.local.php"
+      - "--exclude=.env.test"
       - "--include=bin/**"
       - "--include=config/**"
       - "--include=migrations/**"
       - "--include=public/**"
+      - "--include=public/uploads/avatars/default.webp"
       - "--include=src/**"
       - "--include=templates/**"
       - "--include=translations/**"
@@ -107,7 +114,7 @@
   ansible.builtin.composer:
     command: install
     working_dir: "{{ symfony_root_dir }}"
-    no_dev: false
+    no_dev: true  # Changé à true pour la production
     arguments: >-
       --ignore-platform-req=ext-simplexml
       --ignore-platform-req=ext-xml
@@ -118,26 +125,6 @@
   changed_when: composer_result.changed
   become: true
   become_user: www-data
-
-- name: Installer DoctrineFixturesBundle
-  ansible.builtin.composer:
-    command: require
-    arguments: "doctrine/doctrine-fixtures-bundle --dev"
-    working_dir: "{{ symfony_root_dir }}"
-  register: fixtures_install_result
-  changed_when: fixtures_install_result.changed
-  become: true
-  become_user: www-data
-
-- name: Vider le cache après l'installation du bundle
-  ansible.builtin.shell: |
-    cd {{ symfony_root_dir }} && \
-    php bin/console cache:clear
-  register: cache_clear_after_bundle
-  changed_when: cache_clear_after_bundle.stdout is defined and cache_clear_after_bundle.stdout != ""
-  become: true
-  become_user: www-data
-  ignore_errors: true
 
 - name: Créer ou mettre à jour le fichier .env.local
   ansible.builtin.copy:
@@ -184,16 +171,6 @@
     php bin/console doctrine:migrations:migrate --no-interaction
   register: command_result
   changed_when: "'No migrations to execute' not in command_result.stdout"
-  become: true
-  become_user: www-data
-  ignore_errors: true
-
-- name: Charger les fixtures Symfony
-  ansible.builtin.shell: |
-    cd {{ symfony_root_dir }} && \
-    php bin/console doctrine:fixtures:load --no-interaction
-  register: fixtures_result
-  changed_when: fixtures_result.stdout is defined and fixtures_result.stdout != ""
   become: true
   become_user: www-data
   ignore_errors: true

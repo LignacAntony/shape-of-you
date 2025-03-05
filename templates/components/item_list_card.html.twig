@@ -3,7 +3,7 @@
         <div class="aspect-square bg-tertiary-400 flex items-center justify-center">
             {% if item.clothingItem.images !=null %}
                 <img src="{{ asset(item.clothingItem.images[0]) }}" alt="{{ item.clothingItem.name }}"
-                     class="w-full h-full object-cover"/>
+                    class="w-full h-full object-cover"/>
             {% else %}
                 {% if item.clothingItem.category %}
                     <i class="fas fa-{{ item.clothingItem.category.name|lower == 'chaussures' ? 'shoe-prints' :
@@ -18,15 +18,15 @@
             <h3 class="text-sm font-medium text-gray-900 truncate">
                 {{ item.clothingItem.name }}
             </h3>
-            <div class="flex gap-2 items-center">
+            <div class="flex flex-wrap gap-2 items-center">
                 {% if item.clothingItem.brand %}
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                                    <i class="fas fa-tag mr-1"></i>{{ item.clothingItem.brand }}
-                                                </span>
+                        <i class="fas fa-tag mr-1"></i>{{ item.clothingItem.brand }}
+                    </span>
                 {% endif %}
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                <i class="fas fa-ruler mr-1"></i>{{ item.size }}
-                                            </span>
+                    <i class="fas fa-ruler mr-1"></i>{{ item.size }}
+                </span>
             </div>
             {% if item.clothingItem.color %}
                 <div class="text-xs text-gray-500 mt-1">

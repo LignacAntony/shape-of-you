@@ -29,18 +29,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
     let editActive = false;
 
-    editToggle.addEventListener("click", function() {
-        editActive = !editActive;
-        if (editActive) {
-            editToggle.textContent = "Annuler";
-            viewMode.classList.add("hidden");
-            editMode.classList.remove("hidden");
-        } else {
-            editToggle.textContent = "Modifier le profil";
-            viewMode.classList.remove("hidden");
-            editMode.classList.add("hidden");
-        }
-    });
+    if(editToggle) {
+        editToggle.addEventListener("click", function() {
+            editActive = !editActive;
+            if (editActive) {
+                editToggle.textContent = "Annuler";
+                viewMode.classList.add("hidden");
+                editMode.classList.remove("hidden");
+            } else {
+                editToggle.textContent = "Modifier le profil";
+                viewMode.classList.remove("hidden");
+                editMode.classList.add("hidden");
+            }
+        });
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -45,7 +45,7 @@ class Profile
 
     public function __construct()
     {
-        $this->avatar = 'default.jpg';
+        $this->avatar = 'default.webp';
     }
     public function __serialize(): array
     {
