@@ -10,13 +10,10 @@ use Psr\Log\LoggerInterface;
 
 class NotFoundListener
 {
-    private $urlGenerator;
-    private $logger;
-
-    public function __construct(UrlGeneratorInterface $urlGenerator, LoggerInterface $logger)
-    {
-        $this->urlGenerator = $urlGenerator;
-        $this->logger = $logger;
+    public function __construct(
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly LoggerInterface $logger
+    ) {
     }
 
     public function onKernelException(ExceptionEvent $event): void
@@ -26,10 +23,15 @@ class NotFoundListener
             return;
         }
 
+        // Log l'erreur 404 pour analyse
         $this->logger->warning('Page non trouvée : {url}', [
             'url' => $event->getRequest()->getUri(),
             'referer' => $event->getRequest()->headers->get('referer')
         ]);
 
+        // Rediriger vers la page 404 personnalisée
+        $event->setResponse(new RedirectResponse(
+            $this->urlGenerator->generate('app_home')
+        ));
     }
 } 
