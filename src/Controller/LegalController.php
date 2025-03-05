@@ -13,4 +13,16 @@ class LegalController extends AbstractController
     {
         return $this->render('legal/terms.html.twig');
     }
+
+    #[Route('/test-403', name: 'test_403')]
+    public function test403(): Response
+    {
+        throw $this->createAccessDeniedException('Test page 403');
+    }
+
+    #[Route('/test-404', name: 'test_404')]
+    public function test404(): Response
+    {
+        throw $this->createNotFoundException('Test page 404');
+    }
 } 
