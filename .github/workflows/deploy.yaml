@@ -20,6 +20,15 @@ jobs:
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+          
+      # Configurer SSH pour désactiver la vérification stricte des clés d'hôte
+      - name: "Configure SSH"
+        run: |
+          mkdir -p ~/.ssh
+          echo "Host ${{ secrets.VPS_HOST }}" > ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       - name: "Install Ansible"
         uses: alex-oleshkevich/setup-ansible@v1.0.1
@@ -39,4 +48,5 @@ jobs:
       - name: "Deploy with Ansible"
         run: |
           cd infrastructure/ansible
-          ansible-playbook playbooks/symfony_stack.yml -i inventory.ci.ini 
+          # Ajout du paramètre pour désactiver la vérification des clés d'hôte
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook playbooks/symfony_stack.yml -i inventory.ci.ini 
