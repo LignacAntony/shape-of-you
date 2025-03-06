@@ -80,15 +80,20 @@ class SecurityController extends AbstractController
             ->subject('Réinitialisation de votre mot de passe')
             ->html(sprintf(
                 '<p>Bonjour %s,</p>
-                <p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
+                <p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
                 <a href="%s">Réinitialiser votre mot de passe</a>',
                 htmlspecialchars($user->getUsername()),
                 htmlspecialchars($url)
             ));
-        $mailer->send($emailMessage);
-
-        $this->addFlash('success', 'Email envoyé avec succès !');
-        return $this->redirectToRoute('app_login');
+        
+        try {
+            $mailer->send($emailMessage);
+            $this->addFlash('success', 'Email envoyé avec succès !');
+            return $this->redirectToRoute('app_home');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email : ' . $e->getMessage());
+            return $this->redirectToRoute('auth_forgot_get');
+        }
     }
 
     #[Route('/forgot-password/{token}', name: 'reset_password')]
