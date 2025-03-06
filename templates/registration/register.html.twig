@@ -90,14 +90,14 @@
                             }) }}
                             {{ form_errors(registrationForm.plainPassword) }}
                         </div>
-                        <div class="flex items-center mt-4">
+                        <div class="flex items-baseline mt-4">
                             {{ form_widget(registrationForm.agreeTerms, {
                                 'attr': {
                                     'class': 'h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-4'
                                 }
                             }) }}
 
-                                {{ form_label(registrationForm.agreeTerms, 'J’accepte les conditions d’utilisation', { 'label_attr': { 'class': 'ml-2 block text-sm text-gray-900 mt-4' } }) }}
+                                {{ form_label(registrationForm.agreeTerms, 'J’accepte les ', { 'label_attr': { 'class': 'ml-2 block text-sm text-gray-900 mt-4' } }) }}<a class="ml-1 text-sm underline" href="{{ path('app_terms') }}" class="text-indigo-600"> conditions d’utilisation</a>
                                 {{ form_errors(registrationForm.agreeTerms) }}
                         </div>
                     </div>
