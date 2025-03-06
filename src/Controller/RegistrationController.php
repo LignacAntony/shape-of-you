@@ -17,10 +17,11 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+use Psr\Log\LoggerInterface;
 
 class RegistrationController extends AbstractController
 {
-    public function __construct(private EmailVerifier $emailVerifier)
+    public function __construct(private EmailVerifier $emailVerifier, private LoggerInterface $logger)
     {
     }
 
@@ -38,7 +39,6 @@ class RegistrationController extends AbstractController
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
             $entityManager->persist($user);
@@ -48,18 +48,26 @@ class RegistrationController extends AbstractController
             $entityManager->persist($profile);
             $entityManager->flush();
 
-            // generate a signed url and email it to the user
-            $this->emailVerifier->sendEmailConfirmation(
-                'app_verify_email',
-                $user,
-                (new TemplatedEmail())
-                    ->from(new Address('test@soy.com', 'soy admin'))
-                    ->to((string) $user->getEmail())
-                    ->subject('Please Confirm your Email')
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
-            );
+            $this->logger->info('Tentative d\'envoi de l\'email de confirmation');
+            try {
+                // on envoie à l'email de test avec laquelle on a créé le compte Resend
+                $recipientEmail = $this->getParameter('kernel.environment') === 'prod' 
+                    ? 'antony.lignac@eemi.com'
+                    : (string) $user->getEmail();
 
-            // do anything else you need here, like send an email
+                $this->emailVerifier->sendEmailConfirmation(
+                    'app_verify_email',
+                    $user,
+                    (new TemplatedEmail())
+                        ->from(new Address('onboarding@resend.dev', 'soy admin'))
+                        ->to($recipientEmail)
+                        ->subject('Please Confirm your Email')
+                        ->htmlTemplate('registration/confirmation_email.html.twig')
+                );
+                $this->logger->info('Email de confirmation envoyé avec succès');
+            } catch (\Exception $e) {
+                $this->logger->error('Erreur lors de l\'envoi de l\'email: ' . $e->getMessage());
+            }
 
             return $security->login($user, 'form_login', 'main');
         }
@@ -85,9 +93,8 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_register');
         }
 
-        // @TODO Change the redirect on success and handle or remove the flash message in your templates
         $this->addFlash('success', 'Your email address has been verified.');
 
-        return $this->redirectToRoute('app_register');
+        return $this->redirectToRoute('app_home');
     }
 }
