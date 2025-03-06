@@ -126,15 +126,6 @@
   become: true
   become_user: www-data
 
-- name: Installer les assets Stimulus
-  ansible.builtin.command: php bin/console importmap:install
-  args:
-    chdir: "{{ symfony_root_dir }}"
-  register: stimulus_result
-  changed_when: stimulus_result.stdout is defined and stimulus_result.stdout != ""
-  become: true
-  become_user: www-data
-
 - name: Créer ou mettre à jour le fichier .env.local
   ansible.builtin.copy:
     content: |
