@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="{{ app.user and app.user.profile and app.user.profile.preferences and app.user.profile.preferences.theme == 'dark' ? 'dark' : '' }}">
 <head>
     <meta charset="UTF-8">
     <title>Shape of you | {% block title %}Welcome!{% endblock %}</title>
@@ -22,13 +22,13 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="bg-gray-100 flex h-screen">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white flex h-screen transition-colors duration-200">
 <div class="flex flex-grow">
     {% include 'components/left_side_bar.html.twig' %}
     <main class="flex-grow h-full p-4 sm:ml-64 ">
         {% for label, messages in app.flashes %}
             {% for message in messages %}
-                <div class="mb-4 p-4 rounded-lg {% if label == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                <div class="mb-4 p-4 rounded-lg {% if label == 'success' %}bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200{% else %}bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-200{% endif %}">
                     {{ message }}
                 </div>
             {% endfor %}
