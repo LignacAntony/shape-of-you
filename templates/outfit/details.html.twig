@@ -15,10 +15,10 @@
                class="w-full md:w-auto bg-tertiary-600 hover:bg-tertiary-700 text-white font-semibold py-2 px-4 rounded mt-4 mb-5">Rechercher des vêtements avec l'IA</a>
         </div>
         {% endif %}
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
 
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h1 class="text-xl font-semibold text-gray-900">{{ outfit.name }}</h1>
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ outfit.name }}</h1>
                 <div class="flex flex-row items-center">
                         <span class="px-3 py-1.5 text-xs font-medium rounded-full bg-secondary-400 text-white">
                             {{ outfit.outfitItems|length }} vétements
@@ -61,8 +61,8 @@
                         }"
                              class="relative" @click.away="showOptions = false">
                             <button @click="showOptions = !showOptions"
-                                    class="p-2 rounded-full  transition-colors duration-200 ml-4">
-                                <i class="fas fa-ellipsis-v text-gray-600"></i>
+                                    class="p-2 rounded-full transition-colors duration-200 ml-4">
+                                <i class="fas fa-ellipsis-v text-gray-600 dark:text-white"></i>
                             </button>
 
                             <div x-show="showOptions"
@@ -72,17 +72,17 @@
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+                                 class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 z-50">
 
                                 <a href="{{ path('outfit_edit_user', {'id': outfit.id}) }}"
-                                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                                   class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
                                     <i class="fas fa-edit w-5 mr-2"></i>
                                     <span>Modifier</span>
                                 </a>
 
                                 <button @click="deleteOutfit"
                                         :disabled="isDeleting"
-                                        class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200">
+                                        class="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50 transition-colors duration-200">
                                     <i class="fas" :class="isDeleting ? 'fa-spinner fa-spin' : 'fa-trash'"
                                        class="w-5 mr-2"></i>
                                     <span x-text="isDeleting ? 'Suppression...' : 'Supprimer'"></span>
@@ -93,7 +93,7 @@
 
                 </div>
             </div>
-            <div class="p-6">
+            <div class="p-6 dark:bg-gray-800">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {# Colonne de gauche: Images #}
                     <div class="lg:col-span-1">
@@ -128,20 +128,19 @@
                         {% endif %}
                     </div>
                     <div class="space-y-1 flex flex-col">
-                        <div class="p-3">
+                        <div class="p-3 dark:bg-gray-800">
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between">
                                     {% if outfit.isPublished %}
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <i class="fas fa-check mr-1"></i>Publié
-                            </span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                            <i class="fas fa-check mr-1"></i>Publié
+                                        </span>
                                     {% else %}
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                <i class="fas fa-clock mr-1"></i>Non publié
-                            </span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white">
+                                            <i class="fas fa-clock mr-1"></i>Non publié
+                                        </span>
                                     {% endif %}
                                     {% include 'components/like_button.html.twig' with { 'outfit': outfit } %}
-
                                 </div>
                                 <a href="{{ path('profile_show_user', {'id': outfit.author.id}) }}"
                                    class="flex items-center">
@@ -149,16 +148,15 @@
                                          alt="Photo de profil"
                                          class="w-10 h-10 rounded-full me-2 border-2 border-secondary-400">
                                     <div class="flex flex-col">
-                                        <h2 class="font-medium mr-2 text-xl">{{ outfit.author.username }}</h2>
-                                        <p class="text-xs text-gray-500">Le {{ outfit.createdAt|date('d/m/Y') }}</p>
+                                        <h2 class="font-medium mr-2 text-xl dark:text-white">{{ outfit.author.username }}</h2>
+                                        <p class="text-xs text-gray-500 dark:text-white">Le {{ outfit.createdAt|date('d/m/Y') }}</p>
                                     </div>
                                 </a>
-
                             </div>
                         </div>
                         <div class="h-72 overflow-y-auto">
                             {% if outfit.description %}
-                                <p class="py-2 px-4 text-sm text-gray-600">{{ outfit.description }}</p>
+                                <p class="py-2 px-4 text-sm text-gray-600 dark:text-white">{{ outfit.description }}</p>
                             {% endif %}
 
                             <div id="reviews-container" class="space-y-0">
@@ -170,12 +168,11 @@
                                                  alt="Photo de profil"
                                                  class="w-6 h-6 rounded-full me-2 border-2 border-secondary-400">
                                             <div>
-
-                                                <span class="font-medium text-base">{{ review.author.username }}</span>
-                                                <span class="text-gray-500 text-xs ml-2">{{ review.createdAt|date('d/m/Y H:i') }}</span>
+                                                <span class="font-medium text-base dark:text-white">{{ review.author.username }}</span>
+                                                <span class="text-gray-500 dark:text-white text-xs ml-2">{{ review.createdAt|date('d/m/Y H:i') }}</span>
                                             </div>
                                         </a>
-                                        <p class="text-gray-700">{{ review.content }}</p>
+                                        <p class="text-gray-700 dark:text-white">{{ review.content }}</p>
                                     </div>
                                 {% endfor %}
                             </div>
@@ -200,50 +197,29 @@
                             .then(data => {
                                 if (data.status === 'success') {
                                     const reviewsContainer = document.getElementById('reviews-container');
-
-                                    // Créer l'élément principal
                                     const newReview = document.createElement('div');
                                     newReview.className = 'p-2';
-
-                                    // Créer l'en-tête avec l'auteur et la date
-                                    const header = document.createElement('div');
-                                    header.className = 'flex items-center mb-2';
-
                                     const reviewHeader = document.createElement('div');
                                     reviewHeader.className = 'flex items-center mb-2';
-
                                     const avatarImg = document.createElement('img');
                                     avatarImg.src = data.review.avatar;
                                     avatarImg.alt = 'Photo de profil';
                                     avatarImg.className = 'w-6 h-6 rounded-full me-2 border-2 border-secondary-400';
-
-
                                     const authorSpan = document.createElement('span');
-                                    authorSpan.className = 'font-medium';
+                                    authorSpan.className = 'font-medium dark:text-white';
                                     authorSpan.textContent = data.review.author;
-
                                     const dateSpan = document.createElement('span');
-                                    dateSpan.className = 'text-gray-500 text-sm ml-2';
+                                    dateSpan.className = 'text-gray-500 dark:text-white text-sm ml-2';
                                     dateSpan.textContent = data.review.createdAt;
-
-                                    header.appendChild(authorSpan);
-                                    header.appendChild(dateSpan);
-
-                                    reviewHeader.appendChild(avatarImg);
-                                    reviewHeader.appendChild(header)
-
-                                    // Créer le contenu
                                     const content = document.createElement('p');
-                                    content.className = 'text-gray-700';
+                                    content.className = 'text-gray-700 dark:text-white';
                                     content.textContent = data.review.content;
-
-                                    // Assembler le tout
+                                    reviewHeader.appendChild(avatarImg);
+                                    reviewHeader.appendChild(authorSpan);
+                                    reviewHeader.appendChild(dateSpan);
                                     newReview.appendChild(reviewHeader);
                                     newReview.appendChild(content);
-
-                                    // Ajouter au conteneur
                                     reviewsContainer.insertBefore(newReview, reviewsContainer.firstChild);
-
                                     this.content = '';
                                     this.isSubmitting = false;
                                 } else {
@@ -262,7 +238,7 @@
                             <textarea
                                     x-model="content"
                                     placeholder="Écrivez votre commentaire..."
-                                    class="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 resize-none"
+                                    class="mt-2 w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 resize-none dark:bg-gray-700 dark:text-white"
                                     rows="3"
                             ></textarea>
                                     <div class="flex justify-end mt-2">
@@ -280,7 +256,7 @@
                                 </div>
                             </div>
                         {% else %}
-                            <a href="{{ path('app_login') }}" class="text-sm text-gray-600 hover:text-gray-900">
+                            <a href="{{ path('app_login') }}" class="text-sm text-gray-600 dark:text-white hover:text-gray-900 dark:hover:text-white">
                                 Connectez-vous pour commenter
                             </a>
                         {% endif %}
@@ -288,13 +264,13 @@
                 </div>
             </div>
         </div>
-        <div class="mb-4 border rounded-lg overflow-hidden mt-8" data-accordion-section>
+        <div class="mb-4 border dark:border-gray-700 rounded-lg overflow-hidden mt-8" data-accordion-section>
             <div
                     class="flex flex-col md:flex-row justify-between md:items-center px-4 py-3 bg-tertiary-500 cursor-pointer"
                     data-accordion-header
             >
                 <div class="flex items-center">
-                    <i class="fa-solid fa-shirt mr-2  text-white"></i>
+                    <i class="fa-solid fa-shirt mr-2 text-white"></i>
                     <h2 class="text-lg font-semibold mb-0 text-white">Vêtements</h2>
                 </div>
                 <div>
@@ -305,8 +281,6 @@
                         </span>
                         </div>
                         {% if canEdit %}
-
-
                             {% include 'components/add_clothing_modal.html.twig' with {
                                 'categories': categories,
                                 'wardrobe_id': outfit.wardrobe.id,
@@ -317,12 +291,11 @@
                                 'wardrobe': outfit.wardrobe
                             } %}
                         {% endif %}
-
                     </div>
                 </div>
             </div>
 
-            <div class="px-4 py-4 bg-white" data-accordion-content>
+            <div class="px-4 py-4 bg-gray-100 dark:bg-gray-900" data-accordion-content>
                 {% if outfit.outfititems|length > 0 %}
                     <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
                         {% for item in outfit.outfititems %}
@@ -332,25 +305,23 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+                    <div class="bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200 px-4 py-3 rounded-lg">
                         <i class="fas fa-info-circle mr-2"></i>Vous n'avez pas encore de vêtements.
                     </div>
                 {% endif %}
             </div>
-
         </div>
     </div>
+</div>
+{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('carousel-init') }}
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
 
-    {% endblock %}
-
-    {% block javascripts %}
-        {{ parent() }}
-        {{ encore_entry_script_tags('carousel-init') }}
-        <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    {% endblock %}
-
-    {% block stylesheets %}
+{% block stylesheets %}
     {{ parent() }}
     {% include 'components/card_styles.html.twig' %}
 {% endblock %}
