@@ -277,10 +277,8 @@ final class OutfitController extends AbstractController
             // Debug de la valeur de isPublished
             $formData = $request->request->all();
             $isPublished = $formData['outfit']['isPublished'] ?? null;
-            $this->addFlash('debug', sprintf(
-                'Form isPublished: %s, Entity isPublished: %s',
-                var_export($isPublished, true),
-                var_export($outfit->getIsPublished(), true)
+            $this->addFlash('success', sprintf(
+                'Outfit créé avec succès',
             ));
 
             // Forcer la valeur de isPublished depuis le formulaire
