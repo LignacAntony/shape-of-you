@@ -11,9 +11,9 @@
         {% include 'components/breadcrumb.html.twig' with {
             'wardrobe': wardrobe
         } %}
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
-                    <h1 class="text-lg font-medium text-gray-900">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                <div class="px-4 py-5 border-b border-gray-200 dark:border-gray-700 sm:px-6">
+                    <h1 class="text-lg font-medium text-gray-900 dark:text-white">
                         Modifier {{ wardrobe.name }}
                     </h1>
                 </div>
@@ -31,14 +31,14 @@
                         
                         <div class="space-y-4">
                             <div>
-                                {{ form_label(form.name, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.name, {'attr': {'class': 'form-area w-full'}}) }}
+                                {{ form_label(form.name, 'Nom', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                                {{ form_widget(form.name, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600'}}) }}
                                 {{ form_errors(form.name) }}
                             </div>
 
                             <div>
-                                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.description, {'attr': {'class': 'form-area w-full', 'rows': '3'}}) }}
+                                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600', 'rows': '3'}}) }}
                                 {{ form_errors(form.description) }}
                             </div>
                         </div>
@@ -48,14 +48,14 @@
                     <div class="p-4">
                         <h2 class="text-xl font-bold text-primary-600 mb-4">Image</h2>
 
-                        {{ form_label(form.image, 'Changer l\'image', {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(form.image, {'attr': {'class': 'mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'}}) }}
+                        {{ form_label(form.image, 'Changer l\'image', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                        {{ form_widget(form.image, {'attr': {'class': 'mt-1 block w-full text-sm text-gray-500 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-200 dark:file:hover:bg-blue-800'}}) }}
                         {{ form_errors(form.image) }}
                         
                         {% if wardrobe.image %}
                             <div class="mt-4">
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Image actuelle :</h3>
-                                <div class="relative group border border-gray-200 rounded-lg overflow-hidden" style="max-width: 200px;">
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-white mb-2">Image actuelle :</h3>
+                                <div class="relative group border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" style="max-width: 200px;">
                                     <img src="{{ asset(wardrobe.image) }}" 
                                         alt="{{ wardrobe.name }}"
                                         class="w-full h-auto">
@@ -66,7 +66,7 @@
 
                     <div class="flex justify-end gap-3">
                         <a href="{{ path('wardrobe_details', {'id': wardrobe.id}) }}" 
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                             Annuler
                         </a>
                         <button type="submit"

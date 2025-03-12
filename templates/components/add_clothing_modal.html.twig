@@ -67,17 +67,17 @@
         x-transition:leave-end="opacity-0 transform translate-y-4" @click.stop>
 
     <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md">
                 {# En-tête de la modale #}
-                <div class="flex items-center justify-between p-4 border-b">
-                    <h3 class="text-xl font-semibold text-gray-900">Ajouter un vêtement</h3>
-                    <button @click="open = false" class="text-gray-400 hover:text-gray-500">
+                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Ajouter un vêtement</h3>
+                    <button @click="open = false" class="text-gray-400 hover:text-gray-500 dark:text-white dark:hover:text-gray-200">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
 
                 {# Message d'erreur global #}
-                <div x-show="errorMessage" class="p-4 bg-red-50 text-red-700 border-b">
+                <div x-show="errorMessage" class="p-4 bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-200 border-b dark:border-gray-700">
                     <p x-text="errorMessage"></p>
                 </div>
 
@@ -98,82 +98,81 @@
                         {% endif %}
 
                         <div>
-                            {{ form_label(form.category, 'Catégorie', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.category, {'attr': {'class': 'form-area w-full'}}) }}
-                            <div x-show="fieldErrors.category" class="mt-1 text-sm text-red-600" x-text="fieldErrors.category"></div>
+                            {{ form_label(form.category, 'Catégorie', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                            {{ form_widget(form.category, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600'}}) }}
+                            <div x-show="fieldErrors.category" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.category"></div>
                             {{ form_errors(form.category) }}
                         </div>
 
                         <div>
-                            {{ form_label(form.name, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.name, {'attr': {'class': 'form-area w-full'}}) }}
-                            <div x-show="fieldErrors.name" class="mt-1 text-sm text-red-600" x-text="fieldErrors.name"></div>
+                            {{ form_label(form.name, 'Nom', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                            {{ form_widget(form.name, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600'}}) }}
+                            <div x-show="fieldErrors.name" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.name"></div>
                             {{ form_errors(form.name) }}
                         </div>
 
                         <div>
-                            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.description, {'attr': {'class': 'form-area w-full', 'rows': '1'}}) }}
-                            <div x-show="fieldErrors.description" class="mt-1 text-sm text-red-600" x-text="fieldErrors.description"></div>
+                            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600', 'rows': '1'}}) }}
+                            <div x-show="fieldErrors.description" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.description"></div>
                             {{ form_errors(form.description) }}
                         </div>
 
                         <div>
-                            {{ form_label(form.brand, 'Marque', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.brand, {'attr': {'class': 'form-area w-full'}}) }}
-                            <div x-show="fieldErrors.brand" class="mt-1 text-sm text-red-600" x-text="fieldErrors.brand"></div>
+                            {{ form_label(form.brand, 'Marque', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                            {{ form_widget(form.brand, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600'}}) }}
+                            <div x-show="fieldErrors.brand" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.brand"></div>
                             {{ form_errors(form.brand) }}
                         </div>
 
                         <div>
-                            {{ form_label(form.color, 'Couleur', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_label(form.color, 'Couleur', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
                             {{ form_widget(form.color, {'attr': {'class': 'mt-2 h-8'}}) }}
-                            <div x-show="fieldErrors.color" class="mt-1 text-sm text-red-600" x-text="fieldErrors.color"></div>
+                            <div x-show="fieldErrors.color" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.color"></div>
                             {{ form_errors(form.color) }}
                         </div>
 
                         <div>
-                            {{ form_label(form.size, 'Taille', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.size, {'attr': {'class': 'form-area w-full'}}) }}
-                            <div x-show="fieldErrors.size" class="mt-1 text-sm text-red-600" x-text="fieldErrors.size"></div>
+                            {{ form_label(form.size, 'Taille', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                            {{ form_widget(form.size, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600'}}) }}
+                            <div x-show="fieldErrors.size" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.size"></div>
                             {{ form_errors(form.size) }}
                         </div>
 
                         {% if form.outfit is defined %}
                             <div>
-                                {{ form_label(form.outfit, 'Ajouter à une tenue', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_label(form.outfit, 'Ajouter à une tenue', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
                                 {{ form_widget(form.outfit, {
                                     'attr': {
-                                        'class': 'form-area w-full'
+                                        'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600'
                                     },
                                     'value': outfit_id is defined ? outfit_id : null
                                 }) }}
-                                <div x-show="fieldErrors.outfit" class="mt-1 text-sm text-red-600" x-text="fieldErrors.outfit"></div>
+                                <div x-show="fieldErrors.outfit" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.outfit"></div>
                                 {{ form_errors(form.outfit) }}
                             </div>
                         {% endif %}
 
                         <div>
-                            {{ form_label(form.price, 'Prix (€)', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_label(form.price, 'Prix (€)', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
                             <div class="w-full form-area flex flex-row-reverse relative">
-
-                                {{ form_widget(form.price, {'attr': {'class': 'form-area w-full absolute top-0 left-0 m-0'}}) }}
+                                {{ form_widget(form.price, {'attr': {'class': 'form-area w-full absolute top-0 left-0 m-0 dark:bg-gray-700 dark:text-white dark:border-gray-600'}}) }}
                             </div>
-                            <div x-show="fieldErrors.price" class="mt-1 text-sm text-red-600" x-text="fieldErrors.price"></div>
+                            <div x-show="fieldErrors.price" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.price"></div>
                             {{ form_errors(form.price) }}
                         </div>
 
                         <div>
-                            {{ form_label(form.images, 'Images', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.images, {'attr': {'class': 'w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'}}) }}
-                            <div x-show="fieldErrors.images" class="mt-1 text-sm text-red-600" x-text="fieldErrors.images"></div>
+                            {{ form_label(form.images, 'Images', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                            {{ form_widget(form.images, {'attr': {'class': 'w-full text-sm text-gray-500 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-200 dark:file:hover:bg-blue-800'}}) }}
+                            <div x-show="fieldErrors.images" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.images"></div>
                             {{ form_errors(form.images) }}
                         </div>
 
                         {# Boutons d'action #}
                         <div class="flex justify-end gap-3 mt-6">
                             <button type="button" @click="open = false"
-                                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                 Annuler
                             </button>
                             <button type="submit"

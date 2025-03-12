@@ -24,11 +24,11 @@
         <div class="max-w-4xl mx-auto">
             {% include 'components/breadcrumb.html.twig' %}
 
-            <h1 class="text-3xl font-bold mb-6">Création d'un Outfit pour la wardrobe : {{ wardrobe.name }}</h1>
+            <h1 class="text-3xl font-bold mb-6 dark:text-white">Création d'un Outfit pour la wardrobe : {{ wardrobe.name }}</h1>
 
-            <div class="bg-white shadow rounded-lg mb-8 flex flex-col">
-                <div class="border-b border-gray-200 px-6 py-4">
-                    <h2 class="text-2xl font-semibold">Proposer un Outfit avec l'IA</h2>
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg mb-8 flex flex-col">
+                <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                    <h2 class="text-2xl font-semibold dark:text-white">Proposer un Outfit avec l'IA</h2>
                 </div>
                 <div class="px-6 py-4">
                     {{ form_start(formProposal, {
@@ -39,7 +39,7 @@
                     }) }}
                     {{ form_row(formProposal.demande, {
                         'attr': {
-                            'class': 'appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+                            'class': 'appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
                         }
                     }) }}
                     <button type="submit" name="action" value="propose" class="w-full md:w-auto bg-tertiary-600 hover:bg-tertiary-700 text-white font-semibold py-2 px-4 rounded">
@@ -53,25 +53,25 @@
                             <div class="w-4 h-4 rounded-full animate-pulse bg-tertiary-600"></div>
                             <div class="w-4 h-4 rounded-full animate-pulse bg-tertiary-600"></div>
                         </div>
-                        <p class="text-center text-sm text-gray-500 mt-2">Recherche des vêtements en cours...</p>
+                        <p class="text-center text-sm text-gray-500 dark:text-white mt-2">Recherche des vêtements en cours...</p>
                     </div>
                 </div>
             </div>
 
             {% if error %}
-                <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-lg">
+                <div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-400 dark:border-red-700 p-4 mb-6 rounded-lg">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle text-red-400 text-lg"></i>
+                            <i class="fas fa-exclamation-circle text-red-400 dark:text-red-300 text-lg"></i>
                         </div>
                         <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">Une erreur est survenue</h3>
-                            <div class="mt-2 text-sm text-red-700">
+                            <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Une erreur est survenue</h3>
+                            <div class="mt-2 text-sm text-red-700 dark:text-red-300">
                                 <p>{{ error }}</p>
                                 
                                 {% if "vide" in error %}
                                     <div class="mt-3">
-                                        <p class="font-medium">Pour commencer :</p>
+                                        <p class="font-medium dark:text-red-200">Pour commencer :</p>
                                         <ul class="list-disc pl-5 mt-1 space-y-1">
                                             <li>Ajoutez des vêtements à votre garde-robe</li>
                                             <li>Assurez-vous d'avoir différentes catégories (haut, bas, chaussures...)</li>
@@ -82,7 +82,7 @@
 
                                 {% if "reformuler" in error %}
                                     <div class="mt-3">
-                                        <p class="font-medium">Conseils pour améliorer votre demande :</p>
+                                        <p class="font-medium dark:text-red-200">Conseils pour améliorer votre demande :</p>
                                         <ul class="list-disc pl-5 mt-1 space-y-1">
                                             <li>Précisez l'occasion (travail, soirée, casual...)</li>
                                             <li>Mentionnez la saison ou la météo</li>
@@ -98,21 +98,21 @@
             {% endif %}
 
             {% if proposedOutfit is not null %}
-                <hr class="my-8">
-                <h2 class="text-2xl font-semibold mb-4">Vêtements proposés</h2>
+                <hr class="my-8 dark:border-gray-700">
+                <h2 class="text-2xl font-semibold mb-4 dark:text-white">Vêtements proposés</h2>
                 <div class="flex flex-wrap -mx-2">
                     {% for item in proposedOutfit %}
                         <div class="w-full md:w-1/2 px-2 mb-4">
-                            <div class="bg-white shadow rounded-lg p-6">
+                            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                                 <div class="flex justify-between items-start mb-4">
                                     <div>
-                                        <h3 class="text-lg font-semibold text-gray-900">{{ item.name }}</h3>
-                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 mt-1">
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ item.name }}</h3>
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white mt-1">
                                             {{ item.category }}
                                         </span>
                                     </div>
                                 </div>
-                                <p class="text-gray-600 text-sm">{{ item.reason }}</p>
+                                <p class="text-gray-600 dark:text-white text-sm">{{ item.reason }}</p>
                             </div>
                         </div>
                     {% endfor %}
@@ -120,9 +120,9 @@
             {% endif %}
 
             {% if formOutfit is not null %}
-                <div class="bg-white shadow rounded-lg">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h2 class="text-2xl font-semibold">Créer l'Outfit</h2>
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                    <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+                        <h2 class="text-2xl font-semibold dark:text-white">Créer l'Outfit</h2>
                     </div>
                     <div class="px-6 py-4">
                         {{ form_start(formOutfit, {
@@ -136,13 +136,13 @@
                         
                         {{ form_row(formOutfit.name, {
                             'attr': {
-                                'class': 'appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+                                'class': 'appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
                             }
                         }) }}
                         
                         {{ form_row(formOutfit.description, {
                             'attr': {
-                                'class': 'appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+                                'class': 'appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
                             }
                         }) }}
                         

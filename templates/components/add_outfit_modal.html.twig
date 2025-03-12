@@ -64,17 +64,17 @@
         x-transition:leave-start="opacity-100 transform translate-y-0"
         x-transition:leave-end="opacity-0 transform translate-y-4" @click.stop>
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="bg-white dark:bg-gray-900 rounded-lg w-full max-w-md">
                 {# En-tête de la modale #}
-                <div class="flex items-center justify-between p-4 border-b">
-                    <h3 class="text-xl font-semibold text-gray-900">Créer une nouvelle tenue</h3>
-                    <button @click="open = false" class="text-gray-400 hover:text-gray-500">
+                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Créer une nouvelle tenue</h3>
+                    <button @click="open = false" class="text-gray-400 hover:text-gray-500 dark:text-white dark:hover:text-gray-200">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
 
                 {# Message d'erreur global #}
-                <div x-show="errorMessage" class="p-4 bg-red-50 text-red-700 border-b">
+                <div x-show="errorMessage" class="p-4 bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-200 border-b dark:border-gray-700">
                     <p x-text="errorMessage"></p>
                 </div>
 
@@ -91,40 +91,40 @@
                     }) }}
 
                         <div>
-                            {{ form_label(form.name, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.name, {'attr': {'class': 'form-area w-full'}}) }}
-                            <div x-show="fieldErrors.name" class="mt-1 text-sm text-red-600" x-text="fieldErrors.name"></div>
+                            {{ form_label(form.name, 'Nom', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                            {{ form_widget(form.name, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600'}}) }}
+                            <div x-show="fieldErrors.name" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.name"></div>
                             {{ form_errors(form.name) }}
                         </div>
 
                         <div>
-                            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.description, {'attr': {'class': 'form-area w-full', 'rows': '3'}}) }}
-                            <div x-show="fieldErrors.description" class="mt-1 text-sm text-red-600" x-text="fieldErrors.description"></div>
+                            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label dark:text-white'}}) }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-area w-full dark:bg-gray-700 dark:text-white dark:border-gray-600', 'rows': '3'}}) }}
+                            <div x-show="fieldErrors.description" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.description"></div>
                             {{ form_errors(form.description) }}
                         </div>
 
                         <div class="flex items-center">
                             {{ form_widget(form.isPublished, {
                                 'attr': {
-                                    'class': 'h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 mr-2',
+                                    'class': 'h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500 mr-2',
                                     'x-model': 'isPublished'
                                 }
                             }) }}
-                            {{ form_label(form.isPublished, 'Publier la tenue', {'label_attr': {'class': 'text-sm font-medium text-gray-700'}}) }}
-                            <div x-show="fieldErrors.isPublished" class="mt-1 text-sm text-red-600" x-text="fieldErrors.isPublished"></div>
+                            {{ form_label(form.isPublished, 'Publier la tenue', {'label_attr': {'class': 'text-sm font-medium text-gray-700 dark:text-white'}}) }}
+                            <div x-show="fieldErrors.isPublished" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.isPublished"></div>
                             {{ form_errors(form.isPublished) }}
                         </div>
 
                         <div>
-                            {{ form_label(form.images, 'Images', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-1'}}) }}
+                            {{ form_label(form.images, 'Images', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 dark:text-white mb-1'}}) }}
                             {{ form_widget(form.images, {'attr': {
-                                'class': 'w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100',
+                                'class': 'w-full text-sm text-gray-500 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100',
                                 'multiple': 'multiple'
                             }}) }}
-                            <div x-show="fieldErrors.images" class="mt-1 text-sm text-red-600" x-text="fieldErrors.images"></div>
+                            <div x-show="fieldErrors.images" class="mt-1 text-sm text-red-600 dark:text-red-400" x-text="fieldErrors.images"></div>
                             {{ form_errors(form.images) }}
-                            <p class="mt-1 text-sm text-gray-500">Formats acceptés : JPEG, PNG, WEBP. Taille maximale : 5 Mo</p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-white">Formats acceptés : JPEG, PNG, WEBP. Taille maximale : 5 Mo</p>
                         </div>
 
                         {# Boutons d'action #}
