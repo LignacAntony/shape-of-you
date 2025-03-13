@@ -26,13 +26,6 @@
 <div class="flex flex-grow">
     {% include 'components/left_side_bar.html.twig' %}
     <main class="flex-grow h-full p-4 sm:ml-64 ">
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="mb-4 p-4 rounded-lg {% if label == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endfor %}
         {% block body %}{% endblock %}
     </main>
 </div>

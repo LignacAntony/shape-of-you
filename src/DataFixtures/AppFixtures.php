@@ -206,7 +206,7 @@ class AppFixtures extends Fixture
 
         $profile = new Profile();
         $profile->setAppUser($user);
-        $profile->setAvatar('default.webp');
+        $profile->setAvatar('default.png');
         $profile->setBio('Passionné(e) de mode et de style.');
         $profile->setPreferences([
             'theme' => 'light',
