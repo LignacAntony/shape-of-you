@@ -80,7 +80,7 @@
       - "--include=config/**"
       - "--include=migrations/**"
       - "--include=public/**"
-      - "--include=public/uploads/avatars/default.webp"
+      - "--include=public/uploads/avatars/default.png"
       - "--include=src/**"
       - "--include=templates/**"
       - "--include=translations/**"
