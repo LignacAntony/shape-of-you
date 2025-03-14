@@ -5,7 +5,7 @@
 {% block body %}
 
     <div class="container mx-auto px-4 py-4">
-        <div class="mb-4 border rounded-lg overflow-hidden" data-accordion-section>
+        <div class="mb-4 border rounded-lg overflow-hidden dark:border-primary-400" data-accordion-section>
             <div
                     class="flex justify-between items-center px-4 py-3 bg-primary-400 cursor-pointer"
                     data-accordion-header
@@ -39,7 +39,7 @@
         </div>
 
         {# Section Tenues #}
-        <div class="mb-4 border rounded-lg overflow-hidden" data-accordion-section>
+        <div class="mb-4 border rounded-lg overflow-hidden dark:border-secondary-400" data-accordion-section>
             <div
                     class="flex justify-between items-center px-4 py-3 bg-secondary-400 cursor-pointer"
                     data-accordion-header
@@ -70,7 +70,7 @@
         </div>
 
         {# Section Vêtements #}
-        <div class="mb-4 border rounded-lg overflow-hidden" data-accordion-section>
+        <div class="mb-4 border rounded-lg overflow-hidden dark:border-tertiary-400" data-accordion-section>
             <div
                 class="flex justify-between items-center px-4 py-3 bg-tertiary-500 cursor-pointer"
                 data-accordion-header
@@ -127,5 +127,5 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
 {% endblock %}

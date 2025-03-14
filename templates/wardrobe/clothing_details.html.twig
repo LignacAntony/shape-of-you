@@ -10,9 +10,9 @@
         <div class="max-w-4xl mx-auto">
             {% include 'components/breadcrumb.html.twig' %}
 
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                    <h1 class="text-xl font-semibold text-gray-900">{{ outfitItem.clothingItem.name }}</h1>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ outfitItem.clothingItem.name }}</h1>
                     {% if canEdit %}
                     <a href="{{ path('clothing_edit', {'id': outfitItem.id}) }}" 
                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-tertiary-600 rounded-md hover:bg-tertiary-500 transition-colors duration-200">
@@ -60,8 +60,8 @@
                         {# Colonne de droite: Informations #}
                         <div class="space-y-1">
                             {# Caractéristiques #}
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <h2 class="text-lg font-medium text-gray-900 mb-4">Caractéristiques</h2>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                                <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Caractéristiques</h2>
                                 <div class="space-y-3">
                                     {% if outfitItem.clothingItem.brand %}
                                         <div class="flex items-center text-sm">
@@ -104,8 +104,8 @@
                                 </div>
                             </div>
 
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <h2 class="text-lg font-medium text-gray-900 mb-4">Informations</h2>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                                <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Informations</h2>
                                 <div class="space-y-3 text-sm">
                                     <div class="flex items-center">
                                         <i class="far fa-calendar-alt w-5 text-tertiary-600"></i>
@@ -115,11 +115,11 @@
                                 </div>
                             </div>
                             {% if canEdit %}
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <h2 class="text-lg font-medium text-gray-900 mb-4">Garde-robe:</h2>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                                <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Garde-robe:</h2>
                                     <div class="space-y-2">
                                             <a href="{{ path('wardrobe_details', {'id': outfitItem.wardrobe.id}) }}"
-                                               class="flex items-center p-2 rounded-lg hover:bg-primary-200 transition-colors duration-200">
+                                               class="flex items-center p-2 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors duration-200">
                                                 <i class="fa-solid fa-door-open text-primary-500 mr-3"></i>
                                                 <span class="text-sm">{{ outfitItem.wardrobe.name }}</span>
                                             </a>
@@ -130,20 +130,20 @@
                             {# Tenues associées #}
                             {% if canEdit %}
 
-                            <div class="bg-gray-50 rounded-lg p-3">
-                                <h2 class="text-lg font-medium text-gray-900 mb-4">Tenues associées</h2>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                                <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Tenues associées</h2>
                                 {% if outfitItem.outfits|length > 0 %}
                                     <div class="space-y-2">
                                         {% for outfit in outfitItem.outfits %}
                                             <a href="{{ path('outfit_details', {'id': outfit.id}) }}" 
-                                               class="flex items-center p-2 rounded-lg hover:bg-secondary-100 transition-colors duration-200">
+                                               class="flex items-center p-2 rounded-lg hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors duration-200">
                                                 <i class="fas fa-tshirt text-secondary-500 mr-3"></i>
                                                 <span class="text-sm">{{ outfit.name }}</span>
                                             </a>
                                         {% endfor %}
                                     </div>
                                 {% else %}
-                                    <p class="text-sm text-gray-500">Ce vêtement n'est associé à aucune tenue.</p>
+                                    <p class="text-sm text-gray-500 dark:text-white">Ce vêtement n'est associé à aucune tenue.</p>
                                 {% endif %}
                             </div>
                             {% endif %}
@@ -152,9 +152,9 @@
                     </div>
 
                     {% if outfitItem.clothingItem.description %}
-                        <div class="mt-6 bg-gray-50 rounded-lg p-3">
-                            <h2 class="text-lg font-medium text-gray-900 mb-4">Description</h2>
-                            <p class="text-sm text-gray-600">{{ outfitItem.clothingItem.description }}</p>
+                        <div class="mt-6 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Description</h2>
+                            <p class="text-sm text-gray-600 dark:text-white">{{ outfitItem.clothingItem.description }}</p>
                         </div>
                     {% endif %}
                 </div>

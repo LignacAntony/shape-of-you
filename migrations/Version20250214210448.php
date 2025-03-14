@@ -7,19 +7,16 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
+
 final class Version20250214210448 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'ajout de la colonne outfit_id dans la table outfit_item';
     }
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE outfit_outfit_item (outfit_id INT NOT NULL, outfit_item_id INT NOT NULL, PRIMARY KEY(outfit_id, outfit_item_id))');
         $this->addSql('CREATE INDEX IDX_F909BF3DAE96E385 ON outfit_outfit_item (outfit_id)');
         $this->addSql('CREATE INDEX IDX_F909BF3DB0BCBA56 ON outfit_outfit_item (outfit_item_id)');
@@ -32,7 +29,6 @@ final class Version20250214210448 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE SCHEMA public');
         $this->addSql('ALTER TABLE outfit_outfit_item DROP CONSTRAINT FK_F909BF3DAE96E385');
         $this->addSql('ALTER TABLE outfit_outfit_item DROP CONSTRAINT FK_F909BF3DB0BCBA56');

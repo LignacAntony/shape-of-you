@@ -124,11 +124,10 @@ class ImageAnalysisController extends AbstractController
 
                     $analysis = json_decode($jsonResponse, true);
                     if (!is_array($analysis) || empty($analysis)) {
-                        file_put_contents('logs/openai_response.log', "Réponse brute : " . $jsonResponse . "\n", FILE_APPEND);
-                        $error = 'Erreur lors du traitement des données. Vérifie le log openai_response.log.';
+                        $error = 'Analyse impossible, merci d\'envoyer une image d\'outfit.';
                     } else {
                         $session->set('analysis', $analysis);
-                        $this->addFlash('info', 'Analysis data stored in session.');
+                        $this->addFlash('success', 'Analyse réussie');
 
                     }
                 } catch (\Exception $e) {

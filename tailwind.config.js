@@ -4,6 +4,7 @@ module.exports = {
     "./assets/**/*.js",
     "./templates/**/*.html.twig",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -21,7 +22,7 @@ module.exports = {
           '950': '#161d1b',
         },
         secondary: {
-          '50':  '#fdf7f7',
+          '50': '#fdf7f7',
           '100': '#f8e3e4',
           '200': '#f0c6c7',
           '300': '#e8a7a9',
@@ -34,7 +35,7 @@ module.exports = {
           '950': '#37181a',
         },
         tertiary: {
-          '50':  '#f7f8fb',
+          '50': '#f7f8fb',
           '100': '#eaeef6',
           '200': '#d4dceb',
           '300': '#b9c8de',
@@ -47,7 +48,8 @@ module.exports = {
           '950': '#1b2130',
         },
 
-      },},
+      },
+    },
   },
   plugins: [],
 }
